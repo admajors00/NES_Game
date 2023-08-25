@@ -25,7 +25,7 @@ nametable = $14
 
 .include "controller.asm"
 .include "famistudio_ca65.s"
-.include "../graphics/StreetCanvas_1.asm"
+.include "../graphics/StreetCanvas_2.asm"
 .include "player.asm"
 
 
@@ -105,7 +105,7 @@ LoadSprites:
 		LDA sprites, x ; load data from address (sprites + x)
 		STA $0200, x ; store into RAM address ($0200 + x)
 		INX ; X = X + 1
-		CPX #$30 ; Compare X to hex $10, decimal 16
+		CPX #$10 ; Compare X to hex $10, decimal 16
 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
 		; if compare was equal to 16, continue down  
 
@@ -119,9 +119,9 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<StreetCanvas_1 
+	LDA #<StreetCanvas_2 
 	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>StreetCanvas_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>StreetCanvas_2        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA pointerHi           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0
@@ -234,11 +234,11 @@ palette:
 .byte $2d,$16,$26,$36
 .byte $2d,$14,$24,$34
 
-
-.byte $0f,$00,$10,$30
+.byte $0f,$00,$30,$27
 .byte $0f,$01,$21,$31
 .byte $0f,$06,$16,$26
 .byte $0f,$09,$19,$29
+
 
 
 	;; Background palette

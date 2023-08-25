@@ -5,15 +5,20 @@ sprites:
 .byte $C8, $22, $00, $80 ;sprite 2
 .byte $C8, $23, $00, $88 ;sprite 3
 
-.byte $B0, $40, $01, $B0 ;sprite 0
-.byte $B0, $41, $01, $B8 ;sprite 1
-.byte $B8, $42, $01, $B0 ;sprite 2
-.byte $B8, $43, $01, $B8 ;sprite 3
+; .byte $B0, $40, $01, $B0 ;sprite 0
+; .byte $B0, $41, $01, $B8 ;sprite 1
+; .byte $B8, $42, $01, $B0 ;sprite 2
+; .byte $B8, $43, $01, $B8 ;sprite 3
 
-.byte $B0, $60, $01, $A0 ;sprite 0
-.byte $B0, $61, $01, $A8 ;sprite 1
-.byte $B8, $62, $01, $A0 ;sprite 2
-.byte $B8, $63, $01, $A8 ;sprite 3
+; .byte $B0, $60, $01, $A0 ;sprite 0
+; .byte $B0, $61, $01, $A8 ;sprite 1
+; .byte $B8, $62, $01, $A0 ;sprite 2
+; .byte $B8, $63, $01, $A8 ;sprite 3
+
+
+
+
+
 
 sprite_pos_x = $10
 sprite_pos_y = $11
