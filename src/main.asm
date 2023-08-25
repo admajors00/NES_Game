@@ -25,7 +25,7 @@ nametable = $14
 
 .include "controller.asm"
 .include "famistudio_ca65.s"
-.include "../graphics/Canvas.asm"
+.include "../graphics/StreetCanvas_1.asm"
 .include "player.asm"
 
 
@@ -119,9 +119,9 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<Canvas 
+	LDA #<StreetCanvas_1 
 	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>Canvas        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>StreetCanvas_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA pointerHi           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0
@@ -226,16 +226,31 @@ Scroll:
 
 
 palette:
+
+
+
+.byte $2d,$3d,$38,$00
+.byte $2d,$12,$22,$32
+.byte $2d,$16,$26,$36
+.byte $2d,$14,$24,$34
+
+
+.byte $0f,$00,$10,$30
+.byte $0f,$01,$21,$31
+.byte $0f,$06,$16,$26
+.byte $0f,$09,$19,$29
+
+
 	;; Background palette
-	.byte 	$0f,$21,$31,$30
-	.byte 	$0f,$21,$39,$19
-	.byte 	$0f,$39,$29,$19
-	.byte 	$0f,$27,$17,$26
-		;; Sprite palette
-	.byte	$0F,$2E,$16,$26
-	.byte	$0F,$2E,$27,$36
-	.byte	$0F,$36,$17,$2C
-	.byte	$0F,$30,$12,$2B
+	; .byte 	$0f,$21,$31,$30
+	; .byte 	$0f,$21,$39,$19
+	; .byte 	$0f,$39,$29,$19
+	; .byte 	$0f,$27,$17,$26
+	; 	;; Sprite palette
+	; .byte	$0F,$2E,$16,$26
+	; .byte	$0F,$2E,$27,$36
+	; .byte	$0F,$36,$17,$2C
+	; .byte	$0F,$30,$12,$2B
 
 
 
@@ -260,6 +275,6 @@ song_test:
   
 .segment "CHARS"
 
-	.incbin	"../graphics/CatSim.chr"	; includes 8KB graphics from SMB1
+	.incbin	"../graphics/EWL.chr"	; includes 8KB graphics from SMB1
 
 	

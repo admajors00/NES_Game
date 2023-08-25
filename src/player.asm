@@ -1,9 +1,9 @@
 sprites:
 ;vert tile attr horiz
-.byte $C0, $00, $00, $80 ;sprite 0
-.byte $C0, $01, $00, $88 ;sprite 1
-.byte $C8, $02, $00, $80 ;sprite 2
-.byte $C8, $03, $00, $88 ;sprite 3
+.byte $C0, $20, $00, $80 ;sprite 0
+.byte $C0, $21, $00, $88 ;sprite 1
+.byte $C8, $22, $00, $80 ;sprite 2
+.byte $C8, $23, $00, $88 ;sprite 3
 
 .byte $B0, $40, $01, $B0 ;sprite 0
 .byte $B0, $41, $01, $B8 ;sprite 1
