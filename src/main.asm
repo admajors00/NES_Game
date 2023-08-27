@@ -99,7 +99,7 @@ load_palettes:
 
 LoadSprites:
 	ldx #$80
-	stx sprite_pos_x
+	stx Player::sprite_pos_x
 	LDX #$00 ; start at 0
 	LoadSpritesLoop:
 		LDA sprites, x ; load data from address (sprites + x)
@@ -140,7 +140,7 @@ load_background:
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
 
-
+jsr Player::init_character
 ldx #.lobyte(music_data_untitled)
 ldy #.hibyte(music_data_untitled)
 lda #1 ; NTSC
@@ -172,7 +172,8 @@ nmi:
 	; sprite DMA from $0200
 	jsr UpdateButtons
 
-	jsr moveCharacter
+	jsr Player::moveCharacter
+	jsr Player::update_sprite
 
 
 	@end:
