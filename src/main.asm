@@ -173,7 +173,8 @@ nmi:
 	jsr UpdateButtons
 
 	jsr Player::moveCharacter
-	jsr Player::update_sprite
+	jsr Player::update_sprite_frame
+	jsr Player::update_sprite_pos
 
 
 	@end:

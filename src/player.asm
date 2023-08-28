@@ -1,9 +1,9 @@
 sprites:
 	;vert tile attr horiz
-	.byte $C0, $20, $00, $80 ;sprite 0
-	.byte $C0, $21, $00, $88 ;sprite 1
-	.byte $C8, $22, $00, $80 ;sprite 2
-	.byte $C8, $23, $00, $88 ;sprite 3
+	.byte $C0, $A0, $00, $80 ;sprite 0
+	.byte $C0, $A1, $00, $88 ;sprite 1
+	.byte $C8, $A2, $00, $80 ;sprite 2
+	.byte $C8, $A3, $00, $88 ;sprite 3
 
 	; .byte $B0, $40, $01, $B0 ;sprite 0
 	; .byte $B0, $41, $01, $B8 ;sprite 1
@@ -52,25 +52,41 @@ OAM_X    = 3
 	egg:
 		.byte	$24, $25, $26, $27
 	cat:
-		.byte  	$A0, $A1, $A2, $A3
-		.byte  	$A4, $A5, $A6, $A7
+		.byte  	$C0, $C1, $C2, $C3
+		.byte  	$C4, $C5, $C6, $C7
+		.byte  	$C8, $C9, $CA, $CB
+		.byte  	$CC, $CD, $CE, $CF
+
+	look_up_table:
+		.byte $C0, $C4, $C8, $CC
+
 .endscope
 
 .scope Player
 	sprite_pos_x = $10
 	sprite_pos_y = $11
-	sprite_direction = $12
+	sprite_direction = $18
 	character_velocity_x = $13
 	character_velocity_y = $14
 	sprite_animation_timer = $15
 	sprite_animation_frame = $16
+	player_state = $17
 
+	.enum PlayerStates
+		moving = 0
+		idle = 1
+	.endenum
+
+	.enum Directions
+		left = %10111111 ; $bf
+		right = %01000000 ; $40
+	.endenum
 
 	init_character:
 		ldx #$00
 		stx character_velocity_x
 		stx character_velocity_y
-		stx sprite_direction
+		stx sprite_animation_frame
 
 		ldx #$80
 		stx sprite_pos_x
@@ -80,9 +96,19 @@ OAM_X    = 3
 		ldx #5
 		stx sprite_animation_timer
 
-		ldx Sprite::cat
-		stx sprite_animation_frame
+	
+		
+
+		ldx #PlayerStates::idle
+		stx player_state
+
+		ldx #Directions::left
+		stx sprite_direction 
+
+
 	rts
+
+
 	moveCharacter:
 		lda #BUTTON_LEFT
 		and Port_1_Pressed_Buttons
@@ -92,43 +118,36 @@ OAM_X    = 3
 		and Port_1_Pressed_Buttons
 		bne @left
 
+		ldx #PlayerStates::idle
+		stx player_state
 		jmp @end
 
 		@left:
+			ldx #PlayerStates::moving
+			stx player_state
+
+			ldx #Directions::left
+			stx sprite_direction
+
 			lda sprite_pos_x
 			cmp #$E0
 			bne @moveSpriteLeft
 			INC scroll
 			jsr Scroll
 			jmp @end
-			@moveSpriteLeft:
+		@moveSpriteLeft:
 			ldx sprite_pos_x
 			inx
 			beq @end ;if position is 0 do not move 
 			stx sprite_pos_x
-			lda sprite_pos_x
-			adc #$07
-			stx	$0203		; store sprite position
-			sta $0207   ; add offset for other sprites
-			stx	$020B
-			sta $020F
-
-			lda $0202
-			and #%10111111 ;reset mirror bit for sprite
-			sta $0202
-			lda $0206
-			and #%10111111
-			sta $0206
-			lda $020A
-			and #%10111111
-			sta $020A
-			lda $020E
-			and #%10111111
-			sta $020E
 			jmp @end
-
-
 		@right:
+			ldx #PlayerStates::moving
+			stx player_state
+
+			ldx #Directions::right
+			stx sprite_direction
+
 			lda sprite_pos_x
 			cmp #$10
 			bne @moveSpriteRight
@@ -140,53 +159,42 @@ OAM_X    = 3
 			dex
 			beq @end
 			stx sprite_pos_x
-			lda sprite_pos_x
-			adc #$07
-			sta	$0203		
-			stx $0207
-			sta	$020B
-			stx $020F
-
-			lda $0202
-			ora #%01000000
-			sta $0202
-			lda $0206
-			ora #%01000000
-			sta $0206
-			lda $020A
-			ora #%01000000
-			sta $020A
-			lda $020E
-			ora #%01000000
-			sta $020E
 			jmp @end
 
 		@end:
 
+
+			
 		rts
 	
-	update_sprite:
+	update_sprite_frame:
+		lda player_state
+		cmp #PlayerStates::idle
+		beq @done
 		dec sprite_animation_timer
 		beq @changeSprite
 		jmp	@put_in_OAM
 		@changeSprite:
 			ldx #10
 			stx sprite_animation_timer
+
+			inc sprite_animation_frame
 			lda sprite_animation_frame
-			cmp Sprite::cat ;if frame 0
-			beq @set_frame_2 ;set to fram 1
-			@set_frame_1:  ;selse set to frame 0
-				lda Sprite::cat
+			cmp #$04 ;if frame 0
+			beq @reset_frame ;set to fram 1
+			jmp @put_in_OAM
+
+			@reset_frame:  ;selse set to frame 0
+				lda #$00
 				sta sprite_animation_frame
 				jmp	@put_in_OAM
-			@set_frame_2:
-				lda Sprite::cat
-				adc #3 
-				sta sprite_animation_frame
-				jmp	@put_in_OAM
+			
 
 		@put_in_OAM:
 			ldx sprite_animation_frame
+			lda Sprite::look_up_table, x
+			
+			tax
 			stx $200 + OAM_TILE
 			inx
 			stx $204 + OAM_TILE
@@ -194,8 +202,75 @@ OAM_X    = 3
 			stx $208 + OAM_TILE
 			inx
 			stx $20C + OAM_TILE
+			
+		@done:
+			rts
+
+	update_sprite_pos:
+		lda sprite_direction
+		cmp #Directions::left
+		beq @left
+		@right:
+			
+			lda $200 + OAM_ATTR
+			ora sprite_direction ;reset mirror bit for sprite
+			sta $200 + OAM_ATTR
+
+			lda $204 + OAM_ATTR
+			ora sprite_direction
+			sta $204 + OAM_ATTR
+
+			lda $208 + OAM_ATTR
+			ora sprite_direction
+			sta $208 + OAM_ATTR
+
+			lda $20C + OAM_ATTR
+			ora sprite_direction
+			sta $20C + OAM_ATTR
+
+		
+			ldy sprite_pos_x
+			lda sprite_pos_x
+			clc
+			adc #$07
+			tax 
+
+
+			jmp @done
+		@left:
+			
+
+			lda $200 + OAM_ATTR
+			and sprite_direction ;reset mirror bit for sprite
+			sta $200 + OAM_ATTR
+
+			lda $204 + OAM_ATTR
+			and sprite_direction
+			sta $204 + OAM_ATTR
+
+			lda $208 + OAM_ATTR
+			and sprite_direction
+			sta $208 + OAM_ATTR
+
+			lda $20C + OAM_ATTR
+			and sprite_direction
+			sta $20C + OAM_ATTR
+
+			ldx sprite_pos_x
+			lda sprite_pos_x
+			clc
+			adc #$07
+			tay 
+			jmp @done
+		@done:
+			stx	$200 + OAM_X		; store sprite position
+			sty $204 + OAM_X  ; add offset for other sprites
+			stx	$208 + OAM_X
+			sty $20C + OAM_X
+
+			
+	
+
 		rts
-
-
 .endscope
 
