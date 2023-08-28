@@ -43,7 +43,7 @@ reset:
 	inx			; now X = 0
 	stx	$2000		; disable NMI
 	stx	$2001		; disable rendering
-	stx	$4010		; disable DMC IRQs
+	stx	$4010		; disable DMC I	RQs
 
 	;; first wait for vblank to make sure PPU is ready
 jsr vblankwait
@@ -105,7 +105,7 @@ LoadSprites:
 		LDA sprites, x ; load data from address (sprites + x)
 		STA $0200, x ; store into RAM address ($0200 + x)
 		INX ; X = X + 1
-		CPX #$10 ; Compare X to hex $10, decimal 16
+		CPX #$20 ; Compare X to hex $10, decimal 16
 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
 		; if compare was equal to 16, continue down  
 

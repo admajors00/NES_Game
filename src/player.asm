@@ -1,9 +1,14 @@
 sprites:
 	;vert tile attr horiz
-	.byte $C0, $A0, $00, $80 ;sprite 0
-	.byte $C0, $A1, $00, $88 ;sprite 1
-	.byte $C8, $A2, $00, $80 ;sprite 2
-	.byte $C8, $A3, $00, $88 ;sprite 3
+	.byte $94, $C0, $00, $80 ;sprite 0
+	.byte $94, $C1, $00, $88 ;sprite 1
+	.byte $9B, $C2, $00, $80 ;sprite 2
+	.byte $9B, $C3, $00, $88 ;sprite 3
+
+	.byte $B7, $24, $00, $80 ;sprite 0
+	.byte $B7, $25, $00, $88 ;sprite 1
+	.byte $C0, $26, $00, $80 ;sprite 2
+	.byte $C0, $27, $00, $88 ;sprite 3
 
 	; .byte $B0, $40, $01, $B0 ;sprite 0
 	; .byte $B0, $41, $01, $B8 ;sprite 1
@@ -51,6 +56,7 @@ OAM_X    = 3
 
 	egg:
 		.byte	$24, $25, $26, $27
+		.byte	$28, $29, $2A, $2B
 	cat:
 		.byte  	$C0, $C1, $C2, $C3
 		.byte  	$C4, $C5, $C6, $C7
@@ -65,12 +71,14 @@ OAM_X    = 3
 .scope Player
 	sprite_pos_x = $10
 	sprite_pos_y = $11
-	sprite_direction = $18
+	sprite_direction = $12
 	character_velocity_x = $13
 	character_velocity_y = $14
 	sprite_animation_timer = $15
 	sprite_animation_frame = $16
+	
 	player_state = $17
+	egg_animation_frame = $18
 
 	.enum PlayerStates
 		moving = 0
@@ -87,17 +95,15 @@ OAM_X    = 3
 		stx character_velocity_x
 		stx character_velocity_y
 		stx sprite_animation_frame
+		stx egg_animation_frame
 
-		ldx #$80
+		ldx #$20
 		stx sprite_pos_x
-		ldx #$C0
+		ldx #$94
 		stx sprite_pos_y
 
 		ldx #5
 		stx sprite_animation_timer
-
-	
-		
 
 		ldx #PlayerStates::idle
 		stx player_state
@@ -105,6 +111,7 @@ OAM_X    = 3
 		ldx #Directions::left
 		stx sprite_direction 
 
+		
 
 	rts
 
@@ -130,7 +137,7 @@ OAM_X    = 3
 			stx sprite_direction
 
 			lda sprite_pos_x
-			cmp #$E0
+			cmp #$80
 			bne @moveSpriteLeft
 			INC scroll
 			jsr Scroll
@@ -163,9 +170,7 @@ OAM_X    = 3
 
 		@end:
 
-
-			
-		rts
+	rts
 	
 	update_sprite_frame:
 		lda player_state
@@ -179,14 +184,24 @@ OAM_X    = 3
 			stx sprite_animation_timer
 
 			inc sprite_animation_frame
+
+			ldx #$04
+				lda Sprite::egg, x
+				sta egg_animation_frame
 			lda sprite_animation_frame
 			cmp #$04 ;if frame 0
 			beq @reset_frame ;set to fram 1
 			jmp @put_in_OAM
 
 			@reset_frame:  ;selse set to frame 0
+				ldx #30
+				stx sprite_animation_timer
 				lda #$00
 				sta sprite_animation_frame
+
+				
+				lda Sprite::egg
+				sta egg_animation_frame
 				jmp	@put_in_OAM
 			
 
@@ -202,6 +217,16 @@ OAM_X    = 3
 			stx $208 + OAM_TILE
 			inx
 			stx $20C + OAM_TILE
+
+			ldx egg_animation_frame
+			lda Sprite::egg, x
+			stx $210 + OAM_TILE
+			inx
+			stx $214 + OAM_TILE
+			inx
+			stx $218 + OAM_TILE
+			inx
+			stx $21C + OAM_TILE
 			
 		@done:
 			rts
@@ -228,6 +253,22 @@ OAM_X    = 3
 			ora sprite_direction
 			sta $20C + OAM_ATTR
 
+
+			lda $210 + OAM_ATTR
+			ora sprite_direction
+			sta $210 + OAM_ATTR
+
+			lda $214 + OAM_ATTR
+			ora sprite_direction
+			sta $214 + OAM_ATTR
+
+			lda $218 + OAM_ATTR
+			ora sprite_direction
+			sta $218 + OAM_ATTR
+
+			lda $21C + OAM_ATTR
+			ora sprite_direction
+			sta $21C + OAM_ATTR
 		
 			ldy sprite_pos_x
 			lda sprite_pos_x
@@ -256,6 +297,23 @@ OAM_X    = 3
 			and sprite_direction
 			sta $20C + OAM_ATTR
 
+
+			lda $210 + OAM_ATTR
+			and sprite_direction
+			sta $210 + OAM_ATTR
+
+			lda $214 + OAM_ATTR
+			and sprite_direction
+			sta $214 + OAM_ATTR
+
+			lda $218 + OAM_ATTR
+			and sprite_direction
+			sta $218 + OAM_ATTR
+			
+			lda $21C + OAM_ATTR
+			and sprite_direction
+			sta $21C + OAM_ATTR
+
 			ldx sprite_pos_x
 			lda sprite_pos_x
 			clc
@@ -268,8 +326,21 @@ OAM_X    = 3
 			stx	$208 + OAM_X
 			sty $20C + OAM_X
 
-			
+			stx	$210 + OAM_X		; store sprite position
+			sty $214 + OAM_X  ; add offset for other sprites
+			stx	$218 + OAM_X
+			sty $21C + OAM_X
+
+			lda sprite_pos_y
+			sbc #$0E
+			sta	$210 + OAM_Y
+			sta $214 + OAM_Y
 	
+			lda sprite_pos_y
+			sbc #$07
+			
+			sta	$218 + OAM_Y
+			sta $21C + OAM_Y
 
 		rts
 .endscope
