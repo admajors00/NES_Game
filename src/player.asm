@@ -75,32 +75,42 @@ OAM_X    = 3
 	character_velocity_x = $13
 	character_velocity_y = $14
 	sprite_animation_timer = $15
-	sprite_animation_frame = $16
-	
+	sprite_animation_frame = $16	
 	player_state = $17
 	egg_animation_frame = $18
-
+	player_pos_x_LOW = $19
+	player_pos_x_HIGH = $1A
+	player_pos_y_LOW = $1B
+	player_pos_y_HIGH = $1C
 	.enum PlayerStates
 		moving = 0
 		idle = 1
+		pushing = 2
 	.endenum
 
 	.enum Directions
-		left = %10111111 ; $bf
+		left =  %10111111 ; $bf
 		right = %01000000 ; $40
 	.endenum
 
 	init_character:
 		ldx #$00
-		stx character_velocity_x
+		
 		stx character_velocity_y
 		stx sprite_animation_frame
 		stx egg_animation_frame
+		stx player_pos_x_LOW
+		stx player_pos_y_LOW
 
+		ldx #$01
+		stx character_velocity_x
 		ldx #$20
 		stx sprite_pos_x
+		stx player_pos_x_HIGH
+
 		ldx #$94
 		stx sprite_pos_y
+		stx player_pos_y_HIGH
 
 		ldx #5
 		stx sprite_animation_timer
@@ -117,65 +127,100 @@ OAM_X    = 3
 
 
 	moveCharacter:
-		lda #BUTTON_LEFT
-		and Port_1_Pressed_Buttons
-		bne @right
 
-		lda #BUTTON_RIGHT
-		and Port_1_Pressed_Buttons
-		bne @left
+		ldx character_velocity_x
+		
+		beq @set_state_idle
+		dex
+		stx character_velocity_x
 
-		ldx #PlayerStates::idle
-		stx player_state
+		lda player_pos_x_HIGH
+		cmp #$80
+		bcs @scroll_screen
+			lda player_pos_x_LOW
+			clc
+			adc character_velocity_x
+			sta player_pos_x_LOW
+			lda player_pos_x_HIGH
+			adc #$00
+			sta player_pos_x_HIGH
+			sta sprite_pos_x
+			jmp @checkButtons
+		@scroll_screen:
+			lda player_pos_x_LOW
+			clc
+			adc character_velocity_x
+			sta player_pos_x_LOW
+			lda scroll
+			adc #$00
+			sta scroll
+			jsr Scroll
+		jmp @checkButtons
+
+		
+		
+		@set_state_idle:
+			ldx #PlayerStates::idle
+			stx player_state
+
+		; @accelerate_y:
+		; lda character_velocity_y
+		; beq @checkButtons
+		; dec character_velocity_y
+
+		; lda player_pos_y_LOW
+		; clc
+		; adc character_velocity_y
+
+		; sta player_pos_y_LOW
+		; lda player_pos_y_HIGH
+		; ADC #$00
+		; sta player_pos_y_HIGH
+		
+
+		@checkButtons:
+		; lda #BUTTON_LEFT
+		; and Port_1_Pressed_Buttons
+		; bne @left
+
+		; lda #BUTTON_RIGHT
+		; and Port_1_Pressed_Buttons
+		; bne @right
+
+		lda #BUTTON_A
+		and Port_1_Pressed_Buttons
+		bne @push
+
+		; ldx #PlayerStates::idle
+		; stx player_state
 		jmp @end
 
-		@left:
-			ldx #PlayerStates::moving
+		@push:
+			lda character_velocity_x
+			adc #$04
+			cmp #$F0          
+			bcs @end
+			sta character_velocity_x
+
+			ldx #PlayerStates::pushing
 			stx player_state
+			
+			
 
-			ldx #Directions::left
-			stx sprite_direction
 
-			lda sprite_pos_x
-			cmp #$80
-			bne @moveSpriteLeft
-			INC scroll
-			jsr Scroll
-			jmp @end
-		@moveSpriteLeft:
-			ldx sprite_pos_x
-			inx
-			beq @end ;if position is 0 do not move 
-			stx sprite_pos_x
-			jmp @end
-		@right:
-			ldx #PlayerStates::moving
-			stx player_state
 
-			ldx #Directions::right
-			stx sprite_direction
-
-			lda sprite_pos_x
-			cmp #$10
-			bne @moveSpriteRight
-			DEC scroll
-			jsr Scroll
-			jmp @end
-		@moveSpriteRight:
-			ldx sprite_pos_x
-			dex
-			beq @end
-			stx sprite_pos_x
-			jmp @end
-
+			
 		@end:
+		
+			
+
 
 	rts
 	
 	update_sprite_frame:
 		lda player_state
-		cmp #PlayerStates::idle
-		beq @done
+		cmp #PlayerStates::pushing
+		bne @done
 		dec sprite_animation_timer
 		beq @changeSprite
 		jmp	@put_in_OAM
@@ -202,6 +247,9 @@ OAM_X    = 3
 				
 				lda Sprite::egg
 				sta egg_animation_frame
+
+				ldx #PlayerStates::moving
+				stx player_state
 				jmp	@put_in_OAM
 			
 
