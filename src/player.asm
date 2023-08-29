@@ -72,7 +72,7 @@ OAM_X    = 3
 	sprite_pos_x = $10
 	sprite_pos_y = $11
 	sprite_direction = $12
-	character_velocity_x = $13
+	character_velocity_x_LOW = $13
 	character_velocity_y = $14
 	sprite_animation_timer = $15
 	sprite_animation_frame = $16	
@@ -82,6 +82,8 @@ OAM_X    = 3
 	player_pos_x_HIGH = $1A
 	player_pos_y_LOW = $1B
 	player_pos_y_HIGH = $1C
+
+	character_velocity_x_HIGH = $1D
 	.enum PlayerStates
 		moving = 0
 		idle = 1
@@ -103,7 +105,7 @@ OAM_X    = 3
 		stx player_pos_y_LOW
 
 		ldx #$01
-		stx character_velocity_x
+		stx character_velocity_x_LOW
 		ldx #$20
 		stx sprite_pos_x
 		stx player_pos_x_HIGH
@@ -128,31 +130,38 @@ OAM_X    = 3
 
 	moveCharacter:
 
-		ldx character_velocity_x
+		lda character_velocity_x_HIGH
+		
 		
 		beq @set_state_idle
-		dex
-		stx character_velocity_x
+
+		lda character_velocity_x_LOW
+		sec
+		sbc #$01
+		sta character_velocity_x_LOW
+		lda character_velocity_x_HIGH
+		sbc #$00
+		sta character_velocity_x_HIGH
 
 		lda player_pos_x_HIGH
 		cmp #$80
 		bcs @scroll_screen
 			lda player_pos_x_LOW
 			clc
-			adc character_velocity_x
+			adc character_velocity_x_LOW
 			sta player_pos_x_LOW
 			lda player_pos_x_HIGH
-			adc #$00
+			adc character_velocity_x_HIGH
 			sta player_pos_x_HIGH
 			sta sprite_pos_x
 			jmp @checkButtons
 		@scroll_screen:
 			lda player_pos_x_LOW
 			clc
-			adc character_velocity_x
+			adc character_velocity_x_LOW
 			sta player_pos_x_LOW
 			lda scroll
-			adc #$00
+			adc character_velocity_x_HIGH
 			sta scroll
 			jsr Scroll
 		jmp @checkButtons
@@ -196,11 +205,16 @@ OAM_X    = 3
 		jmp @end
 
 		@push:
-			lda character_velocity_x
+			lda character_velocity_x_LOW
+			clc
 			adc #$04
-			cmp #$F0          
-			bcs @end
-			sta character_velocity_x
+			sta character_velocity_x_LOW
+			lda character_velocity_x_HIGH
+			adc #$00
+			sta character_velocity_x_HIGH
+			;cmp #$F0          
+			;bcs @end
+			
 
 			ldx #PlayerStates::pushing
 			stx player_state
