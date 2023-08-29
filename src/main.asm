@@ -27,6 +27,7 @@ nametable = $24
 .include "famistudio_ca65.s"
 .include "../graphics/StreetCanvas_2.asm"
 .include "player.asm"
+;.include "game.asm"
 
 
 

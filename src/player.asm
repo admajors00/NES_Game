@@ -1,3 +1,5 @@
+
+.include "game.asm"
 sprites:
 	;vert tile attr horiz
 	.byte $94, $C0, $00, $80 ;sprite 0
@@ -111,11 +113,11 @@ OAM_X    = 3
 
 		ldx #$01
 		stx character_velocity_x_LOW
-		ldx #$20
+		ldx #$10
 		stx sprite_pos_x
 		stx player_pos_x_HIGH
 
-		ldx #$94
+		ldx #Game::ground
 		stx sprite_pos_y
 		stx player_pos_y_HIGH
 
@@ -152,14 +154,14 @@ OAM_X    = 3
 		@decrease_velocity_x:
 			lda character_velocity_x_LOW
 			sec
-			sbc #$01
+			sbc #Game::friction
 			sta character_velocity_x_LOW
 			lda character_velocity_x_HIGH
 			sbc #$00
 			sta character_velocity_x_HIGH
 
 			lda player_pos_x_HIGH
-			cmp #$80
+			cmp #Game::scroll_wall
 			bcs @scroll_screen
 				lda player_pos_x_LOW
 				clc
@@ -193,11 +195,11 @@ OAM_X    = 3
 
 		@accelerate_y:
 			lda player_pos_y_HIGH
-			cmp #$94
+			cmp #Game::ground
 			bcs @landed
 			lda character_velocity_y_LOW
 			sec
-			sbc #$10
+			sbc #Game::gravity
 			sta character_velocity_y_LOW
 			lda character_velocity_y_HIGH
 			sbc #$00
@@ -237,14 +239,14 @@ OAM_X    = 3
 
 		@push:
 			lda character_velocity_x_HIGH
-			cmp #$04 
+			cmp #Game::max_speed 
 			bcs @end
 			lda character_velocity_x_LOW
 			clc
-			adc #$80
+			adc #Game::push_speed_low
 			sta character_velocity_x_LOW
 			lda character_velocity_x_HIGH
-			adc #$00
+			adc #Game::push_speed_high
 			sta character_velocity_x_HIGH
 			        
 			ldx #PlayerStates::pushing
@@ -255,10 +257,10 @@ OAM_X    = 3
 			lda player_state
 			cmp #PlayerStates::airborne
 			beq @end
-			ldx #$01
+			ldx #Game::jump_speed_high
 			
 			stx character_velocity_y_HIGH
-			ldx #$80
+			ldx #Game::jump_speed_low
 			stx character_velocity_y_LOW
 			dec player_pos_y_HIGH
 			ldx #PlayerStates::airborne
