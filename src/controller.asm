@@ -8,22 +8,29 @@ BUTTON_LEFT   = 1 << 1
 BUTTON_RIGHT  = 1 << 0
 
 Port_1 = $4016
+Port_2 = $4017
 
-Port_1_Pressed_Buttons = $20
-
+Port_1_Pressed_Buttons  = $20 ;pressed this frame
+Port_1_Down_Buttons     = $21 ;held down
 
 UpdateButtons:
+    lda Port_1_Down_Buttons
+    tay
     lda #$01
     sta Port_1
-    sta Port_1_Pressed_Buttons
-    lda #$00
+    sta Port_1_Down_Buttons
+    lsr
+    ;lda #$00
     sta Port_1
 
     @loop:
     lda Port_1
     lsr
-    rol Port_1_Pressed_Buttons
+    rol Port_1_Down_Buttons
     bcc @loop
-
+    tya
+    eor Port_1_Down_Buttons
+    and Port_1_Down_Buttons
+    sta Port_1_Pressed_Buttons
     rts
 

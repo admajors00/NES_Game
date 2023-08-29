@@ -72,22 +72,25 @@ OAM_X    = 3
 	sprite_pos_x = $10
 	sprite_pos_y = $11
 	sprite_direction = $12
-	character_velocity_x_LOW = $13
-	character_velocity_y = $14
-	sprite_animation_timer = $15
-	sprite_animation_frame = $16	
-	player_state = $17
-	egg_animation_frame = $18
-	player_pos_x_LOW = $19
-	player_pos_x_HIGH = $1A
-	player_pos_y_LOW = $1B
-	player_pos_y_HIGH = $1C
+	sprite_animation_timer = $13
+	sprite_animation_frame = $14	
+	player_state = $15
+	egg_animation_frame = $16
 
-	character_velocity_x_HIGH = $1D
+	player_pos_x_LOW = $17
+	player_pos_x_HIGH = $18
+	player_pos_y_LOW = $19
+	player_pos_y_HIGH = $1A
+
+	character_velocity_x_LOW = $1B
+	character_velocity_x_HIGH = $1C
+	character_velocity_y_LOW = $1D
+	character_velocity_y_HIGH = $1E
 	.enum PlayerStates
 		moving = 0
 		idle = 1
 		pushing = 2
+		airborne = 3
 	.endenum
 
 	.enum Directions
@@ -95,10 +98,12 @@ OAM_X    = 3
 		right = %01000000 ; $40
 	.endenum
 
+
+
 	init_character:
 		ldx #$00
 		
-		stx character_velocity_y
+		stx character_velocity_y_HIGH
 		stx sprite_animation_frame
 		stx egg_animation_frame
 		stx player_pos_x_LOW
@@ -122,112 +127,141 @@ OAM_X    = 3
 
 		ldx #Directions::left
 		stx sprite_direction 
-
-		
-
 	rts
 
 
+
+	updatePlayer:
+		jsr moveCharacter
+		jsr checkButtons
+		jsr update_sprite_frame
+		jsr update_sprite_pos
+	rts
+
+
+
 	moveCharacter:
-
 		lda character_velocity_x_HIGH
-		
-		
-		beq @set_state_idle
+		beq @check_velocity_x_low
+		jmp @decrease_velocity_x
 
-		lda character_velocity_x_LOW
-		sec
-		sbc #$01
-		sta character_velocity_x_LOW
-		lda character_velocity_x_HIGH
-		sbc #$00
-		sta character_velocity_x_HIGH
+		@check_velocity_x_low:
+			lda character_velocity_x_LOW
+			beq @set_state_idle
 
-		lda player_pos_x_HIGH
-		cmp #$80
-		bcs @scroll_screen
-			lda player_pos_x_LOW
-			clc
-			adc character_velocity_x_LOW
-			sta player_pos_x_LOW
+		@decrease_velocity_x:
+			lda character_velocity_x_LOW
+			sec
+			sbc #$01
+			sta character_velocity_x_LOW
+			lda character_velocity_x_HIGH
+			sbc #$00
+			sta character_velocity_x_HIGH
+
 			lda player_pos_x_HIGH
-			adc character_velocity_x_HIGH
-			sta player_pos_x_HIGH
-			sta sprite_pos_x
-			jmp @checkButtons
-		@scroll_screen:
-			lda player_pos_x_LOW
-			clc
-			adc character_velocity_x_LOW
-			sta player_pos_x_LOW
-			lda scroll
-			adc character_velocity_x_HIGH
-			sta scroll
-			jsr Scroll
-		jmp @checkButtons
+			cmp #$80
+			bcs @scroll_screen
+				lda player_pos_x_LOW
+				clc
+				adc character_velocity_x_LOW
+				sta player_pos_x_LOW
+				lda player_pos_x_HIGH
+				adc character_velocity_x_HIGH
+				sta player_pos_x_HIGH
+				sta sprite_pos_x
+				jmp @accelerate_y
+
+
+			@scroll_screen:
+				lda player_pos_x_LOW
+				clc
+				adc character_velocity_x_LOW
+				sta player_pos_x_LOW
+				lda scroll
+				adc character_velocity_x_HIGH
+				sta scroll
+				jsr Scroll
+			jmp @accelerate_y
 
 		
-		
-		@set_state_idle:
-			ldx #PlayerStates::idle
-			stx player_state
+			@set_state_idle:
+				ldx #PlayerStates::idle
+				stx player_state
 
-		; @accelerate_y:
-		; lda character_velocity_y
-		; beq @checkButtons
-		; dec character_velocity_y
+		@accelerate_y:
+			lda player_pos_y_HIGH
+			cmp #$94
+			bcs @landed
+			lda character_velocity_y_LOW
+			sec
+			sbc #$10
+			sta character_velocity_y_LOW
+			lda character_velocity_y_HIGH
+			sbc #$00
+			sta character_velocity_y_HIGH
 
-		; lda player_pos_y_LOW
-		; clc
-		; adc character_velocity_y
+			lda player_pos_y_LOW
+			sec
+			sbc character_velocity_y_LOW
+			sta player_pos_y_LOW
+			lda player_pos_y_HIGH
+			sbc character_velocity_y_HIGH
+			sta player_pos_y_HIGH
+			sta sprite_pos_y
+			jmp @end
 
-		; sta player_pos_y_LOW
-		; lda player_pos_y_HIGH
-		; ADC #$00
-		; sta player_pos_y_HIGH
-		
+		@landed:
+			lda #PlayerStates::airborne
+			cmp player_state
+			bne @end
+			lda #PlayerStates::idle
+			sta player_state
+			jmp @end
 
-		@checkButtons:
-		; lda #BUTTON_LEFT
-		; and Port_1_Pressed_Buttons
-		; bne @left
+		@end:
+	rts
 
-		; lda #BUTTON_RIGHT
-		; and Port_1_Pressed_Buttons
-		; bne @right
-
+	checkButtons:
 		lda #BUTTON_A
 		and Port_1_Pressed_Buttons
 		bne @push
 
-		; ldx #PlayerStates::idle
-		; stx player_state
+		lda #BUTTON_B
+		and Port_1_Pressed_Buttons
+		bne @jump
+
 		jmp @end
 
 		@push:
+			lda character_velocity_x_HIGH
+			cmp #$04 
+			bcs @end
 			lda character_velocity_x_LOW
 			clc
-			adc #$04
+			adc #$80
 			sta character_velocity_x_LOW
 			lda character_velocity_x_HIGH
 			adc #$00
 			sta character_velocity_x_HIGH
-			;cmp #$F0          
-			;bcs @end
-			
-
+			        
 			ldx #PlayerStates::pushing
 			stx player_state
-			
-			
-
-
-
-			
-		@end:
+			jmp @end
 		
+		@jump:
+			lda player_state
+			cmp #PlayerStates::airborne
+			beq @end
+			ldx #$01
 			
-
+			stx character_velocity_y_HIGH
+			ldx #$80
+			stx character_velocity_y_LOW
+			dec player_pos_y_HIGH
+			ldx #PlayerStates::airborne
+			stx player_state
+		
+		@end:
 
 	rts
 	
@@ -265,7 +299,6 @@ OAM_X    = 3
 				ldx #PlayerStates::moving
 				stx player_state
 				jmp	@put_in_OAM
-			
 
 		@put_in_OAM:
 			ldx sprite_animation_frame
@@ -291,7 +324,7 @@ OAM_X    = 3
 			stx $21C + OAM_TILE
 			
 		@done:
-			rts
+	rts
 
 	update_sprite_pos:
 		lda sprite_direction
@@ -394,6 +427,14 @@ OAM_X    = 3
 			sty $21C + OAM_X
 
 			lda sprite_pos_y
+			sta	$200 + OAM_Y		
+			sta $204 + OAM_Y
+
+			adc #$07			  
+			sta	$208 + OAM_Y
+			sta $20C + OAM_Y
+
+			lda sprite_pos_y
 			sbc #$0E
 			sta	$210 + OAM_Y
 			sta $214 + OAM_Y
@@ -404,6 +445,6 @@ OAM_X    = 3
 			sta	$218 + OAM_Y
 			sta $21C + OAM_Y
 
-		rts
+	rts
 .endscope
 

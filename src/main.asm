@@ -172,9 +172,8 @@ nmi:
 	; sprite DMA from $0200
 	jsr UpdateButtons
 
-	jsr Player::moveCharacter
-	jsr Player::update_sprite_frame
-	jsr Player::update_sprite_pos
+	jsr Player::updatePlayer
+	
 
 
 	@end:
