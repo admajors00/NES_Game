@@ -185,6 +185,9 @@ OAM_X    = 3
 
 		
 			@set_state_idle:
+				lda player_state
+				cmp #PlayerStates::airborne
+				beq @accelerate_y
 				ldx #PlayerStates::idle
 				stx player_state
 
@@ -430,7 +433,7 @@ OAM_X    = 3
 			sta	$200 + OAM_Y		
 			sta $204 + OAM_Y
 
-			adc #$07			  
+			adc #$08			  
 			sta	$208 + OAM_Y
 			sta $20C + OAM_Y
 
