@@ -60,15 +60,21 @@ OAM_X    = 3
 		.byte	$24, $25, $26, $27;standing up
 		.byte	$28, $29, $2A, $2B;leand forward
 
-	look_up_table:
-		.byte $C0, $C4, $C8, $CC
+	leggs_pushing:
+		.byte $E0, $E4, $E8, $EC
+	leggs_jumping:
+		.byte $E0, $E8, $F0, $E0
+	skateboard_cruising:
+		.byte $D0, $D4, $D8, $D4
+	skateboard_ollie:
+		.byte $D0, $F8, $FF, $D0
 
 .endscope
 
 .scope Player
 	sprite_pos_x = $10
 	sprite_pos_y = $11
-	sprite_direction = $12
+	skateboard_animation_frame= $12
 	sprite_animation_timer = $13
 	sprite_animation_frame = $14	
 	player_state = $15
@@ -123,8 +129,7 @@ OAM_X    = 3
 		ldx #PlayerStates::idle
 		stx player_state
 
-		ldx #Directions::left
-		stx sprite_direction 
+
 	rts
 
 
@@ -268,13 +273,50 @@ OAM_X    = 3
 	
 	update_sprite_frame:
 		lda player_state
-		cmp #PlayerStates::pushing
-		bne @done
+		cmp #PlayerStates::coasting
+		beq @done1
+
+	
 		dec sprite_animation_timer
-		beq @changeSprite
+		bne @done1
+
+		cmp #PlayerStates::pushing
+		beq @pushing_animation
+
+		cmp #PlayerStates::airborne
+		beq @jumping_animation
+		
+		
+			lda Sprite::egg
+			sta egg_animation_frame
+			lda sprite_animation_frame
+		ldx sprite_animation_frame
+			lda Sprite::leggs_pushing, x
+			tax
+
 		jmp	@put_in_OAM
-		@changeSprite:
+		@pushing_animation:
+
 			lda #$08
+		
+			sta sprite_animation_timer
+
+			inc sprite_animation_frame
+
+			ldx #$04
+			lda Sprite::egg, x
+			sta egg_animation_frame
+			lda sprite_animation_frame
+			cmp #$04 ;if frame 0
+			beq @reset_frame ;set to fram 1
+			ldx sprite_animation_frame
+			lda Sprite::leggs_pushing, x
+			
+
+			jmp @put_in_OAM
+		@jumping_animation:
+			dec sprite_animation_timer
+			lda #$10
 		
 			sta sprite_animation_timer
 
@@ -286,27 +328,32 @@ OAM_X    = 3
 			lda sprite_animation_frame
 			cmp #$04 ;if frame 0
 			beq @reset_frame ;set to fram 1
+			ldx sprite_animation_frame
+			lda Sprite::leggs_jumping, x
+			tax
+
 			jmp @put_in_OAM
+		@done1:
+			jmp @done
 
-			@reset_frame:  ;sel1e set to frame 0
-				ldx #$01
-				stx sprite_animation_timer
-				lda #$00
-				sta sprite_animation_frame
+		@reset_frame:  ;sel1e set to frame 0
+			ldx #$01
+			stx sprite_animation_timer
+			lda #$00
+			sta sprite_animation_frame
 
-				
-				lda Sprite::egg
-				sta egg_animation_frame
+			
+			lda Sprite::egg
+			sta egg_animation_frame
 
-				ldx #PlayerStates::coasting
-				stx player_state
-				jmp	@put_in_OAM
+			ldx #PlayerStates::coasting
+			stx player_state
+			ldx Sprite::leggs_pushing
+			jmp	@put_in_OAM
 
 		@put_in_OAM:
-			ldx sprite_animation_frame
-			lda Sprite::look_up_table, x
 			
-			tax
+			
 			stx $200 + OAM_TILE
 			inx
 			stx $204 + OAM_TILE
