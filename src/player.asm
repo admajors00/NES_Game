@@ -57,13 +57,8 @@ OAM_X    = 3
 .scope Sprite
 
 	egg:
-		.byte	$24, $25, $26, $27
-		.byte	$28, $29, $2A, $2B
-	cat:
-		.byte  	$C0, $C1, $C2, $C3
-		.byte  	$C4, $C5, $C6, $C7
-		.byte  	$C8, $C9, $CA, $CB
-		.byte  	$CC, $CD, $CE, $CF
+		.byte	$24, $25, $26, $27;standing up
+		.byte	$28, $29, $2A, $2B;leand forward
 
 	look_up_table:
 		.byte $C0, $C4, $C8, $CC
@@ -89,8 +84,9 @@ OAM_X    = 3
 	character_velocity_y_LOW = $1D
 	character_velocity_y_HIGH = $1E
 	.enum PlayerStates
-		moving = 0
-		idle = 1
+		
+		idle = 0
+		coasting = 1
 		pushing = 2
 		airborne = 3
 	.endenum
@@ -219,7 +215,7 @@ OAM_X    = 3
 			lda #PlayerStates::airborne
 			cmp player_state
 			bne @end
-			lda #PlayerStates::idle
+			lda #PlayerStates::coasting
 			sta player_state
 			jmp @end
 
@@ -278,8 +274,9 @@ OAM_X    = 3
 		beq @changeSprite
 		jmp	@put_in_OAM
 		@changeSprite:
-			ldx #10
-			stx sprite_animation_timer
+			lda #$08
+		
+			sta sprite_animation_timer
 
 			inc sprite_animation_frame
 
@@ -291,8 +288,8 @@ OAM_X    = 3
 			beq @reset_frame ;set to fram 1
 			jmp @put_in_OAM
 
-			@reset_frame:  ;selse set to frame 0
-				ldx #30
+			@reset_frame:  ;sel1e set to frame 0
+				ldx #$01
 				stx sprite_animation_timer
 				lda #$00
 				sta sprite_animation_frame
@@ -301,7 +298,7 @@ OAM_X    = 3
 				lda Sprite::egg
 				sta egg_animation_frame
 
-				ldx #PlayerStates::moving
+				ldx #PlayerStates::coasting
 				stx player_state
 				jmp	@put_in_OAM
 
@@ -332,123 +329,41 @@ OAM_X    = 3
 	rts
 
 	update_sprite_pos:
-		lda sprite_direction
-		cmp #Directions::left
-		beq @left
-		@right:
-			
-			lda $200 + OAM_ATTR
-			ora sprite_direction ;reset mirror bit for sprite
-			sta $200 + OAM_ATTR
 
-			lda $204 + OAM_ATTR
-			ora sprite_direction
-			sta $204 + OAM_ATTR
+		ldx sprite_pos_x
+		txa
+		clc
+		adc #$07
+		tay 
 
-			lda $208 + OAM_ATTR
-			ora sprite_direction
-			sta $208 + OAM_ATTR
+		stx	$200 + OAM_X		; store sprite position
+		sty $204 + OAM_X  ; add offset for other sprites
+		stx	$208 + OAM_X
+		sty $20C + OAM_X
 
-			lda $20C + OAM_ATTR
-			ora sprite_direction
-			sta $20C + OAM_ATTR
+		stx	$210 + OAM_X		; store sprite position
+		sty $214 + OAM_X  ; add offset for other sprites
+		stx	$218 + OAM_X
+		sty $21C + OAM_X
 
+		lda sprite_pos_y
+		sta	$200 + OAM_Y		
+		sta $204 + OAM_Y
 
-			lda $210 + OAM_ATTR
-			ora sprite_direction
-			sta $210 + OAM_ATTR
+		adc #$08			  
+		sta	$208 + OAM_Y
+		sta $20C + OAM_Y
 
-			lda $214 + OAM_ATTR
-			ora sprite_direction
-			sta $214 + OAM_ATTR
+		lda sprite_pos_y
+		sbc #$0E
+		sta	$210 + OAM_Y
+		sta $214 + OAM_Y
 
-			lda $218 + OAM_ATTR
-			ora sprite_direction
-			sta $218 + OAM_ATTR
-
-			lda $21C + OAM_ATTR
-			ora sprite_direction
-			sta $21C + OAM_ATTR
+		lda sprite_pos_y
+		sbc #$07
 		
-			ldy sprite_pos_x
-			lda sprite_pos_x
-			clc
-			adc #$07
-			tax 
-
-
-			jmp @done
-		@left:
-			
-
-			lda $200 + OAM_ATTR
-			and sprite_direction ;reset mirror bit for sprite
-			sta $200 + OAM_ATTR
-
-			lda $204 + OAM_ATTR
-			and sprite_direction
-			sta $204 + OAM_ATTR
-
-			lda $208 + OAM_ATTR
-			and sprite_direction
-			sta $208 + OAM_ATTR
-
-			lda $20C + OAM_ATTR
-			and sprite_direction
-			sta $20C + OAM_ATTR
-
-
-			lda $210 + OAM_ATTR
-			and sprite_direction
-			sta $210 + OAM_ATTR
-
-			lda $214 + OAM_ATTR
-			and sprite_direction
-			sta $214 + OAM_ATTR
-
-			lda $218 + OAM_ATTR
-			and sprite_direction
-			sta $218 + OAM_ATTR
-			
-			lda $21C + OAM_ATTR
-			and sprite_direction
-			sta $21C + OAM_ATTR
-
-			ldx sprite_pos_x
-			lda sprite_pos_x
-			clc
-			adc #$07
-			tay 
-			jmp @done
-		@done:
-			stx	$200 + OAM_X		; store sprite position
-			sty $204 + OAM_X  ; add offset for other sprites
-			stx	$208 + OAM_X
-			sty $20C + OAM_X
-
-			stx	$210 + OAM_X		; store sprite position
-			sty $214 + OAM_X  ; add offset for other sprites
-			stx	$218 + OAM_X
-			sty $21C + OAM_X
-
-			lda sprite_pos_y
-			sta	$200 + OAM_Y		
-			sta $204 + OAM_Y
-
-			adc #$08			  
-			sta	$208 + OAM_Y
-			sta $20C + OAM_Y
-
-			lda sprite_pos_y
-			sbc #$0E
-			sta	$210 + OAM_Y
-			sta $214 + OAM_Y
-	
-			lda sprite_pos_y
-			sbc #$07
-			
-			sta	$218 + OAM_Y
-			sta $21C + OAM_Y
+		sta	$218 + OAM_Y
+		sta $21C + OAM_Y
 
 	rts
 .endscope
