@@ -1,7 +1,7 @@
-.IFNDEF PLAYER_
-.DEFINE PLAYER_
-; .include "game.asm"
-; .include "animations.asm"
+.IFNDEF PLAYER_INC
+PLAYER_INC =1
+.include "game.asm"
+;.include "animations.asm"
 sprites:
 	;vert tile attr horiz
 	.byte $94, $C0, $00, $80 ;sprite 0
@@ -133,7 +133,7 @@ OAM_X    = 3
 		ldx #PlayerStates::idle
 		stx player_state
 
-
+		jsr #::Animation::Init
 	rts
 
 
@@ -292,8 +292,8 @@ OAM_X    = 3
 		
 		jmp @done
 		@pushing_animation:
-			ldx >EWL_StreetSkate_pointers
-			ldy <EWL_StreetSkate_pointers
+		;	ldx >EWL_StreetSkate_pointers
+			;ldy <EWL_StreetSkate_pointers
 
 		@jumping_animation:
 

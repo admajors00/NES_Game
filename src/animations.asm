@@ -1,9 +1,9 @@
 ;adress space is $20-$2F
-.IFNDEF ANIMATIONS_
-.DEFINE ANIMATIONS_
+.ifndef ANIMATIONS_INC
+ANIMATIONS_INC =1
 ;animation flags 
 
-; .include "player.asm"
+.include "player.asm"
 
 ; BUTTON_A      = 1 << 7
 ; BUTTON_B      = 1 << 6
@@ -121,14 +121,14 @@ OAM_DMA_ADDR = $200
         ;load oam address plus offset   
         @loop:
             ldy 0
-            lda Player::player_pos_x_HIGH
+            lda #::Player::player_pos_x_HIGH
             sec 
             sbc (frame_pointer_LO),y
             sta OAM_DMA_ADDR + oam_size + OAM_X
 
             iny
 
-            lda Player::player_pos_y_HIGH
+            lda #::Player::player_pos_y_HIGH
             sec 
             sbc (frame_pointer_LO),y
             sta OAM_DMA_ADDR +oam_size + OAM_Y
@@ -234,4 +234,4 @@ EWL_StreetSkate_pointers:
 
 
 
-.ENDIF
+.endif
