@@ -143,6 +143,7 @@ load_background:
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
 
 jsr Player::init_character
+jsr Animation::Init
 ldx #.lobyte(music_data_untitled)
 ldy #.hibyte(music_data_untitled)
 lda #1 ; NTSC

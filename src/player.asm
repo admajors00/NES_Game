@@ -1,5 +1,7 @@
-
-.include "game.asm"
+.IFNDEF PLAYER_
+.DEFINE PLAYER_
+; .include "game.asm"
+; .include "animations.asm"
 sprites:
 	;vert tile attr horiz
 	.byte $94, $C0, $00, $80 ;sprite 0
@@ -139,7 +141,7 @@ OAM_X    = 3
 	updatePlayer:
 		jsr moveCharacter
 		jsr checkButtons
-		jsr update_sprite_frame
+		jsr Animation::Update
 		jsr update_sprite_pos
 	rts
 
@@ -276,11 +278,11 @@ OAM_X    = 3
 	update_sprite_frame:
 		lda player_state
 		cmp #PlayerStates::coasting
-		beq @done1
+		beq @done
 
 	
 		dec sprite_animation_timer
-		bne @done1
+		bne @done
 
 		cmp #PlayerStates::pushing
 		beq @pushing_animation
@@ -288,92 +290,15 @@ OAM_X    = 3
 		cmp #PlayerStates::airborne
 		beq @jumping_animation
 		
-		
-			lda Sprite::egg
-			sta egg_animation_frame
-			lda sprite_animation_frame
-		ldx sprite_animation_frame
-			lda Sprite::leggs_pushing, x
-			tax
-
-		jmp	@put_in_OAM
+		jmp @done
 		@pushing_animation:
+			ldx >EWL_StreetSkate_pointers
+			ldy <EWL_StreetSkate_pointers
 
-			lda #$08
-		
-			sta sprite_animation_timer
-
-			inc sprite_animation_frame
-
-			ldx #$04
-			lda Sprite::egg, x
-			sta egg_animation_frame
-			lda sprite_animation_frame
-			cmp #$04 ;if frame 0
-			beq @reset_frame ;set to fram 1
-			ldx sprite_animation_frame
-			lda Sprite::leggs_pushing, x
-			
-
-			jmp @put_in_OAM
 		@jumping_animation:
-			dec sprite_animation_timer
-			lda #$10
-		
-			sta sprite_animation_timer
-
-			inc sprite_animation_frame
-
-			ldx #$04
-				lda Sprite::egg, x
-				sta egg_animation_frame
-			lda sprite_animation_frame
-			cmp #$04 ;if frame 0
-			beq @reset_frame ;set to fram 1
-			ldx sprite_animation_frame
-			lda Sprite::leggs_jumping, x
-			tax
-
-			jmp @put_in_OAM
-		@done1:
-			jmp @done
 
 		@reset_frame:  ;sel1e set to frame 0
-			ldx #$01
-			stx sprite_animation_timer
-			lda #$00
-			sta sprite_animation_frame
-
-			
-			lda Sprite::egg
-			sta egg_animation_frame
-
-			ldx #PlayerStates::coasting
-			stx player_state
-			ldx Sprite::leggs_pushing
-			jmp	@put_in_OAM
-
-		@put_in_OAM:
-			
-			
-			stx $200 + OAM_TILE
-			inx
-			stx $204 + OAM_TILE
-			inx
-			stx $208 + OAM_TILE
-			inx
-			stx $20C + OAM_TILE
-
-			ldx egg_animation_frame
-			lda Sprite::egg, x
-			stx $210 + OAM_TILE
-			inx
-			stx $214 + OAM_TILE
-			inx
-			stx $218 + OAM_TILE
-			inx
-			stx $21C + OAM_TILE
-			
+	
 		@done:
 	rts
 
@@ -417,3 +342,4 @@ OAM_X    = 3
 	rts
 .endscope
 
+.ENDIF

@@ -1,5 +1,6 @@
 
-
+.IFNDEF GAME_
+.DEFINE GAME_
 .scope Game
     ;some game constants
     gravity = $10
@@ -16,3 +17,5 @@
 
 
 .endscope
+
+.ENDIF
