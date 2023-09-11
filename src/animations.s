@@ -1,10 +1,11 @@
-;adress space is $20-$2F
-.ifndef ANIMATIONS_INC
-ANIMATIONS_INC =1
-;animation flags 
+; adress space is $20-$2F
+; .ifndef ANIMATIONS_INC
+; ANIMATIONS_INC =1
+; ;animation flags 
 
-.include "player.asm"
-
+; .include "player."
+.autoimport +
+;.include "player.inc"
 ; BUTTON_A      = 1 << 7
 ; BUTTON_B      = 1 << 6
 ; BUTTON_SELECT = 1 << 5
@@ -20,23 +21,27 @@ OAM_DMA_ADDR = $200
 ; OAM_ATTR = 2
 ; OAM_X    = 3
 
-.scope Animation
 
+.scope Animation
+    .export Load_Animation
     pt_pointer_LO = $20
     pt_pointer_HI = $21
 
     frame_pointer_LO = $22
-    frame_pointer_HI = $24
+    frame_pointer_HI = $23
     
-    animation_timer = $25
-    num_frames = $26
-    frame_counter = $27
+    animation_timer = $24
+    num_frames = $25
+    frame_counter = $26
     oam_size = $27
-
-
+    flags = $28
     temp = $29
+
+    oam_dma_addr_LO = $2A
+    oam_dma_addr_HI = $2B
+
     Init:
-        lda #8
+        lda #64
         sta animation_timer
 
         lda #IDLE
@@ -44,18 +49,27 @@ OAM_DMA_ADDR = $200
 
         lda #0 
         sta oam_size
+        sta oam_dma_addr_LO
+
+        lda #2
+        sta oam_dma_addr_HI
+
     rts
   
     
     Load_Animation: ;store animation pt addr hi in x and lo in y before calling
         lda flags
-        and STARTED
+        and #STARTED
+
         bne @done ;do nothing if in the middle of an animation
 
+        lda #STARTED
+        sta flags
+   
         sty pt_pointer_LO
         stx pt_pointer_HI
 
-        ldy 0
+        ldy #0
         lda (pt_pointer_LO), y
         sta num_frames
         sta frame_counter
@@ -68,6 +82,13 @@ OAM_DMA_ADDR = $200
         lda (pt_pointer_LO), y
         sta frame_pointer_LO
 
+        lda pt_pointer_LO
+        clc
+        adc #1
+        sta pt_pointer_LO
+        lda pt_pointer_HI
+        adc #0
+        sta pt_pointer_HI
 
         @done:
 
@@ -77,9 +98,10 @@ OAM_DMA_ADDR = $200
         lda flags
         and #STARTED
         bne @started
-        lda flags
-        eor #STARTED
-        sta flags
+        jmp @done
+        ; lda flags
+        ; eor #STARTED
+        ; sta flags
         ;load number of updates for this frame into frame timer
 
         @started:
@@ -87,24 +109,38 @@ OAM_DMA_ADDR = $200
             ;if animation timer == 0 
             bne @done
                 ;dec numframes
+                lda #40
+                sta animation_timer
                 dec frame_counter
                 ;if numframes == 0
                 bne @next_frame
-                    lda flags
-                    ora #IDLE
-                    eor #STARTED
+                    lda #IDLE
+                    sta flags
+                    lda #Player::PlayerStates::coasting
+		            cmp Player::player_state
+                    jmp @done
+                    ;eor #STARTED
                     ;set idle flag
                     ;reset started flag
                 ;else
                 @next_frame:
                 ;   get next frame pointer
                     
-                    lda frame_pointer_LO
+                    lda pt_pointer_LO
                     clc
                     adc #2
-                    sta frame_pointer_LO
-                    lda frame_pointer_HI
+                    sta pt_pointer_LO
+                    lda pt_pointer_HI
                     adc #0
+                    sta pt_pointer_HI
+                    ldy #0
+                    iny
+                    lda (pt_pointer_LO), y
+                    sta frame_pointer_HI
+
+                    iny
+                    lda (pt_pointer_LO), y
+                    sta frame_pointer_LO
                 ;   call store frame
                     jsr Store_frame
             ;else
@@ -113,23 +149,25 @@ OAM_DMA_ADDR = $200
 
     rts
 
-    Store_frame:
+    .proc Store_frame
         ;load frame pointer
-        
+
         ldx #0
         stx oam_size
         ;load oam address plus offset   
+        ldy #0
         @loop:
-            ldy 0
-            lda #::Player::player_pos_x_HIGH
-            sec 
+            
+          
+            lda Player::player_pos_x_HIGH
+           ; sec 
             sbc (frame_pointer_LO),y
             sta OAM_DMA_ADDR + oam_size + OAM_X
 
             iny
 
-            lda #::Player::player_pos_y_HIGH
-            sec 
+            lda Player::player_pos_y_HIGH
+          ;  sec 
             sbc (frame_pointer_LO),y
             sta OAM_DMA_ADDR +oam_size + OAM_Y
 
@@ -143,19 +181,21 @@ OAM_DMA_ADDR = $200
 
             lda oam_size
             adc #4
+            sta oam_size
             iny
             lda (frame_pointer_LO),y
 
-            
-            bpl @loop
+            cmp #$80
+            bne @loop
 
 
     rts
+    .endproc
+
+
+
+
 .endscope
-
-
-
-
 
 
 EWL_StreetSkate_Push_1_data:
@@ -232,6 +272,5 @@ EWL_StreetSkate_pointers:
 
 
 
-
-
-.endif
+;.export Animation
+; .endif

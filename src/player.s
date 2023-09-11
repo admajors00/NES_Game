@@ -1,28 +1,12 @@
-.IFNDEF PLAYER_INC
-PLAYER_INC =1
-.include "game.asm"
-;.include "animations.asm"
-sprites:
-	;vert tile attr horiz
-	.byte $94, $C0, $00, $80 ;sprite 0
-	.byte $94, $C1, $00, $88 ;sprite 1
-	.byte $9B, $C2, $00, $80 ;sprite 2
-	.byte $9B, $C3, $00, $88 ;sprite 3
+; .IFNDEF PLAYER_INC
+; PLAYER_INC =1
+;.include "game.asm"
+;.include "animations.s"
+;.include "player.inc"
 
-	.byte $B7, $24, $00, $80 ;sprite 0
-	.byte $B7, $25, $00, $88 ;sprite 1
-	.byte $C0, $26, $00, $80 ;sprite 2
-	.byte $C0, $27, $00, $88 ;sprite 3
 
-	; .byte $B0, $40, $01, $B0 ;sprite 0
-	; .byte $B0, $41, $01, $B8 ;sprite 1
-	; .byte $B8, $42, $01, $B0 ;sprite 2
-	; .byte $B8, $43, $01, $B8 ;sprite 3
+; .import Game
 
-	; .byte $B0, $60, $01, $A0 ;sprite 0
-	; .byte $B0, $61, $01, $A8 ;sprite 1
-	; .byte $B8, $62, $01, $A0 ;sprite 2
-	; .byte $B8, $63, $01, $A8 ;sprite 3
 
 ; OAM address ($2003) > write / OAM data ($2004) > write
 ; Set the "sprite" address using OAMADDR ($2003)
@@ -31,51 +15,15 @@ OAM_ADDR  = $2003
 OAM_DATA	= $2004
 OAM_DMA   = $4014
 
-; - Byte 0 (Y Position)
 OAM_Y    = 0
-
-; - Byte 1 (Tile Index)
-;
-; 76543210
-; ||||||||
-; |||||||+- Bank ($0000 or $1000) of tiles
-; +++++++-- Tile number of top of sprite (0 to 254; bottom half gets the next tile)
 OAM_TILE = 1
-
-; - Byte 2 (Attributes)
-;
-; 76543210
-; ||||||||
-; ||||||++- Palette (4 to 7) of sprite
-; |||+++--- Unimplemented
-; ||+------ Priority (0: in front of background; 1: behind background)
-; |+------- Flip sprite horizontally
-; +-------- Flip sprite vertically
 OAM_ATTR = 2
-
-; - Byte 3 (X Position)
 OAM_X    = 3
 
 
-
-.scope Sprite
-
-	egg:
-		.byte	$24, $25, $26, $27;standing up
-		.byte	$28, $29, $2A, $2B;leand forward
-
-	leggs_pushing:
-		.byte $E0, $E4, $E8, $EC
-	leggs_jumping:
-		.byte $E0, $E8, $F0, $E0
-	skateboard_cruising:
-		.byte $D0, $D4, $D8, $D4
-	skateboard_ollie:
-		.byte $D0, $F8, $FF, $D0
-
-.endscope
-
 .scope Player
+
+	 .import Load_Animation
 	sprite_pos_x = $10
 	sprite_pos_y = $11
 	skateboard_animation_frame= $12
@@ -108,7 +56,7 @@ OAM_X    = 3
 
 
 
-	init_character:
+	.proc init_character
 		ldx #$00
 		
 		stx character_velocity_y_HIGH
@@ -133,16 +81,16 @@ OAM_X    = 3
 		ldx #PlayerStates::idle
 		stx player_state
 
-		jsr #::Animation::Init
-	rts
-
+		
+		rts
+	.endproc
 
 
 	updatePlayer:
 		jsr moveCharacter
 		jsr checkButtons
-		jsr Animation::Update
-		jsr update_sprite_pos
+		jsr update_sprite_frame
+		;jsr update_sprite_pos
 	rts
 
 
@@ -281,8 +229,8 @@ OAM_X    = 3
 		beq @done
 
 	
-		dec sprite_animation_timer
-		bne @done
+		; dec sprite_animation_timer
+		; bne @done
 
 		cmp #PlayerStates::pushing
 		beq @pushing_animation
@@ -292,8 +240,9 @@ OAM_X    = 3
 		
 		jmp @done
 		@pushing_animation:
-		;	ldx >EWL_StreetSkate_pointers
-			;ldy <EWL_StreetSkate_pointers
+			ldx #>EWL_StreetSkate_pointers
+			ldy #<EWL_StreetSkate_pointers
+			jsr Load_Animation
 
 		@jumping_animation:
 
@@ -342,4 +291,6 @@ OAM_X    = 3
 	rts
 .endscope
 
-.ENDIF
+
+; .export Player
+;  .ENDIF

@@ -22,14 +22,16 @@ nametable = $24
 
 
 .segment "CODE"
-
-.include "controller.asm"
+.autoimport 	+
+.include "controller.s"
 .include "famistudio_ca65.s"
-.include "../graphics/StreetCanvas_2.asm"
-.include "animations.asm"
-.include "player.asm"
+.include "../graphics/StreetCanvas_2.s"
+.include "game.s"
+.include "player.s"
 
-.include "game.asm"
+.include "animations.s"
+
+
 
 ;.include "game.asm"
 
@@ -102,17 +104,17 @@ load_palettes:
 		cpx	#$20
 		bne	@loop		; if x = $20, 32 bytes copied, all done
 
-LoadSprites:
-	ldx #$80
-	stx Player::sprite_pos_x
-	LDX #$00 ; start at 0
-	LoadSpritesLoop:
-		LDA sprites, x ; load data from address (sprites + x)
-		STA $0200, x ; store into RAM address ($0200 + x)
-		INX ; X = X + 1
-		CPX #$20 ; Compare X to hex $10, decimal 16
-		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-		; if compare was equal to 16, continue down  
+; LoadSprites:
+; 	ldx #$80
+; 	stx Player::sprite_pos_x
+; 	LDX #$00 ; start at 0
+; 	LoadSpritesLoop:
+; 		LDA sprites, x ; load data from address (sprites + x)
+; 		STA $0200, x ; store into RAM address ($0200 + x)
+; 		INX ; X = X + 1
+; 		CPX #$20 ; Compare X to hex $10, decimal 16
+; 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
+; 		; if compare was equal to 16, continue down  
 
 
 
@@ -180,7 +182,7 @@ nmi:
 
 	jsr Player::updatePlayer
 	
-
+	jsr Animation::Update
 
 	@end:
 

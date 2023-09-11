@@ -10,8 +10,8 @@ BUTTON_RIGHT  = 1 << 0
 Port_1 = $4016
 Port_2 = $4017
 
-Port_1_Pressed_Buttons  = $20 ;pressed this frame
-Port_1_Down_Buttons     = $21 ;held down
+Port_1_Pressed_Buttons  = $30 ;pressed this frame
+Port_1_Down_Buttons     = $31 ;held down
 
 UpdateButtons:
     lda Port_1_Down_Buttons
