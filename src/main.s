@@ -10,8 +10,8 @@
 pointerLo = $00   ; pointer variables are declared in RAM
 pointerHi = $01   ; low byte first, high byte immediately after
 
-scroll =$23
-nametable = $24
+scroll =$33
+nametable = $34
 
 .segment "RAM"
 

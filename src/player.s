@@ -24,6 +24,7 @@ OAM_X    = 3
 .scope Player
 
 	 .import Load_Animation
+	 .import flags
 	sprite_pos_x = $10
 	sprite_pos_y = $11
 	skateboard_animation_frame= $12
@@ -81,7 +82,9 @@ OAM_X    = 3
 		ldx #PlayerStates::idle
 		stx player_state
 
-		
+		ldx #>EWL_StreetSkate_pointers_IDLE
+		ldy #<EWL_StreetSkate_pointers_IDLE
+		jsr Load_Animation
 		rts
 	.endproc
 
@@ -224,71 +227,58 @@ OAM_X    = 3
 	rts
 	
 	update_sprite_frame:
+		lda flags
+		and #STARTED
+		bne @done
 		lda player_state
-		cmp #PlayerStates::coasting
-		beq @done
+
 
 	
 		; dec sprite_animation_timer
 		; bne @done
+		cmp #PlayerStates::idle
+		beq @idle_ani
 
 		cmp #PlayerStates::pushing
 		beq @pushing_animation
 
 		cmp #PlayerStates::airborne
 		beq @jumping_animation
+
+		cmp #PlayerStates::coasting
+		beq @coasting
 		
 		jmp @done
-		@pushing_animation:
-			ldx #>EWL_StreetSkate_pointers
-			ldy #<EWL_StreetSkate_pointers
+
+		@idle_ani:
+			ldx #>EWL_StreetSkate_pointers_IDLE
+			ldy #<EWL_StreetSkate_pointers_IDLE
 			jsr Load_Animation
+			jmp @done
+
+		jmp	@done
+		@pushing_animation:
+			ldx #>EWL_StreetSkate_pointers_push
+			ldy #<EWL_StreetSkate_pointers_push
+			jsr Load_Animation
+			jmp @done
 
 		@jumping_animation:
+			ldx #>EWL_StreetSkate_pointers_jump
+			ldy #<EWL_StreetSkate_pointers_jump
+			jsr Load_Animation
+			jmp @done
+
+		@coasting:
+
+			jmp @done
+
 
 		@reset_frame:  ;sel1e set to frame 0
-	
+			jmp @done
 		@done:
 	rts
 
-	; update_sprite_pos:
-
-	; 	ldx sprite_pos_x
-	; 	txa
-	; 	clc
-	; 	adc #$07
-	; 	tay 
-
-	; 	stx	$200 + OAM_X		; store sprite position
-	; 	sty $204 + OAM_X  ; add offset for other sprites
-	; 	stx	$208 + OAM_X
-	; 	sty $20C + OAM_X
-
-	; 	stx	$210 + OAM_X		; store sprite position
-	; 	sty $214 + OAM_X  ; add offset for other sprites
-	; 	stx	$218 + OAM_X
-	; 	sty $21C + OAM_X
-
-	; 	lda sprite_pos_y
-	; 	sta	$200 + OAM_Y		
-	; 	sta $204 + OAM_Y
-
-	; 	adc #$08			  
-	; 	sta	$208 + OAM_Y
-	; 	sta $20C + OAM_Y
-
-	; 	lda sprite_pos_y
-	; 	sbc #$0E
-	; 	sta	$210 + OAM_Y
-	; 	sta $214 + OAM_Y
-
-	; 	lda sprite_pos_y
-	; 	sbc #$07
-		
-	; 	sta	$218 + OAM_Y
-	; 	sta $21C + OAM_Y
-
-	; rts
 .endscope
 
 
