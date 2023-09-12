@@ -407,10 +407,10 @@ EWL_StreetSkate_pointers_walk:
 
 EWL_StreetSkate_pointers_push:
     .byte 4
-	.word EWL_StreetSkate_Push_1_data
 	.word EWL_StreetSkate_Push_2_data
 	.word EWL_StreetSkate_Push_3_data
 	.word EWL_StreetSkate_Push_4_data
+    .word EWL_StreetSkate_Push_1_data
 
 EWL_StreetSkate_pointers_jump:
     .byte 4
