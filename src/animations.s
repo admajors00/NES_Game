@@ -16,12 +16,12 @@ PAUSE   = 1 << 1
 STARTED  = 1 << 0
 
 OAM_DMA_ADDR = $200
-; OAM_Y    = 0
-; OAM_TILE = 1
-; OAM_ATTR = 2
-; OAM_X    = 3
+OAM_DMA_Y    = $200
+OAM_DMA_TILE = $201
+OAM_DMA_ATTR = $202
+OAM_DMA_X    = $203
 
-
+; 
 .scope Animation
     .export Load_Animation
     pt_pointer_LO = $20
@@ -90,6 +90,8 @@ OAM_DMA_ADDR = $200
         adc #0
         sta pt_pointer_HI
 
+        jsr Store_frame
+
         @done:
 
     rts
@@ -109,7 +111,7 @@ OAM_DMA_ADDR = $200
             ;if animation timer == 0 
             bne @done
                 ;dec numframes
-                lda #40
+                lda #$FF
                 sta animation_timer
                 dec frame_counter
                 ;if numframes == 0
@@ -128,19 +130,19 @@ OAM_DMA_ADDR = $200
                     
                     lda pt_pointer_LO
                     clc
-                    adc #2
+                    adc #2 
                     sta pt_pointer_LO
                     lda pt_pointer_HI
                     adc #0
                     sta pt_pointer_HI
                     ldy #0
-                    iny
+                    
                     lda (pt_pointer_LO), y
-                    sta frame_pointer_HI
+                    sta frame_pointer_LO
 
                     iny
                     lda (pt_pointer_LO), y
-                    sta frame_pointer_LO
+                    sta frame_pointer_HI
                 ;   call store frame
                     jsr Store_frame
             ;else
@@ -151,39 +153,39 @@ OAM_DMA_ADDR = $200
 
     .proc Store_frame
         ;load frame pointer
-
+        jsr reset_oam_dma
         ldx #0
         stx oam_size
         ;load oam address plus offset   
         ldy #0
         @loop:
-            
+            ldx oam_size
           
             lda Player::player_pos_x_HIGH
-           ; sec 
-            sbc (frame_pointer_LO),y
-            sta OAM_DMA_ADDR + oam_size + OAM_X
+          
+            adc (frame_pointer_LO),Y
+            sta OAM_DMA_X, X
 
             iny
-
             lda Player::player_pos_y_HIGH
-          ;  sec 
-            sbc (frame_pointer_LO),y
-            sta OAM_DMA_ADDR +oam_size + OAM_Y
+            
+            adc (frame_pointer_LO),Y
+            sta OAM_DMA_Y ,X
 
             iny
-            lda (frame_pointer_LO),y
-            sta OAM_DMA_ADDR +oam_size + OAM_TILE
+            lda (frame_pointer_LO),Y
+            sta OAM_DMA_TILE,X
 
             iny
-            lda (frame_pointer_LO),y
-            sta OAM_DMA_ADDR +oam_size + OAM_ATTR
+            lda (frame_pointer_LO),Y
+            sta OAM_DMA_ATTR, X 
 
             lda oam_size
             adc #4
             sta oam_size
+
             iny
-            lda (frame_pointer_LO),y
+            lda (frame_pointer_LO),Y
 
             cmp #$80
             bne @loop
@@ -192,6 +194,16 @@ OAM_DMA_ADDR = $200
     rts
     .endproc
 
+    reset_oam_dma:
+        lda #$00
+        ldx #$00
+        @loop:
+            sta $200, X
+            inx
+            bvc @loop
+
+
+    rts
 
 
 

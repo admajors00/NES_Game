@@ -251,44 +251,44 @@ OAM_X    = 3
 		@done:
 	rts
 
-	update_sprite_pos:
+	; update_sprite_pos:
 
-		ldx sprite_pos_x
-		txa
-		clc
-		adc #$07
-		tay 
+	; 	ldx sprite_pos_x
+	; 	txa
+	; 	clc
+	; 	adc #$07
+	; 	tay 
 
-		stx	$200 + OAM_X		; store sprite position
-		sty $204 + OAM_X  ; add offset for other sprites
-		stx	$208 + OAM_X
-		sty $20C + OAM_X
+	; 	stx	$200 + OAM_X		; store sprite position
+	; 	sty $204 + OAM_X  ; add offset for other sprites
+	; 	stx	$208 + OAM_X
+	; 	sty $20C + OAM_X
 
-		stx	$210 + OAM_X		; store sprite position
-		sty $214 + OAM_X  ; add offset for other sprites
-		stx	$218 + OAM_X
-		sty $21C + OAM_X
+	; 	stx	$210 + OAM_X		; store sprite position
+	; 	sty $214 + OAM_X  ; add offset for other sprites
+	; 	stx	$218 + OAM_X
+	; 	sty $21C + OAM_X
 
-		lda sprite_pos_y
-		sta	$200 + OAM_Y		
-		sta $204 + OAM_Y
+	; 	lda sprite_pos_y
+	; 	sta	$200 + OAM_Y		
+	; 	sta $204 + OAM_Y
 
-		adc #$08			  
-		sta	$208 + OAM_Y
-		sta $20C + OAM_Y
+	; 	adc #$08			  
+	; 	sta	$208 + OAM_Y
+	; 	sta $20C + OAM_Y
 
-		lda sprite_pos_y
-		sbc #$0E
-		sta	$210 + OAM_Y
-		sta $214 + OAM_Y
+	; 	lda sprite_pos_y
+	; 	sbc #$0E
+	; 	sta	$210 + OAM_Y
+	; 	sta $214 + OAM_Y
 
-		lda sprite_pos_y
-		sbc #$07
+	; 	lda sprite_pos_y
+	; 	sbc #$07
 		
-		sta	$218 + OAM_Y
-		sta $21C + OAM_Y
+	; 	sta	$218 + OAM_Y
+	; 	sta $21C + OAM_Y
 
-	rts
+	; rts
 .endscope
 
 
