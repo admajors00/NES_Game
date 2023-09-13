@@ -6,7 +6,7 @@
 
 
 ; .import Game
-
+.include "animations.inc"
 .include "../graphics/Frames.inc"
 ; OAM address ($2003) > write / OAM data ($2004) > write
 ; Set the "sprite" address using OAMADDR ($2003)
@@ -227,9 +227,9 @@ OAM_X    = 3
 	rts
 	
 	update_sprite_frame:
-		lda flags
-		and #STARTED
-		bne @done
+		; lda flags
+		; and #ACTIVE
+		; bne @done
 		lda player_state
 
 
@@ -251,21 +251,21 @@ OAM_X    = 3
 		jmp @done
 
 		@idle_ani:
-			ldx #>EWL_StreetSkate_pointers_IDLE
-			ldy #<EWL_StreetSkate_pointers_IDLE
-			jsr Load_Animation
+			; /ldx #>EWL_StreetSkate_pointers_IDLE
+			; ldy #<EWL_StreetSkate_pointers_IDLE
+			; jsr Load_Animation
 			jmp @done
 
 		jmp	@done
 		@pushing_animation:
-			ldx #>EWL_StreetSkate_pointers_push
-			ldy #<EWL_StreetSkate_pointers_push
+			ldx #>Push_Ani_Header
+			ldy #<Push_Ani_Header
 			jsr Load_Animation
 			jmp @done
 
 		@jumping_animation:
-			ldx #>EWL_StreetSkate_pointers_jump
-			ldy #<EWL_StreetSkate_pointers_jump
+			ldx #>Jump_Ani_Header
+			ldy #<Jump_Ani_Header
 			jsr Load_Animation
 			jmp @done
 
