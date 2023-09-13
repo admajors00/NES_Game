@@ -7,7 +7,7 @@
 
 ; .import Game
 
-
+.include "../graphics/Frames.inc"
 ; OAM address ($2003) > write / OAM data ($2004) > write
 ; Set the "sprite" address using OAMADDR ($2003)
 ; Then write the following bytes via OAMDATA ($2004)

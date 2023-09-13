@@ -3,17 +3,15 @@
 ; ANIMATIONS_INC =1
 ; ;animation flags 
 
-; .include "player."
-.autoimport +
+ .include "animations.inc"
+ .include "../graphics/Frames.inc"
+
 ;.include "player.inc"
 ; BUTTON_A      = 1 << 7
 ; BUTTON_B      = 1 << 6
 ; BUTTON_SELECT = 1 << 5
 ; BUTTON_START  = 1 << 4
-IDLE     = 1 << 3
-LOOP   = 1 << 2
-PAUSE   = 1 << 1
-STARTED  = 1 << 0
+
 
 OAM_DMA_ADDR = $200
 OAM_DMA_Y    = $200
@@ -156,13 +154,12 @@ OAM_DMA_X    = $203
     .proc Store_frame
         ;load frame pointer
        ; jsr reset_oam_dma
-    ;    lda #$FE
-    ;         ldx 0
-    ;         @loop2:
-    ;             sta $200, X
-    ;             inx
-    ;             bcc @loop2
-        ldx #0
+        lda #$FE
+        ldx oam_size
+        @loop2:
+            sta $200, X
+            dex
+            bne @loop2
         stx oam_size
         ;load oam address plus offset   
         ldy #0
@@ -217,210 +214,25 @@ OAM_DMA_X    = $203
 .endscope
 
 
-EWL_StreetSkate_Walk_1_data:
 
-
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-
-	.byte 16, 8,$4d,0
-	.byte  8, 8,$50,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_2_data:
-
-
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-
-	.byte 16, 8,$51,0
-	.byte  8, 8,$54,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_3_data:
-
-
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-
-	.byte 16, 8,$55,0
-	.byte  8, 8,$58,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_4_data:
-
-
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-
-	.byte 16, 8,$59,0
-	.byte  8, 8,$5c,0
-	.byte $80
-
-
-EWL_StreetSkate_Push_1_data:
-
-
-	.byte 16, 4,$d1,0
-	.byte  8, 4,$d4,0
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-	.byte 16, 8,$e0,0
-	.byte  8, 8,$e1,0
-	.byte $80
-
-
-EWL_StreetSkate_Push_2_data:
-
-
-	.byte  8, 4,$d8,0
-	.byte 16, 4,$d5,0
-	.byte 15,23,$28,0
-	.byte  7,23,$29,0
-
-	.byte 15,15,$2a,0
-	.byte  7,15,$2b,0
-	.byte 17, 8,$e4,0
-	.byte  9, 8,$e5,0
-
-	.byte  9,  0,$e7,0
-	.byte $80
-
-
-EWL_StreetSkate_Push_3_data:
-
-
-	.byte 16, 4,$d9,0
-	.byte  8, 4,$dc,0
-	.byte 15,23,$28,0
-	.byte  7,23,$29,0
-
-	.byte 15,15,$2a,0
-	.byte  7,15,$2b,0
-	.byte  9, 8,$e9,0
-	.byte 17, 8,$e8,0
-
-	.byte 17,  0,$ea,0
-	.byte $80
-
-
-EWL_StreetSkate_Push_4_data:
-
-
-	.byte 16, 4,$d1,0
-	.byte  8, 4,$d4,0
-	.byte 15,23,$28,0
-	.byte  7,23,$29,0
-
-	.byte 15,15,$2a,0
-	.byte  7,15,$2b,0
-	.byte  9, 8,$ed,0
-	.byte 17, 8,$ec,0
-	.byte $80
-
-
-EWL_StreetSkate_Jump_1_data:
-
-
-	.byte 16, 4,$d1,0
-	.byte  8, 4,$d4,0
-	.byte 16,21,$24,0
-	.byte  8,21,$25,0
-
-	.byte 16,13,$26,0
-	.byte  8,13,$27,0
-	.byte  8, 7,$f1,0
-	.byte 15, 7,$f4,0
-	.byte $80
-
-
-EWL_StreetSkate_Jump_2_data:
-
-
-	.byte 16, 8,$fe,0
-	.byte  8, 8,$ff,0
-	.byte  8,16,$fd,0
-	.byte 16,32,$24,0
-
-	.byte  8,32,$25,0
-	.byte 16,24,$26,0
-	.byte  8,24,$27,0
-	.byte 16,16,$e8,0
-
-	.byte 16, 8,$ea,0
-	.byte  8,16,$e9,0
-	.byte $80
-
-
-EWL_StreetSkate_Jump_3_data:
-
-
-	.byte 16,16,$d1,0
-	.byte  8,16,$d4,0
-	.byte 16,32,$24,0
-	.byte  8,32,$25,0
-
-	.byte 16,24,$26,0
-	.byte  8,24,$27,0
-	.byte  8,16,$f1,0
-	.byte 15,16,$f4,0
-	.byte $80
-
-
-EWL_StreetSkate_Jump_4_data:
-
-
-	.byte 16, 4,$d1,0
-	.byte  8, 4,$d4,0
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-	.byte 16, 8,$e0,0
-	.byte  8, 8,$e1,0
-	.byte $80
-
-
-EWL_StreetSkate_pointers_walk:
-
-	.word EWL_StreetSkate_Walk_1_data
-	.word EWL_StreetSkate_Walk_2_data
-	.word EWL_StreetSkate_Walk_3_data
-	.word EWL_StreetSkate_Walk_4_data
-
-	
-
-EWL_StreetSkate_pointers_push:
-    .byte 4
-	.word EWL_StreetSkate_Push_2_data
-	.word EWL_StreetSkate_Push_3_data
-	.word EWL_StreetSkate_Push_4_data
-    .word EWL_StreetSkate_Push_1_data
-
-EWL_StreetSkate_pointers_jump:
-    .byte 4
-    .word EWL_StreetSkate_Jump_1_data
-	.word EWL_StreetSkate_Jump_2_data
-	.word EWL_StreetSkate_Jump_3_data
-	.word EWL_StreetSkate_Jump_4_data
-EWL_StreetSkate_pointers_IDLE:
-    .byte 1
-	.word EWL_StreetSkate_Push_1_data
-
+Push_Ani_Header:
+      .byte 4
+      .byte 4
+      .addr EWL_StreetSkate_pointers_push
+      .addr push_frame_timers
+      .byte %0001000
+
+push_frame_timers:
+    .byte 8,8,8,8
+
+Jump_Ani_Header:
+      .byte 4
+      .byte 4
+      .addr EWL_StreetSkate_pointers_jump
+      .addr jump_frame_timers
+      .byte %0001000
+
+jump_frame_timers:
+    .byte 2,8,8,8
 ;.export Animation
 ; .endif
