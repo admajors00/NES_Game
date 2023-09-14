@@ -82,8 +82,8 @@ OAM_X    = 3
 		ldx #PlayerStates::idle
 		stx player_state
 
-		ldx #>EWL_StreetSkate_pointers_IDLE
-		ldy #<EWL_StreetSkate_pointers_IDLE
+		ldx #>Coast_Ani_Header
+		ldy #<Coast_Ani_Header
 		jsr Load_Animation
 		rts
 	.endproc
@@ -264,13 +264,15 @@ OAM_X    = 3
 			jmp @done
 
 		@jumping_animation:
-			ldx #>Jump_Ani_Header
-			ldy #<Jump_Ani_Header
-			jsr Load_Animation
+			; ldx #>Jump_Ani_Header
+			; ldy #<Jump_Ani_Header
+			; jsr Load_Animation
 			jmp @done
 
 		@coasting:
-
+			; ldx #>Coast_Ani_Header
+			; ldy #<Coast_Ani_Header
+			; jsr Load_Animation
 			jmp @done
 
 

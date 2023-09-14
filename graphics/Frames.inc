@@ -56,21 +56,6 @@ EWL_StreetSkate_Walk_4_data:
 EWL_StreetSkate_Push_1_data:
 
 
-	.byte 16, 4,$d1,0
-	.byte  8, 4,$d4,0
-	.byte 16,24,$24,0
-	.byte  8,24,$25,0
-
-	.byte 16,16,$26,0
-	.byte  8,16,$27,0
-	.byte 16, 8,$e0,0
-	.byte  8, 8,$e1,0
-	.byte $80
-
-
-EWL_StreetSkate_Push_2_data:
-
-
 	.byte  8, 4,$d8,0
 	.byte 16, 4,$d5,0
 	.byte 15,23,$28,0
@@ -85,7 +70,7 @@ EWL_StreetSkate_Push_2_data:
 	.byte $80
 
 
-EWL_StreetSkate_Push_3_data:
+EWL_StreetSkate_Push_2_data:
 
 
 	.byte 16, 4,$d9,0
@@ -102,7 +87,7 @@ EWL_StreetSkate_Push_3_data:
 	.byte $80
 
 
-EWL_StreetSkate_Push_4_data:
+EWL_StreetSkate_Push_3_data:
 
 
 	.byte 16, 4,$d1,0
@@ -114,6 +99,21 @@ EWL_StreetSkate_Push_4_data:
 	.byte  7,15,$2b,0
 	.byte  9, 8,$ed,0
 	.byte 17, 8,$ec,0
+	.byte $80
+
+
+EWL_StreetSkate_Push_4_data:
+
+
+	.byte 16, 4,$d1,0
+	.byte  8, 4,$d4,0
+	.byte 16,24,$24,0
+	.byte  8,24,$25,0
+
+	.byte 16,16,$26,0
+	.byte  8,16,$27,0
+	.byte 16, 8,$e0,0
+	.byte  8, 8,$e1,0
 	.byte $80
 
 
@@ -180,6 +180,92 @@ EWL_StreetSkate_Jump_4_data:
 	.byte $80
 
 
+EWL_StreetSkate_GuyRunning_1_data:
+
+
+	.byte  8,32,$83,0
+	.byte 20,28,$81,1
+	.byte 12,28,$84,1
+	.byte  4,28,$85,1
+
+	.byte 20,20,$83,1
+	.byte 12,20,$86,1
+	.byte  4,20,$87,1
+	.byte 20,12,$a1,1
+
+	.byte 12,12,$a4,1
+	.byte  4,12,$a5,1
+	.byte $80
+
+
+EWL_StreetSkate_GuyRunning_2_data:
+
+
+	.byte 20,28,$89,1
+	.byte 12,28,$8c,1
+	.byte  4,28,$8d,1
+	.byte 20,20,$8b,1
+
+	.byte 12,20,$8e,1
+	.byte  4,20,$8f,1
+	.byte 20,12,$a9,1
+	.byte 12,12,$ac,1
+
+	.byte  4,12,$ad,1
+	.byte $80
+
+
+EWL_StreetSkate_Coasting_1_data:
+
+
+	.byte 16, 4,$d1,0
+	.byte  8, 4,$d4,0
+	.byte 16,24,$24,0
+	.byte  8,24,$25,0
+
+	.byte 16,16,$26,0
+	.byte  8,16,$27,0
+	.byte 16, 8,$e0,0
+	.byte  8, 8,$e1,0
+	.byte $80
+
+
+EWL_StreetSkate_Coasting_2_data:
+
+
+	.byte  8, 4,$cc,0
+	.byte 16,24,$24,0
+	.byte  8,24,$25,0
+	.byte 16,16,$26,0
+
+	.byte  8,16,$27,0
+	.byte 16, 8,$e0,0
+	.byte  8, 8,$e1,0
+	.byte 16, 4,$d5,0
+
+	.byte  8, 4,$d8,0
+	.byte $80
+
+
+EWL_StreetSkate_Coasting_3_data:
+
+
+	.byte  8, 4,$dc,0
+	.byte 16, 4,$d9,0
+	.byte 16,24,$24,0
+	.byte  8,24,$25,0
+
+	.byte 16,16,$26,0
+	.byte  8,16,$27,0
+	.byte 16, 8,$e0,0
+	.byte  8, 8,$e1,0
+
+	.byte 16, 4,$cd,0
+	.byte $80
+
+
+
+
 EWL_StreetSkate_pointers_walk:
 
 	.word EWL_StreetSkate_Walk_1_data
@@ -190,10 +276,11 @@ EWL_StreetSkate_pointers_walk:
 	
 
 EWL_StreetSkate_pointers_push:
+	.word EWL_StreetSkate_Push_1_data
 	.word EWL_StreetSkate_Push_2_data
 	.word EWL_StreetSkate_Push_3_data
 	.word EWL_StreetSkate_Push_4_data
-    .word EWL_StreetSkate_Push_1_data
+    
 	
 
 EWL_StreetSkate_pointers_jump:
@@ -203,7 +290,9 @@ EWL_StreetSkate_pointers_jump:
 	.word EWL_StreetSkate_Jump_4_data
 
 
-EWL_StreetSkate_pointers_IDLE:
-	.word EWL_StreetSkate_Push_1_data
+EWL_StreetSkate_pointers_coasting:
+	.word EWL_StreetSkate_Coasting_1_data
+	.word EWL_StreetSkate_Coasting_2_data
+	.word EWL_StreetSkate_Coasting_3_data
 
 .endif
