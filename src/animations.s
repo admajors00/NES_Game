@@ -170,17 +170,22 @@ OAM_DMA_X    = $203
         ;decrement the frame timer
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
-        sta temp1
+        
+        sec
         sbc #$01
-        sta temp2
+        
         sta (pointer_1_LO), y
         ;if the frame timer is 0
         bne @done
             ;decrement the frame index
             ldy #Animation_Header_t::frame_index
             lda (pointer_1_LO), y
+            sta temp1
+            sec
             sbc #01
+
             sta (pointer_1_LO), y
+            sta temp2
             ;if the frame index is 0  
             bne @next_frame
                 ;if the animation is a loop
@@ -381,11 +386,11 @@ Coast_Ani_Header:
       .addr EWL_StreetSkate_pointers_coasting
       .addr EWL_StreetSkate_pointers_coasting
       .addr coast_frame_timers
-      .byte 2
+      .byte 8
       .byte %11010000
 
 coast_frame_timers:
-    .byte 2,8,8
+    .byte 8,8,8
 
 
 
