@@ -258,9 +258,9 @@ OAM_X    = 3
 
 		jmp	@done
 		@pushing_animation:
-			ldx #>Push_Ani_Header
-			ldy #<Push_Ani_Header
-			jsr Load_Animation
+			; ldx #>Push_Ani_Header
+			; ldy #<Push_Ani_Header
+			; jsr Load_Animation
 			jmp @done
 
 		@jumping_animation:
