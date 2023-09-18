@@ -129,13 +129,18 @@ OAM_DMA_X    = $203
     Update:
         ;for animation in list
             ;if started 
+     
+        
         jsr Clear_OAM_DMA
         lda #HEADER_TABLE_MAX_SIZE
+        
         asl 
+        sta temp1
         sta header_table_index
         
         @loop:
             ldy header_table_index
+         
             beq @done ; if index is 0 stop
             dey
             ;load the next addres from the header table
@@ -168,6 +173,7 @@ OAM_DMA_X    = $203
         
         ;pointer 1 should already be loaded with the current header location
         ;decrement the frame timer
+        
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
         
