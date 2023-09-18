@@ -104,23 +104,22 @@ OAM_DMA_X    = $203
         and #ANI_OBJECTS_MASK ; get object number whic is equal to index in header table
         tay
         tax
-    
-        lda animation_headers_table,y
+
+        lda #>animation_headers_table
         sta pointer_3_HI
-        
+        sta temp2
         lda #<animation_headers_table
         sta pointer_3_LO
-        
+        sta temp1
 
         ldy #0
         lda (pointer_3_LO), Y
         sta pointer_2_LO
         
-        sta temp1
+        
         iny 
         lda (pointer_3_LO), Y
         sta pointer_2_HI
-        sta temp2
         
         ; ldy #Animation_Header_t::flags
         ; lda (pointer_2_LO), Y
@@ -268,6 +267,23 @@ OAM_DMA_X    = $203
                     lda (pointer_1_LO), y
                     ldy #Animation_Header_t::frame_index
                     sta (pointer_1_LO), y
+
+                     ldy #Animation_Header_t::frame_timers_pt
+                     
+                    lda (pointer_1_LO), y
+                    sta pointer_2_LO
+                    iny 
+                    lda (pointer_1_LO), y
+                    sta pointer_2_HI
+
+                    ;put the current frame index into y
+                    LDY #0
+                    ;get the frame timer from the table at current frame index 
+                    lda (pointer_2_LO), y
+
+                    ;store it in the frame timer
+                    ldy #Animation_Header_t::frame_timer
+                    sta (pointer_1_LO), y
                     jmp @done
                 ;else 
                 @not_a_loop:  
@@ -353,13 +369,13 @@ OAM_DMA_X    = $203
         sta pointer_2_HI
 
 
-        ldy #0
-        lda (pointer_2_LO), y
-        sta pointer_1_LO
+        ; ldy #0
+        ; lda (pointer_2_LO), y
+        ; sta pointer_1_LO
 
-        iny
-        lda (pointer_2_LO), y
-        sta pointer_1_HI
+        ; iny
+        ; lda (pointer_2_LO), y
+        ; sta pointer_1_HI
         ;load oam address plus offset   
         ldy #0
         sty oam_size
@@ -369,21 +385,21 @@ OAM_DMA_X    = $203
           
             lda Player::player_pos_x_HIGH 
             sec
-            sbc (pointer_1_LO),Y
+            sbc (pointer_2_LO),Y
             sta OAM_DMA_X, X
    
             iny
             lda Player::player_pos_y_HIGH    
             sec    
-            sbc (pointer_1_LO),Y
+            sbc (pointer_2_LO),Y
             sta OAM_DMA_Y ,X
    
             iny
-            lda (pointer_1_LO),Y
+            lda (pointer_2_LO),Y
             sta OAM_DMA_TILE,X
       
             iny
-            lda (pointer_1_LO),Y
+            lda (pointer_2_LO),Y
             sta OAM_DMA_ATTR, X 
         
             txa 

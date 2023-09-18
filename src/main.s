@@ -181,13 +181,7 @@ forever:
 
 nmi:
 	; sprite DMA from $0200
-	jsr UpdateButtons
-
-	jsr Player::updatePlayer
 	
-	jsr Animation::Update
-
-	@end:
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	$2003
@@ -212,6 +206,14 @@ nmi:
 	STA $2001	  
 	jsr famistudio_update
 
+
+	jsr UpdateButtons
+
+	jsr Player::updatePlayer
+	
+	jsr Animation::Update
+
+	@end:
 	rti
 
 vblankwait:
