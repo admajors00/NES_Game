@@ -1,3 +1,5 @@
+.segment "CODE"
+
 BUTTON_A      = 1 << 7
 BUTTON_B      = 1 << 6
 BUTTON_SELECT = 1 << 5

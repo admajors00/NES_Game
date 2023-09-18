@@ -11,8 +11,21 @@
 ; BUTTON_B      = 1 << 6
 ; BUTTON_SELECT = 1 << 5
 ; BUTTON_START  = 1 << 4
+.segment "RAM"
+.org $400
+animation_headers_table:
+    .addr 0,0,0,0
+
+player_header_table:
+    .tag Animation_Header_t
+
+chaser_header_table:
+    .tag Animation_Header_t
+.reloc
 
 
+
+.segment "CODE"
 
 HEADER_TABLE_MAX_SIZE = 1
 
@@ -22,7 +35,10 @@ OAM_DMA_TILE = $201
 OAM_DMA_ATTR = $202
 OAM_DMA_X    = $203
 
-; 
+
+
+
+
 .scope Animation
     .export Load_Animation
     .export flags
@@ -40,6 +56,9 @@ OAM_DMA_X    = $203
     temp1 = $27
     temp2 = $28
 
+    pointer_3_LO = $29
+    pointer_3_HI = $2A
+
     Init:
         ; lda #$0F
         ; sta animation_timer
@@ -49,7 +68,29 @@ OAM_DMA_X    = $203
 
         lda #0 
         sta oam_size
+        lda #>animation_headers_table
+        sta pointer_1_HI
+        lda #<animation_headers_table
+        sta pointer_1_LO
 
+        ldy #0
+        lda #<player_header_table
+        sta (pointer_1_LO),Y
+        iny 
+        lda #>player_header_table
+        sta (pointer_1_LO),Y
+
+        iny
+        lda #<chaser_header_table
+        sta (pointer_1_LO),Y
+        iny 
+        lda #>chaser_header_table
+        sta (pointer_1_LO),Y
+
+        
+
+
+        
 
     rts
   
@@ -63,20 +104,32 @@ OAM_DMA_X    = $203
         and #ANI_OBJECTS_MASK ; get object number whic is equal to index in header table
         tay
         tax
+    
+        lda animation_headers_table,y
+        sta pointer_3_HI
+        
+        lda #<animation_headers_table
+        sta pointer_3_LO
+        
 
-        lda animation_headers_table, y  ;store header table location
+        ldy #0
+        lda (pointer_3_LO), Y
         sta pointer_2_LO
-        iny
-        lda animation_headers_table, y
+        
+        sta temp1
+        iny 
+        lda (pointer_3_LO), Y
         sta pointer_2_HI
-
+        sta temp2
+        
         ; ldy #Animation_Header_t::flags
         ; lda (pointer_2_LO), Y
         ; and #ACTIVE
         ; beq @store_header ; jump if the corresponding animation spot is not active
      
-        ldy #Animation_Header_t::flags
-        lda (pointer_2_LO), Y
+        ; ldy #Animation_Header_t::flags
+        ; lda (pointer_2_LO), Y
+        jmp @store_header
         and #INTERUPTABLE
         beq @done ;if not interruptable quit
         jmp @store_header;if interruptable store header
@@ -89,7 +142,7 @@ OAM_DMA_X    = $203
             ldy #Animation_Header_t::num_frames
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
-
+         
             ldy #Animation_Header_t::frame_index
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
@@ -118,6 +171,10 @@ OAM_DMA_X    = $203
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
 
+            ldy #Animation_Header_t::frame_timer
+            lda (pointer_1_LO), Y
+            sta (pointer_2_LO), Y
+
             ldy #Animation_Header_t::flags
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
@@ -133,23 +190,24 @@ OAM_DMA_X    = $203
         
         jsr Clear_OAM_DMA
         lda #HEADER_TABLE_MAX_SIZE
-        
         asl 
-        sta temp1
         sta header_table_index
-        
+        ldx #0
         @loop:
-            ldy header_table_index
-         
+            ldy header_table_index         
             beq @done ; if index is 0 stop
-            dey
+
+            dey            
             ;load the next addres from the header table
             lda animation_headers_table ,y
             sta pointer_1_HI
             
+           
+            
             dey
             lda animation_headers_table ,y
             sta pointer_1_LO
+          
   
             
             sty header_table_index  
@@ -174,24 +232,30 @@ OAM_DMA_X    = $203
         ;pointer 1 should already be loaded with the current header location
         ;decrement the frame timer
         
+
+
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
-        
+    
         sec
         sbc #$01
-        
+   
         sta (pointer_1_LO), y
+        
+       ; inc temp2
         ;if the frame timer is 0
         bne @done
+            ;lda #$69
+           ; sta temp1
             ;decrement the frame index
             ldy #Animation_Header_t::frame_index
             lda (pointer_1_LO), y
-            sta temp1
+            
             sec
             sbc #01
 
             sta (pointer_1_LO), y
-            sta temp2
+           
             ;if the frame index is 0  
             bne @next_frame
                 ;if the animation is a loop
@@ -326,8 +390,10 @@ OAM_DMA_X    = $203
             clc
             adc #$04
             sta oam_size
-            ; cmp #$24
-            ; beq @done
+            lda oam_size
+            cmp #$24
+            bcs @done
+           
             
             iny
             lda (pointer_1_LO),Y
@@ -356,12 +422,9 @@ OAM_DMA_X    = $203
 
 .endscope
 
-player_animation_header:
-    .tag Animation_Header_t
 
-animation_headers_table:
-    .addr Coast_Ani_Header, 0, 0, 0, 0
-
+push_frame_timers:
+    .byte 8,8,8,8
 Push_Ani_Header:
       .byte 4
       .byte 4
@@ -371,8 +434,10 @@ Push_Ani_Header:
       .byte 8
       .byte %10010000
 
-push_frame_timers:
-    .byte 8,8,8,8
+
+
+jump_frame_timers:
+    .byte 2,8,8,8
 
 Jump_Ani_Header:
       .byte 4
@@ -383,8 +448,10 @@ Jump_Ani_Header:
       .byte 2
       .byte %10010000
 
-jump_frame_timers:
-    .byte 2,8,8,8
+
+
+coast_frame_timers:
+    .byte 8,8,8
 
 Coast_Ani_Header:
       .byte 3
@@ -395,8 +462,8 @@ Coast_Ani_Header:
       .byte 8
       .byte %11010000
 
-coast_frame_timers:
-    .byte 8,8,8
+
+
 
 
 

@@ -23,13 +23,15 @@ nametable = $34
 
 .segment "CODE"
 .autoimport 	+
+
 .include "controller.s"
-.include "famistudio_ca65.s"
+
 .include "../graphics/StreetCanvas_2.s"
 .include "game.s"
 .include "player.s"
-
 .include "animations.s"
+.include "famistudio_ca65.s"
+
 
 
 
@@ -147,8 +149,9 @@ load_background:
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
 
-jsr Player::init_character
 jsr Animation::Init
+jsr Player::init_character
+
 ldx #.lobyte(music_data_untitled)
 ldy #.hibyte(music_data_untitled)
 lda #1 ; NTSC

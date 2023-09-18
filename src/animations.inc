@@ -1,5 +1,6 @@
 .ifndef _ANIMATIONS_INC
 
+
 _ANIMATIONS_INC = 1
 
 INTERUPTABLE = 1<<7
@@ -32,4 +33,11 @@ ANI_FLAGS_MASK = %11110000
     prev        .addr
     next        .addr
 .endstruct
+
+
+
+
+
+      
+      
 .endif
