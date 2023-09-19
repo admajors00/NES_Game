@@ -95,16 +95,13 @@ OAM_X    = 3
 
 		lda player_animation_flag;if 0 then an animation has finishjed, return to default state
 		bne @continue
-			lda PlayerStates::airborne
-			sta player_state
-			inc state_change_flag
-
+			jsr determine_state
 		@continue:
 
 		jsr moveCharacter
 		jsr checkButtons
 		jsr handle_states
-		;jsr update_sprite_pos
+		
 	rts
 
 
@@ -161,7 +158,7 @@ OAM_X    = 3
 						ldx #PlayerStates::idle
 						stx player_state
 						inc state_change_flag
-				;jmp @end
+				jmp @end
 
 		@accelerate_y:
 			lda player_pos_y_HIGH
@@ -195,12 +192,7 @@ OAM_X    = 3
 			lda #0
 			sta player_pos_y_LOW
 
-			lda #PlayerStates::airborne
-			cmp player_state
-			bne @end
-			lda #PlayerStates::coasting
-			sta player_state
-			inc state_change_flag
+			jsr determine_state
 			jmp @end
 
 		@end:
@@ -263,12 +255,13 @@ OAM_X    = 3
 		@kickflip:
 
 			lda player_state
-			cmp #PlayerStates::airborne
+			cmp #PlayerStates::kickflip
 			beq @end
 			cmp #PlayerStates::pushing
 			beq @end
-			cmp #PlayerStates::kickflip
+			cmp #PlayerStates::airborne
 			beq @end
+			
 			ldx #Game::jump_speed_high			
 			stx character_velocity_y_HIGH
 			ldx #Game::jump_speed_low
@@ -331,7 +324,7 @@ OAM_X    = 3
 			lda player_animation_flag
 			bne @done
 			@load_push:
-				lda #1
+				lda #10
 				sta player_animation_flag
 
 				ldx #>Push_Ani_Header
@@ -378,11 +371,33 @@ OAM_X    = 3
 				ldy #<KickFlip_Ani_Header
 				jsr Load_Animation
 				jmp @done
-
-		
 		@done:
 	rts
+	determine_state:
+		lda player_pos_y_HIGH
+		cmp Game::ground
+		bcs @cont1
+		lda #PlayerStates::airborne
+		sta player_state
+		inc state_change_flag
+		jmp @done
+		@cont1:
+			lda character_velocity_x_HIGH
+			bne @cont2
+			lda character_velocity_x_LOW
+			bne @cont2
+			lda #PlayerStates::idle
+			sta player_state
+			inc state_change_flag
+			jmp @done
+			@cont2:
+				lda #PlayerStates::coasting
+				sta player_state
+				inc state_change_flag
+				jmp @done
+	@done:
 
+	rts
 	
 .endscope
 

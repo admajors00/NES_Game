@@ -209,10 +209,9 @@ nmi:
 
 	jsr UpdateButtons
 
-	jsr Animation::Update
 	jsr Player::updatePlayer
 	
-	
+	jsr Animation::Update
 
 	@end:
 	rti
@@ -249,10 +248,13 @@ palette:
 .byte $2d,$16,$26,$36
 .byte $2d,$14,$24,$34
 
-.byte $0f,$00,$30,$27
-.byte $0f,$01,$21,$31
-.byte $0f,$06,$16,$26
-.byte $0f,$09,$19,$29
+
+.byte $0f,$0F,$30,$27
+.byte $0f,$00,$38,$31
+.byte $0f,$0f,$00,$20
+.byte $0f,$00,$37,$02
+
+
 
 
 

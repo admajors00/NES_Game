@@ -282,6 +282,8 @@ OAM_DMA_X    = $203
                     ;store it in the frame timer
                     ldy #Animation_Header_t::frame_timer
                     sta (pointer_1_LO), y
+                    lda #0
+                    sta Player::player_animation_flag
                     jmp @done
                 ;else 
                 @not_a_loop:  
@@ -371,14 +373,6 @@ OAM_DMA_X    = $203
         lda (pointer_1_LO), y
         sta pointer_2_HI
 
-
-        ; ldy #0
-        ; lda (pointer_2_LO), y
-        ; sta pointer_1_LO
-
-        ; iny
-        ; lda (pointer_2_LO), y
-        ; sta pointer_1_HI
         ;load oam address plus offset   
         ldy #0
         sty oam_size
@@ -409,9 +403,9 @@ OAM_DMA_X    = $203
             clc
             adc #$04
             sta oam_size
-            ; lda oam_size
-            ; cmp #$24
-            ; bcs @done
+            lda oam_size
+            cmp #$F0
+            bcs @done
            
             
             iny
@@ -457,7 +451,7 @@ Push_Ani_Header:
 
 
 jump_frame_timers:
-    .byte 8,30,16,2
+    .byte 8,20,16,2
 
 Jump_Ani_Header:
       .byte 4
@@ -495,17 +489,27 @@ Idle_Ani_Header:
       .byte %11010000
 
 kickFlip_frame_timers:
-    .byte 2,3,3,3,3,3,3,3,2
+    .byte 4,4,4,4,4,4,4,8,2
 
 KickFlip_Ani_Header:
       .byte 9
-      .byte 8
+      .byte 9
       .addr EWL_StreetSkate_pointers_kickflip
       .addr EWL_StreetSkate_KickFlip_1_data
       .addr kickFlip_frame_timers
       .byte 2
       .byte %10010000
 
+chaser_frame_timers:
+    .byte 16,16
 
+chaser_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_chaser
+      .addr EWL_StreetSkate_GuyRunning_1_data
+      .addr chaser_frame_timers
+      .byte 8
+      .byte %10010000
 ;.export Animation
 ; .endif
