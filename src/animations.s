@@ -137,7 +137,7 @@ OAM_DMA_X    = $203
 
 
         @store_header:;pointer 1 is new header, pointer 2 is local storage
-            
+            inc temp1
             ldy #Animation_Header_t::num_frames
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
@@ -216,7 +216,7 @@ OAM_DMA_X    = $203
             lda (pointer_1_LO), y
            
            ; and #ACTIVE
-            beq @loop 
+            ; beq @loop 
             jsr  Update_Animation
             jmp @loop
         @done:
@@ -232,10 +232,7 @@ OAM_DMA_X    = $203
         ;decrement the frame timer
         
 
-        ldx pointer_1_LO
-        stx temp1
-        ldx pointer_1_HI
-        stx temp2
+    
 
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
@@ -253,14 +250,11 @@ OAM_DMA_X    = $203
             ;decrement the frame index
             ldy #Animation_Header_t::frame_index
             lda (pointer_1_LO), y
-            
-            sec
-            sbc #01
-
-            sta (pointer_1_LO), y
-           
             ;if the frame index is 0  
             bne @next_frame
+                
+           
+            
                 ;if the animation is a loop
                 ldy #Animation_Header_t::flags
                 lda (pointer_1_LO), y
@@ -298,6 +292,10 @@ OAM_DMA_X    = $203
                 
             ;else
             @next_frame:
+            sec
+                sbc #01
+
+                sta (pointer_1_LO), y
                 ;load the corresponding frame timer value from the table 
 
                 ;load the timer table addr into pointer 2
@@ -411,13 +409,13 @@ OAM_DMA_X    = $203
             clc
             adc #$04
             sta oam_size
-            lda oam_size
-            cmp #$24
-            bcs @done
+            ; lda oam_size
+            ; cmp #$24
+            ; bcs @done
            
             
             iny
-            lda (pointer_1_LO),Y
+            lda (pointer_2_LO),Y
     
             cmp #$80
             bne @loop
@@ -431,12 +429,13 @@ OAM_DMA_X    = $203
 
     Clear_OAM_DMA:
         lda #$FE
-        ldx #$FF
+        ldx oam_size
         @loop:
             sta $200, X
             dex
             bne @loop
         stx oam_size
+
     rts
 
 
@@ -445,10 +444,10 @@ OAM_DMA_X    = $203
 
 
 push_frame_timers:
-    .byte 16,16,8,8
+    .byte 1,8,8,8
 Push_Ani_Header:
       .byte 4
-      .byte 4
+      .byte 3
       .addr EWL_StreetSkate_pointers_push
       .addr EWL_StreetSkate_Push_1_data
       .addr push_frame_timers
@@ -458,13 +457,13 @@ Push_Ani_Header:
 
 
 jump_frame_timers:
-    .byte 2,8,8,8
+    .byte 8,30,16,2
 
 Jump_Ani_Header:
       .byte 4
-      .byte 4
+      .byte 3
       .addr EWL_StreetSkate_pointers_jump
-      .addr EWL_StreetSkate_pointers_jump
+      .addr EWL_StreetSkate_Jump_1_data
       .addr jump_frame_timers
       .byte 2
       .byte %10010000
@@ -472,20 +471,40 @@ Jump_Ani_Header:
 
 
 coast_frame_timers:
-    .byte 8,8,8
+    .byte 4,8,8,8
 
 Coast_Ani_Header:
-      .byte 3
+      .byte 4
       .byte 3
       .addr EWL_StreetSkate_pointers_coasting
       .addr EWL_StreetSkate_Coasting_1_data
       .addr coast_frame_timers
-      .byte 8
+      .byte 4
       .byte %11010000
 
+idle_frame_timers:
+    .byte 1
 
+Idle_Ani_Header:
+      .byte 1
+      .byte 1
+      .addr EWL_StreetSkate_pointers_idle
+      .addr EWL_StreetSkate_Coasting_4_data
+      .addr idle_frame_timers
+      .byte 1
+      .byte %11010000
 
+kickFlip_frame_timers:
+    .byte 2,3,3,3,3,3,3,3,2
 
+KickFlip_Ani_Header:
+      .byte 9
+      .byte 8
+      .addr EWL_StreetSkate_pointers_kickflip
+      .addr EWL_StreetSkate_KickFlip_1_data
+      .addr kickFlip_frame_timers
+      .byte 2
+      .byte %10010000
 
 
 ;.export Animation

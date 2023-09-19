@@ -14,7 +14,7 @@
 ; Then write the following bytes via OAMDATA ($2004)
 .segment "CODE"
 OAM_ADDR  = $2003
-OAM_DATA	= $2004
+OAM_DATA  = $2004
 OAM_DMA   = $4014
 
 OAM_Y    = 0
@@ -27,31 +27,28 @@ OAM_X    = 3
 
 	 .import Load_Animation
 	 .import flags
-	sprite_pos_x = $10
-	sprite_pos_y = $11
-	skateboard_animation_frame= $12
-	sprite_animation_timer = $13
-	sprite_animation_frame = $14	
-	player_state = $15
-	egg_animation_frame = $16
 
-	player_pos_x_LOW = $17
-	player_pos_x_HIGH = $18
-	player_pos_y_LOW = $19
-	player_pos_y_HIGH = $1A
+	player_state = $10
 
-	character_velocity_x_LOW = $1B
-	character_velocity_x_HIGH = $1C
-	character_velocity_y_LOW = $1D
-	character_velocity_y_HIGH = $1E
+	player_pos_x_LOW = $11
+	player_pos_x_HIGH = $12
+	player_pos_y_LOW = $13
+	player_pos_y_HIGH = $14
 
-	player_animation_flag = $1F
+	character_velocity_x_LOW = $15
+	character_velocity_x_HIGH = $16
+	character_velocity_y_LOW = $17
+	character_velocity_y_HIGH = $18
+
+	player_animation_flag = $19
+	state_change_flag = $1A ;state change this frame if 1, otherwise 0
 	.enum PlayerStates
 		
 		idle = 0
 		coasting = 1
 		pushing = 2
 		airborne = 3
+		kickflip = 4
 	.endenum
 
 	.enum Directions
@@ -65,38 +62,48 @@ OAM_X    = 3
 		ldx #$00
 		
 		stx character_velocity_y_HIGH
-		stx sprite_animation_frame
-		stx egg_animation_frame
+		
 		stx player_pos_x_LOW
 		stx player_pos_y_LOW
 
 		ldx #$01
 		stx character_velocity_x_LOW
 		ldx #$10
-		stx sprite_pos_x
 		stx player_pos_x_HIGH
 
 		ldx #Game::ground
-		stx sprite_pos_y
 		stx player_pos_y_HIGH
 
-		ldx #5
-		stx sprite_animation_timer
+
+	
 
 		ldx #PlayerStates::idle
 		stx player_state
+		lda #$10
+		sta player_animation_flag
 
-		ldx #>Coast_Ani_Header
-		ldy #<Coast_Ani_Header
+		ldx #>Idle_Ani_Header
+		ldy #<Idle_Ani_Header
 		jsr Load_Animation
 		rts
 	.endproc
 
 
 	updatePlayer:
+		ldx #0
+		stx state_change_flag
+
+		lda player_animation_flag;if 0 then an animation has finishjed, return to default state
+		bne @continue
+			lda PlayerStates::airborne
+			sta player_state
+			inc state_change_flag
+
+		@continue:
+
 		jsr moveCharacter
 		jsr checkButtons
-		jsr update_sprite_frame
+		jsr handle_states
 		;jsr update_sprite_pos
 	rts
 
@@ -130,7 +137,6 @@ OAM_X    = 3
 				lda player_pos_x_HIGH
 				adc character_velocity_x_HIGH
 				sta player_pos_x_HIGH
-				sta sprite_pos_x
 				jmp @accelerate_y
 
 
@@ -150,13 +156,18 @@ OAM_X    = 3
 				lda player_state
 				cmp #PlayerStates::airborne
 				beq @accelerate_y
-				ldx #PlayerStates::idle
-				stx player_state
+					cmp #PlayerStates::idle
+					beq @end
+						ldx #PlayerStates::idle
+						stx player_state
+						inc state_change_flag
+				;jmp @end
 
 		@accelerate_y:
 			lda player_pos_y_HIGH
 			cmp #Game::ground
 			bcs @landed
+
 			lda character_velocity_y_LOW
 			sec
 			sbc #Game::gravity
@@ -171,16 +182,25 @@ OAM_X    = 3
 			sta player_pos_y_LOW
 			lda player_pos_y_HIGH
 			sbc character_velocity_y_HIGH
+
+			cmp #Game::ground
+			bcs @landed
 			sta player_pos_y_HIGH
-			sta sprite_pos_y
 			jmp @end
+		 	
 
 		@landed:
+			lda #Game::ground
+			sta player_pos_y_HIGH
+			lda #0
+			sta player_pos_y_LOW
+
 			lda #PlayerStates::airborne
 			cmp player_state
 			bne @end
 			lda #PlayerStates::coasting
 			sta player_state
+			inc state_change_flag
 			jmp @end
 
 		@end:
@@ -195,9 +215,16 @@ OAM_X    = 3
 		and Port_1_Pressed_Buttons
 		bne @jump
 
+		lda#BUTTON_UP
+		and Port_1_Pressed_Buttons
+		bne @kickflip
+
 		jmp @end
 
 		@push:
+			lda player_state
+			cmp #PlayerStates::pushing
+			beq @end
 			lda character_velocity_x_HIGH
 			cmp #Game::max_speed 
 			bcs @end
@@ -211,11 +238,17 @@ OAM_X    = 3
 			        
 			ldx #PlayerStates::pushing
 			stx player_state
+			inc state_change_flag
+
 			jmp @end
 		
 		@jump:
 			lda player_state
 			cmp #PlayerStates::airborne
+			beq @end
+			cmp #PlayerStates::pushing
+			beq @end
+			cmp #PlayerStates::kickflip
 			beq @end
 			ldx #Game::jump_speed_high
 			
@@ -225,15 +258,38 @@ OAM_X    = 3
 			dec player_pos_y_HIGH
 			ldx #PlayerStates::airborne
 			stx player_state
-		
+			inc state_change_flag
+			jmp @end
+		@kickflip:
+
+			lda player_state
+			cmp #PlayerStates::airborne
+			beq @end
+			cmp #PlayerStates::pushing
+			beq @end
+			cmp #PlayerStates::kickflip
+			beq @end
+			ldx #Game::jump_speed_high			
+			stx character_velocity_y_HIGH
+			ldx #Game::jump_speed_low
+			stx character_velocity_y_LOW
+			dec player_pos_y_HIGH
+			ldx #PlayerStates::kickflip
+			stx player_state
+			inc state_change_flag
+			jmp @end
+
 		@end:
 
 	rts
 	
-	update_sprite_frame:
+	handle_states:
 		; lda flags
 		; and #ACTIVE
 		; bne @done
+		lda state_change_flag
+		beq @done1
+
 		lda player_state
 
 
@@ -251,53 +307,83 @@ OAM_X    = 3
 
 		cmp #PlayerStates::coasting
 		beq @coasting
+
+		cmp #PlayerStates::kickflip
+		beq @kickflip
 		
-		jmp @done
+		jmp @done1
 
 		@idle_ani:
-			; /ldx #>EWL_StreetSkate_pointers_IDLE
-			; ldy #<EWL_StreetSkate_pointers_IDLE
-			; jsr Load_Animation
-			jmp @done
+			lda player_animation_flag
+			bne @done
+			lda #$10
+			sta player_animation_flag
+			ldx #>Idle_Ani_Header
+			ldy #<Idle_Ani_Header
+			jsr Load_Animation
+			jmp @done1
 
-		jmp	@done
+		jmp	@done1
 		@pushing_animation:
+			lda #$10
+			and player_animation_flag
+			bne @load_push
 			lda player_animation_flag
 			bne @done
-			lda #1
-			sta player_animation_flag
+			@load_push:
+				lda #1
+				sta player_animation_flag
 
-			ldx #>Push_Ani_Header
-			ldy #<Push_Ani_Header
-			jsr Load_Animation
+				ldx #>Push_Ani_Header
+				ldy #<Push_Ani_Header
+				jsr Load_Animation
+				jmp @done
+		@done1:
 			jmp @done
-
 		@jumping_animation:
+			
+			lda #$10
+			and player_animation_flag
+			bne @load_jump
 			lda player_animation_flag
 			bne @done
-			lda #1
-			sta player_animation_flag
-			ldx #>Jump_Ani_Header
-			ldy #<Jump_Ani_Header
-			jsr Load_Animation
-			jmp @done
+			@load_jump:
+				lda #1
+				sta player_animation_flag
+				ldx #>Jump_Ani_Header
+				ldy #<Jump_Ani_Header
+				jsr Load_Animation
+				jmp @done
 
 		@coasting:
 			lda player_animation_flag
 			bne @done
-			lda #1
+			lda #$10
 			sta player_animation_flag
 			ldx #>Coast_Ani_Header
 			ldy #<Coast_Ani_Header
 			jsr Load_Animation
 			jmp @done
 
+		@kickflip:
+			lda #$10
+			and player_animation_flag
+			bne @load_kf
+			lda player_animation_flag
+			bne @done
+			@load_kf:
+				lda #1
+				sta player_animation_flag
+				ldx #>KickFlip_Ani_Header
+				ldy #<KickFlip_Ani_Header
+				jsr Load_Animation
+				jmp @done
 
-		@reset_frame:  ;sel1e set to frame 0
-			jmp @done
+		
 		@done:
 	rts
 
+	
 .endscope
 
 
