@@ -104,15 +104,15 @@ OAM_DMA_X    = $203
         and #ANI_OBJECTS_MASK ; get object number whic is equal to index in header table
         tay
         tax
-
+        
         lda #>animation_headers_table
         sta pointer_3_HI
-        sta temp2
+    
         lda #<animation_headers_table
         sta pointer_3_LO
-        sta temp1
+        
 
-        ldy #0
+        ldy#0
         lda (pointer_3_LO), Y
         sta pointer_2_LO
         
@@ -215,7 +215,7 @@ OAM_DMA_X    = $203
             ldy #Animation_Header_t::flags
             lda (pointer_1_LO), y
            
-            and #ACTIVE
+           ; and #ACTIVE
             beq @loop 
             jsr  Update_Animation
             jmp @loop
@@ -232,13 +232,17 @@ OAM_DMA_X    = $203
         ;decrement the frame timer
         
 
+        ldx pointer_1_LO
+        stx temp1
+        ldx pointer_1_HI
+        stx temp2
 
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
-    
+
         sec
         sbc #$01
-   
+        
         sta (pointer_1_LO), y
         
        ; inc temp2
@@ -287,7 +291,8 @@ OAM_DMA_X    = $203
                     jmp @done
                 ;else 
                 @not_a_loop:  
-
+                    lda #0
+                    sta Player::player_animation_flag
                     jmp @done
                     ;set the animation done flag
                 
@@ -440,12 +445,12 @@ OAM_DMA_X    = $203
 
 
 push_frame_timers:
-    .byte 8,8,8,8
+    .byte 16,16,8,8
 Push_Ani_Header:
       .byte 4
       .byte 4
       .addr EWL_StreetSkate_pointers_push
-      .addr EWL_StreetSkate_pointers_push
+      .addr EWL_StreetSkate_Push_1_data
       .addr push_frame_timers
       .byte 8
       .byte %10010000
@@ -473,7 +478,7 @@ Coast_Ani_Header:
       .byte 3
       .byte 3
       .addr EWL_StreetSkate_pointers_coasting
-      .addr EWL_StreetSkate_pointers_coasting
+      .addr EWL_StreetSkate_Coasting_1_data
       .addr coast_frame_timers
       .byte 8
       .byte %11010000

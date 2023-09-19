@@ -209,9 +209,10 @@ nmi:
 
 	jsr UpdateButtons
 
+	jsr Animation::Update
 	jsr Player::updatePlayer
 	
-	jsr Animation::Update
+	
 
 	@end:
 	rti

@@ -44,6 +44,8 @@ OAM_X    = 3
 	character_velocity_x_HIGH = $1C
 	character_velocity_y_LOW = $1D
 	character_velocity_y_HIGH = $1E
+
+	player_animation_flag = $1F
 	.enum PlayerStates
 		
 		idle = 0
@@ -260,21 +262,34 @@ OAM_X    = 3
 
 		jmp	@done
 		@pushing_animation:
+			lda player_animation_flag
+			bne @done
+			lda #1
+			sta player_animation_flag
+
 			ldx #>Push_Ani_Header
 			ldy #<Push_Ani_Header
 			jsr Load_Animation
 			jmp @done
 
 		@jumping_animation:
+			lda player_animation_flag
+			bne @done
+			lda #1
+			sta player_animation_flag
 			ldx #>Jump_Ani_Header
 			ldy #<Jump_Ani_Header
 			jsr Load_Animation
 			jmp @done
 
 		@coasting:
-			; ldx #>Coast_Ani_Header
-			; ldy #<Coast_Ani_Header
-			; jsr Load_Animation
+			lda player_animation_flag
+			bne @done
+			lda #1
+			sta player_animation_flag
+			ldx #>Coast_Ani_Header
+			ldy #<Coast_Ani_Header
+			jsr Load_Animation
 			jmp @done
 
 
