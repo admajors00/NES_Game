@@ -27,7 +27,7 @@ chaser_header_table:
 
 .segment "CODE"
 
-HEADER_TABLE_MAX_SIZE = 1
+HEADER_TABLE_MAX_SIZE = 2
 
 OAM_DMA_ADDR = $200
 OAM_DMA_Y    = $200
@@ -58,6 +58,9 @@ OAM_DMA_X    = $203
 
     pointer_3_LO = $29
     pointer_3_HI = $2A
+
+    sprite_pos_x = $2B
+    sprite_pos_y = $2C
 
     Init:
         ; lda #$0F
@@ -102,8 +105,8 @@ OAM_DMA_X    = $203
         ldy #Animation_Header_t::flags
         lda (pointer_1_LO), Y
         and #ANI_OBJECTS_MASK ; get object number whic is equal to index in header table
+        asl
         tay
-        tax
         
         lda #>animation_headers_table
         sta pointer_3_HI
@@ -112,7 +115,6 @@ OAM_DMA_X    = $203
         sta pointer_3_LO
         
 
-        ldy#0
         lda (pointer_3_LO), Y
         sta pointer_2_LO
         
@@ -136,7 +138,6 @@ OAM_DMA_X    = $203
 
 
         @store_header:;pointer 1 is new header, pointer 2 is local storage
-            inc temp1
             ldy #Animation_Header_t::num_frames
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
@@ -183,12 +184,13 @@ OAM_DMA_X    = $203
 
     Update:
         ;for animation in list
-            ;if started 
+        ;if started 
      
         
         jsr Clear_OAM_DMA
-        lda #HEADER_TABLE_MAX_SIZE
+        lda HEADER_TABLE_MAX_SIZE
         asl 
+        sta temp1
         sta header_table_index
         ldx #0
         @loop:
@@ -216,10 +218,43 @@ OAM_DMA_X    = $203
            
            ; and #ACTIVE
             ; beq @loop 
+   
             jsr  Update_Animation
             jmp @loop
         @done:
-        jsr Update_player_sprite_pos
+
+
+         ldy #2
+        lda animation_headers_table,y
+        sta pointer_1_LO
+        iny
+        lda animation_headers_table,y
+        sta pointer_1_HI
+
+        lda Chaser::pos_y_HI 
+        sta sprite_pos_y
+        lda Chaser::pos_x_HI 
+        sta sprite_pos_x
+        jsr Update_sprite_pos
+
+
+         ldy #0
+        lda animation_headers_table,y
+        sta pointer_1_LO
+        iny
+        lda animation_headers_table,y
+        sta pointer_1_HI
+
+        lda Player::player_pos_y_HIGH 
+        sta sprite_pos_y
+        lda Player::player_pos_x_HIGH 
+        sta sprite_pos_x
+        jsr Update_sprite_pos
+
+
+       
+
+
     rts
 
 
@@ -229,30 +264,19 @@ OAM_DMA_X    = $203
         
         ;pointer 1 should already be loaded with the current header location
         ;decrement the frame timer
-        
-
-    
-
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
-
         sec
         sbc #$01
-        
         sta (pointer_1_LO), y
-        
-       ; inc temp2
+
         ;if the frame timer is 0
         bne @done
-            ;lda #$69
-           ; sta temp1
             ;decrement the frame index
             ldy #Animation_Header_t::frame_index
             lda (pointer_1_LO), y
             ;if the frame index is 0  
             bne @next_frame
-                
-           
             
                 ;if the animation is a loop
                 ldy #Animation_Header_t::flags
@@ -352,16 +376,11 @@ OAM_DMA_X    = $203
         @done:
     rts
 
-    .proc Update_player_sprite_pos
+    .proc Update_sprite_pos
         ;load frame pointer
        ; jsr reset_oam_dma
 
-        ldy #0
-        lda animation_headers_table,y
-        sta pointer_1_LO
-        iny
-        lda animation_headers_table,y
-        sta pointer_1_HI
+       
 
         
         ldy #Animation_Header_t::frame
@@ -373,19 +392,18 @@ OAM_DMA_X    = $203
         sta pointer_2_HI
 
         ;load oam address plus offset   
-        ldy #0
-        sty oam_size
+        
        
         @loop:
             ldx oam_size
           
-            lda Player::player_pos_x_HIGH 
+            lda sprite_pos_x
             sec
             sbc (pointer_2_LO),Y
             sta OAM_DMA_X, X
    
             iny
-            lda Player::player_pos_y_HIGH    
+            lda sprite_pos_y   
             sec    
             sbc (pointer_2_LO),Y
             sta OAM_DMA_Y ,X
@@ -500,15 +518,15 @@ KickFlip_Ani_Header:
       .byte %10010000
 
 chaser_frame_timers:
-    .byte 16,16
+    .byte 16,16,16
 
 chaser_Ani_Header:
-      .byte 2
-      .byte 2
+      .byte 3
+      .byte 3
       .addr EWL_StreetSkate_pointers_chaser
       .addr EWL_StreetSkate_GuyRunning_1_data
       .addr chaser_frame_timers
-      .byte 8
-      .byte %10010000
+      .byte 16
+      .byte %11010001
 ;.export Animation
 ; .endif

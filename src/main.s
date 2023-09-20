@@ -29,6 +29,7 @@ nametable = $34
 .include "../graphics/StreetCanvas_2.s"
 .include "game.s"
 .include "player.s"
+.include "chaser.s"
 .include "animations.s"
 .include "famistudio_ca65.s"
 
@@ -151,6 +152,7 @@ load_background:
 
 jsr Animation::Init
 jsr Player::init_character
+jsr Chaser::Init
 
 ldx #.lobyte(music_data_untitled)
 ldy #.hibyte(music_data_untitled)

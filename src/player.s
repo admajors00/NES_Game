@@ -65,10 +65,6 @@ OAM_X    = 3
 		kickflip = 4
 	.endenum
 
-	.enum Directions
-		left =  %10111111 ; $bf
-		right = %01000000 ; $40
-	.endenum
 
 
 
@@ -82,7 +78,7 @@ OAM_X    = 3
 
 		ldx #$01
 		stx character_velocity_x_LOW
-		ldx #$10
+		ldx #$20
 		stx player_pos_x_HIGH
 
 		ldx #Game::ground

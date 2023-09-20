@@ -442,7 +442,7 @@ EWL_StreetSkate_KickFlip_1_data:
 EWL_StreetSkate_pointers_chaser:
 	.word EWL_StreetSkate_GuyRunning_2_data
 	.word EWL_StreetSkate_GuyRunning_1_data
-
+	.word EWL_StreetSkate_GuyRunning_2_data
 
 
 
