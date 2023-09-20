@@ -129,9 +129,8 @@ OAM_DMA_X    = $203
         ; ldy #Animation_Header_t::flags
         ; lda (pointer_2_LO), Y
         jmp @store_header
-        and #INTERUPTABLE
-        beq @done ;if not interruptable quit
-        jmp @store_header;if interruptable store header
+       ;if not interruptable quit
+        ;if interruptable store header
 
 
 
@@ -282,9 +281,9 @@ OAM_DMA_X    = $203
                     ;store it in the frame timer
                     ldy #Animation_Header_t::frame_timer
                     sta (pointer_1_LO), y
-                    lda #0
-                    sta Player::player_animation_flag
-                    jmp @done
+                    ; lda #0
+                    ; sta Player::player_animation_flag
+                     jmp @done
                 ;else 
                 @not_a_loop:  
                     lda #0
@@ -451,11 +450,11 @@ Push_Ani_Header:
 
 
 jump_frame_timers:
-    .byte 8,20,16,2
+    .byte 8,8,20,16,2
 
 Jump_Ani_Header:
-      .byte 4
-      .byte 3
+      .byte 5
+      .byte 5
       .addr EWL_StreetSkate_pointers_jump
       .addr EWL_StreetSkate_Jump_1_data
       .addr jump_frame_timers

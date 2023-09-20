@@ -482,6 +482,7 @@ EWL_StreetSkate_pointers_push:
 	
 
 EWL_StreetSkate_pointers_jump:
+	.word EWL_StreetSkate_Coasting_1_data
 	.word EWL_StreetSkate_Jump_4_data
 	.word EWL_StreetSkate_Jump_3_data
 	.word EWL_StreetSkate_Jump_2_data

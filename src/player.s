@@ -28,7 +28,7 @@ OAM_X    = 3
 	 .import Load_Animation
 	 .import flags
 
-	player_state = $10
+	player_movement_state = $10
 
 	player_pos_x_LOW = $11
 	player_pos_x_HIGH = $12
@@ -42,12 +42,26 @@ OAM_X    = 3
 
 	player_animation_flag = $19
 	state_change_flag = $1A ;state change this frame if 1, otherwise 0
-	.enum PlayerStates
+
+	player_action_state = $1B
+
+	pointer_1_LO = $1C
+	pointer_1_HI = $1D
+	.enum PlayerMovementStates		
+		idle = 0
+		inAirMoving = 1
+		inAirNotMoving = 2
+		onGroundMoving = 3
 		
+	.endenum
+	movementStateJumpTable:
+		.addr GroundedNotMoving, AirborneMoving, AirborneNotMoving, GroundedMoving
+
+	.enum PlayerActionStates
 		idle = 0
 		coasting = 1
 		pushing = 2
-		airborne = 3
+		ollie = 3
 		kickflip = 4
 	.endenum
 
@@ -77,8 +91,8 @@ OAM_X    = 3
 
 	
 
-		ldx #PlayerStates::idle
-		stx player_state
+		ldx #PlayerMovementStates::idle
+		stx player_movement_state
 		lda #$10
 		sta player_animation_flag
 
@@ -94,111 +108,183 @@ OAM_X    = 3
 		stx state_change_flag
 
 		lda player_animation_flag;if 0 then an animation has finishjed, return to default state
-		bne @continue
-			jsr determine_state
-		@continue:
+		bne @action_not_done
 
-		jsr moveCharacter
+			lda #PlayerActionStates::coasting
+			sta player_action_state
+			inc state_change_flag
+		@action_not_done:
+		jsr Handle_movement_state
+		
+
+		
 		jsr checkButtons
 		jsr handle_states
 		
 	rts
 
+	
+	AirborneMoving:
+		jsr Apply_Friction_X
+		jsr Apply_Gravity_Y
+		jsr Update_Pos_X
+		jsr Update_Pos_Y
+	rts
+	AirborneNotMoving:
+		jsr Apply_Gravity_Y
+		jsr Update_Pos_Y
 
+	rts
 
-	moveCharacter:
-		lda character_velocity_x_HIGH
-		beq @check_velocity_x_low
-		jmp @decrease_velocity_x
+	GroundedMoving:
+		jsr Apply_Friction_X
+		jsr Update_Pos_X
+		;jsr Update_Pos_Y
+	rts
 
-		@check_velocity_x_low:
-			lda character_velocity_x_LOW
-			beq @set_state_idle
+	GroundedNotMoving:
+		lda #PlayerActionStates::idle
+		cmp player_action_state
+		beq @done
+			sta player_action_state
+			inc state_change_flag
+		@done:
+	rts
+	
 
-		@decrease_velocity_x:
-			lda character_velocity_x_LOW
-			sec
-			sbc #Game::friction
-			sta character_velocity_x_LOW
-			lda character_velocity_x_HIGH
-			sbc #$00
-			sta character_velocity_x_HIGH
-
-			lda player_pos_x_HIGH
-			cmp #Game::scroll_wall
-			bcs @scroll_screen
-				lda player_pos_x_LOW
-				clc
-				adc character_velocity_x_LOW
-				sta player_pos_x_LOW
-				lda player_pos_x_HIGH
-				adc character_velocity_x_HIGH
-				sta player_pos_x_HIGH
-				jmp @accelerate_y
-
-
-			@scroll_screen:
-				lda player_pos_x_LOW
-				clc
-				adc character_velocity_x_LOW
-				sta player_pos_x_LOW
-				lda scroll
-				adc character_velocity_x_HIGH
-				sta scroll
-				jsr Scroll
-			jmp @accelerate_y
-
+	Handle_movement_state:
 		
-			@set_state_idle:
-				lda player_state
-				cmp #PlayerStates::airborne
-				beq @accelerate_y
-					cmp #PlayerStates::idle
-					beq @end
-						ldx #PlayerStates::idle
-						stx player_state
-						inc state_change_flag
-				jmp @end
-
-		@accelerate_y:
-			lda player_pos_y_HIGH
-			cmp #Game::ground
-			bcs @landed
-
-			lda character_velocity_y_LOW
-			sec
-			sbc #Game::gravity
-			sta character_velocity_y_LOW
-			lda character_velocity_y_HIGH
-			sbc #$00
-			sta character_velocity_y_HIGH
-
-			lda player_pos_y_LOW
-			sec
-			sbc character_velocity_y_LOW
-			sta player_pos_y_LOW
-			lda player_pos_y_HIGH
-			sbc character_velocity_y_HIGH
-
-			cmp #Game::ground
-			bcs @landed
-			sta player_pos_y_HIGH
-			jmp @end
-		 	
-
-		@landed:
+		lda player_pos_y_HIGH
+		cmp #Game::ground
+		bcc @airborne
 			lda #Game::ground
 			sta player_pos_y_HIGH
 			lda #0
 			sta player_pos_y_LOW
+			lda character_velocity_x_HIGH
+			bne @groundedmoving
+			lda character_velocity_x_LOW
 
-			jsr determine_state
-			jmp @end
 
-		@end:
+			bne @groundedmoving
+				;grounded not moving
+				lda #PlayerMovementStates::idle
+				sta player_movement_state
+				jmp @done
+			@groundedmoving:
+				lda #PlayerMovementStates::onGroundMoving
+				sta player_movement_state
+				jmp @done
+			
+		@airborne:
+		;airborne
+			lda character_velocity_x_HIGH
+			bne @airborneMoving
+			lda character_velocity_x_LOW
+			bne @airborneMoving
+				;AIRBORNE NOT MOVING
+				lda #PlayerMovementStates::inAirNotMoving
+				sta player_movement_state
+				jmp @done
+			@airborneMoving:
+				lda #PlayerMovementStates::inAirMoving
+				sta player_movement_state
+				jmp @done
+		@done:
+	lda player_movement_state
+			asl 
+			tax
+			lda movementStateJumpTable, x
+			sta pointer_1_LO
+			lda movementStateJumpTable+1, x
+			sta pointer_1_LO+1
+			jmp (pointer_1_LO)
 	rts
 
+
+
+	Apply_Friction_X:
+		lda character_velocity_x_LOW
+		sec
+		sbc #Game::friction
+		sta character_velocity_x_LOW
+		lda character_velocity_x_HIGH
+		sbc #$00
+		sta character_velocity_x_HIGH
+	rts
+
+	Update_Pos_X:
+		lda player_pos_x_HIGH
+		cmp #Game::scroll_wall
+		bcs @scroll_screen
+		lda player_pos_x_LOW
+		clc
+		adc character_velocity_x_LOW
+		sta player_pos_x_LOW
+		lda player_pos_x_HIGH
+		adc character_velocity_x_HIGH
+		sta player_pos_x_HIGH
+		jmp @done
+		@scroll_screen:
+			lda player_pos_x_LOW
+			clc
+			adc character_velocity_x_LOW
+			sta player_pos_x_LOW
+			lda scroll
+			adc character_velocity_x_HIGH
+			sta scroll
+			jsr Scroll
+		@done:
+	rts
+
+	Apply_Gravity_Y:
+		lda character_velocity_y_LOW
+		sec
+		sbc #Game::gravity
+		sta character_velocity_y_LOW
+		lda character_velocity_y_HIGH
+		sbc #$00
+		sta character_velocity_y_HIGH
+	rts
+
+	Apply_Jump_Y:
+		ldx #Game::jump_speed_high			
+		stx character_velocity_y_HIGH
+		ldx #Game::jump_speed_low
+		stx character_velocity_y_LOW
+		dec player_pos_y_HIGH
+	rts
+
+	Apply_Push_X:
+		lda character_velocity_x_LOW
+		clc
+		adc #Game::push_speed_low
+		sta character_velocity_x_LOW
+		lda character_velocity_x_HIGH
+		adc #Game::push_speed_high
+		sta character_velocity_x_HIGH
+	rts
+
+	Update_Pos_Y:
+		lda player_pos_y_LOW
+		sec
+		sbc character_velocity_y_LOW
+		sta player_pos_y_LOW
+		lda player_pos_y_HIGH
+		sbc character_velocity_y_HIGH
+		sta player_pos_y_HIGH
+	rts
+
+	
+
 	checkButtons:
+
+		lda player_movement_state			
+		cmp #PlayerMovementStates::inAirNotMoving
+		beq @done
+		cmp #PlayerMovementStates::inAirMoving
+		beq @done
+
 		lda #BUTTON_A
 		and Port_1_Pressed_Buttons
 		bne @push
@@ -211,68 +297,38 @@ OAM_X    = 3
 		and Port_1_Pressed_Buttons
 		bne @kickflip
 
-		jmp @end
+		jmp @done
 
 		@push:
-			lda player_state
-			cmp #PlayerStates::pushing
-			beq @end
+			lda player_action_state
+			cmp #PlayerActionStates::pushing
+			beq @done
 			lda character_velocity_x_HIGH
 			cmp #Game::max_speed 
-			bcs @end
-			lda character_velocity_x_LOW
-			clc
-			adc #Game::push_speed_low
-			sta character_velocity_x_LOW
-			lda character_velocity_x_HIGH
-			adc #Game::push_speed_high
-			sta character_velocity_x_HIGH
-			        
-			ldx #PlayerStates::pushing
-			stx player_state
+			bcs @done
+			
+			jsr Apply_Push_X        
+			ldx #PlayerActionStates::pushing
+			stx player_action_state
 			inc state_change_flag
 
-			jmp @end
+			jmp @done
 		
 		@jump:
-			lda player_state
-			cmp #PlayerStates::airborne
-			beq @end
-			cmp #PlayerStates::pushing
-			beq @end
-			cmp #PlayerStates::kickflip
-			beq @end
-			ldx #Game::jump_speed_high
-			
-			stx character_velocity_y_HIGH
-			ldx #Game::jump_speed_low
-			stx character_velocity_y_LOW
-			dec player_pos_y_HIGH
-			ldx #PlayerStates::airborne
-			stx player_state
+			jsr Apply_Jump_Y		
+			ldx #PlayerActionStates::ollie
+			stx player_action_state
 			inc state_change_flag
-			jmp @end
+			jmp @done
+
 		@kickflip:
-
-			lda player_state
-			cmp #PlayerStates::kickflip
-			beq @end
-			cmp #PlayerStates::pushing
-			beq @end
-			cmp #PlayerStates::airborne
-			beq @end
-			
-			ldx #Game::jump_speed_high			
-			stx character_velocity_y_HIGH
-			ldx #Game::jump_speed_low
-			stx character_velocity_y_LOW
-			dec player_pos_y_HIGH
-			ldx #PlayerStates::kickflip
-			stx player_state
+			jsr Apply_Jump_Y
+			ldx #PlayerActionStates::kickflip
+			stx player_action_state
 			inc state_change_flag
-			jmp @end
+			jmp @done
 
-		@end:
+		@done:
 
 	rts
 	
@@ -283,33 +339,27 @@ OAM_X    = 3
 		lda state_change_flag
 		beq @done1
 
-		lda player_state
+		lda player_action_state
 
-
-	
-		; dec sprite_animation_timer
-		; bne @done
-		cmp #PlayerStates::idle
+		cmp #PlayerActionStates::idle
 		beq @idle_ani
 
-		cmp #PlayerStates::pushing
+		cmp #PlayerActionStates::pushing
 		beq @pushing_animation
 
-		cmp #PlayerStates::airborne
+		cmp #PlayerActionStates::ollie
 		beq @jumping_animation
 
-		cmp #PlayerStates::coasting
+		cmp #PlayerActionStates::coasting
 		beq @coasting
 
-		cmp #PlayerStates::kickflip
+		cmp #PlayerActionStates::kickflip
 		beq @kickflip
 		
 		jmp @done1
 
 		@idle_ani:
-			lda player_animation_flag
-			bne @done
-			lda #$10
+			lda #$11
 			sta player_animation_flag
 			ldx #>Idle_Ani_Header
 			ldy #<Idle_Ani_Header
@@ -318,13 +368,14 @@ OAM_X    = 3
 
 		jmp	@done1
 		@pushing_animation:
+			lda player_animation_flag
+			beq @load_push
 			lda #$10
 			and player_animation_flag
 			bne @load_push
-			lda player_animation_flag
 			bne @done
 			@load_push:
-				lda #10
+				lda #11
 				sta player_animation_flag
 
 				ldx #>Push_Ani_Header
@@ -335,13 +386,14 @@ OAM_X    = 3
 			jmp @done
 		@jumping_animation:
 			
+			lda player_animation_flag
+			beq @load_jump
 			lda #$10
 			and player_animation_flag
 			bne @load_jump
-			lda player_animation_flag
 			bne @done
 			@load_jump:
-				lda #1
+				lda #01
 				sta player_animation_flag
 				ldx #>Jump_Ani_Header
 				ldy #<Jump_Ani_Header
@@ -351,7 +403,7 @@ OAM_X    = 3
 		@coasting:
 			lda player_animation_flag
 			bne @done
-			lda #$10
+			lda #$11
 			sta player_animation_flag
 			ldx #>Coast_Ani_Header
 			ldy #<Coast_Ani_Header
@@ -359,13 +411,15 @@ OAM_X    = 3
 			jmp @done
 
 		@kickflip:
+			lda player_animation_flag
+			beq @load_kf
 			lda #$10
 			and player_animation_flag
 			bne @load_kf
-			lda player_animation_flag
+			
 			bne @done
 			@load_kf:
-				lda #1
+				lda #01
 				sta player_animation_flag
 				ldx #>KickFlip_Ani_Header
 				ldy #<KickFlip_Ani_Header
@@ -373,31 +427,8 @@ OAM_X    = 3
 				jmp @done
 		@done:
 	rts
-	determine_state:
-		lda player_pos_y_HIGH
-		cmp Game::ground
-		bcs @cont1
-		lda #PlayerStates::airborne
-		sta player_state
-		inc state_change_flag
-		jmp @done
-		@cont1:
-			lda character_velocity_x_HIGH
-			bne @cont2
-			lda character_velocity_x_LOW
-			bne @cont2
-			lda #PlayerStates::idle
-			sta player_state
-			inc state_change_flag
-			jmp @done
-			@cont2:
-				lda #PlayerStates::coasting
-				sta player_state
-				inc state_change_flag
-				jmp @done
-	@done:
 
-	rts
+	
 	
 .endscope
 
