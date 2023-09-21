@@ -78,7 +78,7 @@ OAM_X    = 3
 
 		ldx #$01
 		stx character_velocity_x_LOW
-		ldx #$20
+		ldx #$30
 		stx player_pos_x_HIGH
 
 		ldx #Game::ground

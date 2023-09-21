@@ -46,10 +46,11 @@
         sta pos_x_LO
         sta pos_y_LO
 
-        lda #$10
+        lda #$20
         sta pos_x_HI
 
         lda #Game::ground
+        adc #4
         sta pos_y_HI
 
         

@@ -151,8 +151,9 @@ load_background:
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
 
 jsr Animation::Init
-jsr Player::init_character
 jsr Chaser::Init
+jsr Player::init_character
+
 
 ldx #.lobyte(music_data_untitled)
 ldy #.hibyte(music_data_untitled)
@@ -209,11 +210,12 @@ nmi:
 	jsr famistudio_update
 
 
-	jsr UpdateButtons
-
-	jsr Player::updatePlayer
 	
 	jsr Animation::Update
+	jsr UpdateButtons
+	jsr Player::updatePlayer
+	
+	
 
 	@end:
 	rti

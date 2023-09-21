@@ -4,7 +4,7 @@
 .scope Game
     ;some game constants
     gravity = $10
-    ground = $94
+    ground = $98
     friction = $01
     jump_speed_low = $80
     jump_speed_high = $01
