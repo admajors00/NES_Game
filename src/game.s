@@ -10,9 +10,9 @@
         lda Obsticles::pos_x
         clc
         cmp Player::player_pos_x_HIGH
-        bcs @done
+        bcc @done
         sec
-        sbc #$10
+        sbc #$0F
         clc
         cmp Player::player_pos_x_HIGH
         bcc @check_hit
