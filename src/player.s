@@ -8,6 +8,7 @@
 ; .import Game
 
 .include "animations.inc"
+.include "game.inc"
 .include "../graphics/Frames.inc"
 ; OAM address ($2003) > write / OAM data ($2004) > write
 ; Set the "sprite" address using OAMADDR ($2003)
@@ -81,7 +82,7 @@ OAM_X    = 3
 		ldx #$30
 		stx player_pos_x_HIGH
 
-		ldx #Game::ground
+		ldx #Game_Const::ground
 		stx player_pos_y_HIGH
 
 
@@ -151,9 +152,9 @@ OAM_X    = 3
 	Handle_movement_state:
 		
 		lda player_pos_y_HIGH
-		cmp #Game::ground
+		cmp #Game_Const::ground
 		bcc @airborne
-			lda #Game::ground
+			lda #Game_Const::ground
 			sta player_pos_y_HIGH
 			lda #0
 			sta player_pos_y_LOW
@@ -202,7 +203,7 @@ OAM_X    = 3
 	Apply_Friction_X:
 		lda character_velocity_x_LOW
 		sec
-		sbc #Game::friction
+		sbc #Game_Const::friction
 		sta character_velocity_x_LOW
 		lda character_velocity_x_HIGH
 		sbc #$00
@@ -211,7 +212,7 @@ OAM_X    = 3
 
 	Update_Pos_X:
 		lda player_pos_x_HIGH
-		cmp #Game::scroll_wall
+		cmp #Game_Const::scroll_wall
 		bcs @scroll_screen
 		lda player_pos_x_LOW
 		clc
@@ -236,7 +237,7 @@ OAM_X    = 3
 	Apply_Gravity_Y:
 		lda character_velocity_y_LOW
 		sec
-		sbc #Game::gravity
+		sbc #Game_Const::gravity
 		sta character_velocity_y_LOW
 		lda character_velocity_y_HIGH
 		sbc #$00
@@ -244,9 +245,9 @@ OAM_X    = 3
 	rts
 
 	Apply_Jump_Y:
-		ldx #Game::jump_speed_high			
+		ldx #Game_Const::jump_speed_high			
 		stx character_velocity_y_HIGH
-		ldx #Game::jump_speed_low
+		ldx #Game_Const::jump_speed_low
 		stx character_velocity_y_LOW
 		dec player_pos_y_HIGH
 	rts
@@ -254,10 +255,10 @@ OAM_X    = 3
 	Apply_Push_X:
 		lda character_velocity_x_LOW
 		clc
-		adc #Game::push_speed_low
+		adc #Game_Const::push_speed_low
 		sta character_velocity_x_LOW
 		lda character_velocity_x_HIGH
-		adc #Game::push_speed_high
+		adc #Game_Const::push_speed_high
 		sta character_velocity_x_HIGH
 	rts
 
@@ -300,7 +301,7 @@ OAM_X    = 3
 			cmp #PlayerActionStates::pushing
 			beq @done
 			lda character_velocity_x_HIGH
-			cmp #Game::max_speed 
+			cmp #Game_Const::max_speed 
 			bcs @done
 			
 			jsr Apply_Push_X        

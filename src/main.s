@@ -27,10 +27,12 @@ nametable = $34
 .include "controller.s"
 
 .include "../graphics/StreetCanvas_2.s"
-.include "game.s"
+
 .include "player.s"
 .include "chaser.s"
+.include "obsticles.s"
 .include "animations.s"
+.include "game.s"
 .include "famistudio_ca65.s"
 
 
@@ -153,6 +155,7 @@ load_background:
 jsr Animation::Init
 jsr Chaser::Init
 jsr Player::init_character
+jsr Obsticles::Init
 
 
 ldx #.lobyte(music_data_untitled)
@@ -213,7 +216,9 @@ nmi:
 	
 	jsr Animation::Update
 	jsr UpdateButtons
+	jsr Game::Update
 	jsr Player::updatePlayer
+	jsr Obsticles::Update
 	
 	
 

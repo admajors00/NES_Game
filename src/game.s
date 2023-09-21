@@ -1,20 +1,48 @@
 
 ; .IFNDEF GAME_INC
 ; GAME_INC =1
+.include "game.inc"
 .scope Game
     ;some game constants
-    gravity = $10
-    ground = $98
-    friction = $01
-    jump_speed_low = $80
-    jump_speed_high = $01
+   
+    hit_flag = $60
+    Update:
+        lda Obsticles::pos_x
+        clc
+        cmp Player::player_pos_x_HIGH
+        bcs @done
+        sec
+        sbc #$10
+        clc
+        cmp Player::player_pos_x_HIGH
+        bcc @check_hit
 
-    push_speed_low = $80
-    push_speed_high = $00
 
-    scroll_wall = $40
-    max_speed = $04
+        lda #0
+        sta hit_flag
+        jmp @done
 
+
+
+        @check_hit:
+            lda Obsticles::pos_y
+            sec
+            sbc #$0f
+            clc
+            cmp Player::player_pos_y_HIGH
+            bcs @done
+
+            lda hit_flag
+            bne @done
+
+            adc #1
+            sta hit_flag
+            lda #0
+            sta Player::character_velocity_x_HIGH
+            sta Player::character_velocity_x_LOW
+
+        @done:
+    rts
 
 .endscope
 

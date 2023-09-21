@@ -446,36 +446,21 @@ EWL_StreetSkate_GuyRunning_1_data:
 	.byte $80
 
 
-EWL_StreetSkate_pointers:
 
-	.word EWL_StreetSkate_Walk_4_data
-	.word EWL_StreetSkate_Walk_3_data
-	.word EWL_StreetSkate_Walk_2_data
-	.word EWL_StreetSkate_Walk_1_data
-	.word EWL_StreetSkate_Push_4_data
-	.word EWL_StreetSkate_Push_3_data
-	.word EWL_StreetSkate_Push_2_data
-	.word EWL_StreetSkate_Push_1_data
-	.word EWL_StreetSkate_Jump_4_data
-	.word EWL_StreetSkate_Jump_3_data
-	.word EWL_StreetSkate_Jump_2_data
-	.word EWL_StreetSkate_Jump_1_data
-	.word EWL_StreetSkate_Coasting_4_data
-	.word EWL_StreetSkate_Coasting_3_data
-	.word EWL_StreetSkate_Coasting_2_data
-	.word EWL_StreetSkate_Coasting_1_data
-	.word EWL_StreetSkate_KickFlip_9_data
-	.word EWL_StreetSkate_KickFlip_8_data
-	.word EWL_StreetSkate_KickFlip_7_data
-	.word EWL_StreetSkate_KickFlip_6_data
-	.word EWL_StreetSkate_KickFlip_5_data
-	.word EWL_StreetSkate_KickFlip_4_data
-	.word EWL_StreetSkate_KickFlip_3_data
-	.word EWL_StreetSkate_KickFlip_2_data
-	.word EWL_StreetSkate_KickFlip_1_data
-	.word EWL_StreetSkate_GuyRunning_3_data
-	.word EWL_StreetSkate_GuyRunning_2_data
-	.word EWL_StreetSkate_GuyRunning_1_data
+
+
+
+
+
+
+Cone_1:
+
+	.byte 16,17,$60,0
+	.byte  8,17,$61,0
+	.byte 16, 9,$62,0
+	.byte  8, 9,$63,0
+
+	.byte $80
 
 
 
@@ -484,12 +469,9 @@ EWL_StreetSkate_pointers:
 
 
 
-
-
-
-
-
-
+EWL_StreetSkate_pointers_cone:
+	.word Cone_1
+	.word Cone_1
 
 
 

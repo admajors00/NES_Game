@@ -5,7 +5,7 @@
 
  .include "animations.inc"
  .include "../graphics/Frames.inc"
-
+.include "game.inc"
 ;.include "player.inc"
 ; BUTTON_A      = 1 << 7
 ; BUTTON_B      = 1 << 6
@@ -21,13 +21,18 @@ player_header_table:
 
 chaser_header_table:
     .tag Animation_Header_t
+
+obs1_header_table:
+    .tag Animation_Header_t
 .reloc
+
+
 
 
 
 .segment "CODE"
 
-HEADER_TABLE_MAX_SIZE = 2
+HEADER_TABLE_MAX_SIZE = 3
 
 OAM_DMA_ADDR = $200
 OAM_DMA_Y    = $200
@@ -90,6 +95,13 @@ OAM_DMA_X    = $203
         sta (pointer_1_LO),Y
         iny 
         lda #>chaser_header_table
+        sta (pointer_1_LO),Y
+
+         iny
+        lda #<obs1_header_table
+        sta (pointer_1_LO),Y
+        iny 
+        lda #>obs1_header_table
         sta (pointer_1_LO),Y
 
         
@@ -241,6 +253,7 @@ OAM_DMA_X    = $203
         sta sprite_pos_x
         jsr Update_sprite_pos
 
+
         ldy #2
         lda animation_headers_table,y
         sta pointer_1_LO
@@ -249,7 +262,6 @@ OAM_DMA_X    = $203
         lda animation_headers_table,y
         sta pointer_1_HI
         
-
         lda Chaser::pos_y_HI 
         sta sprite_pos_y
         lda Chaser::pos_x_HI 
@@ -257,7 +269,20 @@ OAM_DMA_X    = $203
         jsr Update_sprite_pos
 
 
-       
+
+        ldy #4
+        lda animation_headers_table,y
+        sta pointer_1_LO
+        
+        iny
+        lda animation_headers_table,y
+        sta pointer_1_HI
+        
+        lda Obsticles::pos_y
+        sta sprite_pos_y
+        lda Obsticles::pos_x
+        sta sprite_pos_x
+        jsr Update_sprite_pos
 
 
     rts
@@ -559,5 +584,18 @@ chaser_Ani_Header:
       .addr chaser_frame_timers
       .byte 8
       .byte %11010001
+
+
+cone_frame_timers:
+    .byte 8
+
+Cone_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_cone
+      .addr Cone_1
+      .addr cone_frame_timers
+      .byte 8
+      .byte %11010010
 ;.export Animation
 ; .endif
