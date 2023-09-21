@@ -1,5 +1,13 @@
-# NES_Game
-An NES game i am working on. Dunno what the game is gonna be about yet. Maybe chasing a cat, Something with an egg that has leggs, or maybe a fighting game. We'll see.
-Right now I am calling it Cat Sim. So far you can play as a cat that walks side to side. The background scrolls infinitly. There is also music. 
+# SKATE SCRAMBLE
 
-What I have made so far is mostly from following the Nerdy Nights tutorial. Music is made with FamiStudio and is played in the game with famistudio engine. Graphics are being done with YY-CHR and NEXXT.
+An off-duty mall security guard becomes enraged when not only does his breakfast escape from his house, but.. it skateboards too? Skate through the city and avoid crashing, or being caught and scrammbled by the security guard. Thats not all, stunt on his lame ass by pulling off sick tricks as you go, to ge the high score.
+
+Screen shots
+
+![image](https://github.com/admajors00/NES_Game/assets/33710399/1560691e-3404-4170-a1f6-6d6f4c78ed64)
+![Sk8Scramble-0](https://github.com/admajors00/NES_Game/assets/33710399/a7c6e413-c2f0-4192-be5f-00ba3b0e18e7)
+
+
+Buy Eggs With Leggs Merch
+
+https://eggs-with-leggs.myspreadshop.com/

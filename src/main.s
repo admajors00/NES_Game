@@ -10,8 +10,8 @@
 pointerLo = $00   ; pointer variables are declared in RAM
 pointerHi = $01   ; low byte first, high byte immediately after
 
-scroll =$13
-nametable = $14
+scroll =$33
+nametable = $34
 
 .segment "RAM"
 
@@ -22,11 +22,21 @@ nametable = $14
 
 
 .segment "CODE"
+.autoimport 	+
 
-.include "controller.asm"
+.include "controller.s"
+
+.include "../graphics/StreetCanvas_2.s"
+.include "game.s"
+.include "player.s"
+.include "chaser.s"
+.include "animations.s"
 .include "famistudio_ca65.s"
-.include "../graphics/Canvas.asm"
-.include "player.asm"
+
+
+
+
+;.include "game.asm"
 
 
 
@@ -43,7 +53,7 @@ reset:
 	inx			; now X = 0
 	stx	$2000		; disable NMI
 	stx	$2001		; disable rendering
-	stx	$4010		; disable DMC IRQs
+	stx	$4010		; disable DMC I	RQs
 
 	;; first wait for vblank to make sure PPU is ready
 jsr vblankwait
@@ -97,17 +107,17 @@ load_palettes:
 		cpx	#$20
 		bne	@loop		; if x = $20, 32 bytes copied, all done
 
-LoadSprites:
-	ldx #$80
-	stx sprite_pos_x
-	LDX #$00 ; start at 0
-	LoadSpritesLoop:
-		LDA sprites, x ; load data from address (sprites + x)
-		STA $0200, x ; store into RAM address ($0200 + x)
-		INX ; X = X + 1
-		CPX #$30 ; Compare X to hex $10, decimal 16
-		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-		; if compare was equal to 16, continue down  
+; LoadSprites:
+; 	ldx #$80
+; 	stx Player::sprite_pos_x
+; 	LDX #$00 ; start at 0
+; 	LoadSpritesLoop:
+; 		LDA sprites, x ; load data from address (sprites + x)
+; 		STA $0200, x ; store into RAM address ($0200 + x)
+; 		INX ; X = X + 1
+; 		CPX #$20 ; Compare X to hex $10, decimal 16
+; 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
+; 		; if compare was equal to 16, continue down  
 
 
 
@@ -119,9 +129,9 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<Canvas 
+	LDA #<StreetCanvas_2 
 	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>Canvas        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>StreetCanvas_2        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA pointerHi           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0
@@ -139,6 +149,10 @@ load_background:
 		INX
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
+
+jsr Animation::Init
+jsr Chaser::Init
+jsr Player::init_character
 
 
 ldx #.lobyte(music_data_untitled)
@@ -170,12 +184,7 @@ forever:
 
 nmi:
 	; sprite DMA from $0200
-	jsr UpdateButtons
-
-	jsr moveCharacter
-
-
-	@end:
+	
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	$2003
@@ -200,6 +209,15 @@ nmi:
 	STA $2001	  
 	jsr famistudio_update
 
+
+	
+	jsr Animation::Update
+	jsr UpdateButtons
+	jsr Player::updatePlayer
+	
+	
+
+	@end:
 	rti
 
 vblankwait:
@@ -226,16 +244,34 @@ Scroll:
 
 
 palette:
+
+
+
+.byte $2d,$3d,$38,$00
+.byte $2d,$12,$22,$32
+.byte $2d,$16,$26,$36
+.byte $2d,$14,$24,$34
+
+
+.byte $0f,$0F,$30,$27
+.byte $0f,$00,$38,$31
+.byte $0f,$0f,$00,$20
+.byte $0f,$00,$37,$02
+
+
+
+
+
 	;; Background palette
-	.byte 	$0f,$21,$31,$30
-	.byte 	$0f,$21,$39,$19
-	.byte 	$0f,$39,$29,$19
-	.byte 	$0f,$27,$17,$26
-		;; Sprite palette
-	.byte	$0F,$2E,$16,$26
-	.byte	$0F,$2E,$27,$36
-	.byte	$0F,$36,$17,$2C
-	.byte	$0F,$30,$12,$2B
+	; .byte 	$0f,$21,$31,$30
+	; .byte 	$0f,$21,$39,$19
+	; .byte 	$0f,$39,$29,$19
+	; .byte 	$0f,$27,$17,$26
+	; 	;; Sprite palette
+	; .byte	$0F,$2E,$16,$26
+	; .byte	$0F,$2E,$27,$36
+	; .byte	$0F,$36,$17,$2C
+	; .byte	$0F,$30,$12,$2B
 
 
 
@@ -260,6 +296,6 @@ song_test:
   
 .segment "CHARS"
 
-	.incbin	"../graphics/CatSim.chr"	; includes 8KB graphics from SMB1
+	.incbin	"../graphics/EWL.chr"	; includes 8KB graphics from SMB1
 
 	

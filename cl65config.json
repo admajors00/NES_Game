@@ -1,5 +1,5 @@
 {
     "executable": "C:\\cc65\\bin\\cl65",
-    "input": "src/main.asm",
-    "params": "--verbose -C NesTarget.cfg -o CatSim.nes"
+    "input": "src/main.s",
+    "params": "--verbose -C background.cfg -o Sk8Scramble.nes"
   }
