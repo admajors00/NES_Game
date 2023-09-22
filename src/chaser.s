@@ -50,7 +50,7 @@
         sta pos_x_HI
 
         lda #Game_Const::ground
-        adc #4
+        ;adc #
         sta pos_y_HI
 
         

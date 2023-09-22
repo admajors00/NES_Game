@@ -238,7 +238,19 @@ OAM_DMA_X    = $203
         jsr Clear_OAM_DMA
 
         
-
+ ldy #4
+        lda animation_headers_table,y
+        sta pointer_1_LO
+        
+        iny
+        lda animation_headers_table,y
+        sta pointer_1_HI
+        
+        lda Obsticles::pos_y
+        sta sprite_pos_y
+        lda Obsticles::pos_x
+        sta sprite_pos_x
+        jsr Update_sprite_pos
 
         ldy #0
         lda animation_headers_table,y
@@ -270,19 +282,7 @@ OAM_DMA_X    = $203
 
 
 
-        ldy #4
-        lda animation_headers_table,y
-        sta pointer_1_LO
-        
-        iny
-        lda animation_headers_table,y
-        sta pointer_1_HI
-        
-        lda Obsticles::pos_y
-        sta sprite_pos_y
-        lda Obsticles::pos_x
-        sta sprite_pos_x
-        jsr Update_sprite_pos
+       
 
 
     rts
@@ -593,7 +593,7 @@ Cone_Ani_Header:
       .byte 2
       .byte 2
       .addr EWL_StreetSkate_pointers_cone
-      .addr Cone_1
+      .addr EWL_StreetSkate_Cone_1_data
       .addr cone_frame_timers
       .byte 8
       .byte %11010010

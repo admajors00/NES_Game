@@ -19,7 +19,7 @@
 
         lda #Game_Const::ground
         clc
-        adc #$08
+        adc #$0A
         sta pos_y
 
 

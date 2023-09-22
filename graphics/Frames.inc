@@ -4,6 +4,19 @@ _FRAMES_INC = 1
 OAM_FLIP_H = %01000000
 OAM_FLIP_V = %10000000
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 EWL_StreetSkate_Walk_4_data:
 
 
@@ -127,11 +140,9 @@ EWL_StreetSkate_Jump_4_data:
 	.byte 16,20,$06,2
 	.byte  8,20,$07,2
 
-	.byte  8,12,$f1,0
 	.byte  8, 9,$d8,0
 	.byte 16, 9,$d9,0|OAM_FLIP_H
 	.byte  7,12,$ec,0
-
 	.byte 15,13,$ed,0
 	.byte $80
 
@@ -196,8 +207,6 @@ EWL_StreetSkate_Coasting_4_data:
 	.byte 16, 4,$d5,0|OAM_FLIP_H
 	.byte 16, 8,$e0,0
 	.byte  8, 8,$e1,0
-
-	.byte 16, 4,$cd,0
 	.byte $80
 
 
@@ -213,8 +222,6 @@ EWL_StreetSkate_Coasting_3_data:
 	.byte 16, 4,$d8,0|OAM_FLIP_H
 	.byte 16, 8,$e0,0
 	.byte  8, 8,$e1,0
-
-	.byte 16, 4,$cd,0
 	.byte $80
 
 
@@ -256,11 +263,9 @@ EWL_StreetSkate_KickFlip_9_data:
 	.byte 16,15,$06,2
 	.byte  8,15,$07,2
 
-	.byte  8, 7,$f1,0
 	.byte  8, 4,$d8,0
 	.byte 16, 4,$d9,0|OAM_FLIP_H
 	.byte  7, 7,$ec,0
-
 	.byte 15, 8,$ed,0
 	.byte $80
 
@@ -401,9 +406,7 @@ EWL_StreetSkate_GuyRunning_3_data:
 	.byte 18,14,$39,1
 	.byte 10,14,$3c,1
 
-	.byte 26, 6,$3a,1
-	.byte 18, 6,$3b,1
-	.byte 10, 6,$3e,1
+	.byte 12, 6,$3e,1
 	.byte 18,30,$19,1
 	.byte $80
 
@@ -421,57 +424,43 @@ EWL_StreetSkate_GuyRunning_2_data:
 	.byte 17,14,$ac,1
 	.byte  9,14,$ad,1
 
-	.byte 17, 6,$ae,1
-	.byte 25, 6,$ab,1
+	.byte 20, 6,$ae,1
 	.byte $80
 
 
 EWL_StreetSkate_GuyRunning_1_data:
 
 
-	.byte 24,30,$81,1
 	.byte 16,30,$84,1
 	.byte  8,30,$85,1
 	.byte 24,22,$83,1
-
 	.byte 16,22,$86,1
+
 	.byte  8,22,$87,1
 	.byte 24,14,$a1,1
 	.byte 16,14,$a4,1
-
 	.byte  8,14,$a5,1
+
 	.byte   0,22,$8a,1
-	.byte 16, 6,$a6,1
 	.byte  8, 6,$a7,1
 	.byte $80
 
 
+EWL_StreetSkate_Cone_1_data:
 
 
-
-
-
-
-
-Cone_1:
-
-	.byte 16,17,$60,0
-	.byte  8,17,$61,0
-	.byte 16, 9,$62,0
-	.byte  8, 9,$63,0
-
+	.byte 11,16,$60,0
+	.byte  8, 8,$63,0
+	.byte 16, 8,$62,0
 	.byte $80
-
-
-
 
 
 
 
 
 EWL_StreetSkate_pointers_cone:
-	.word Cone_1
-	.word Cone_1
+	.word EWL_StreetSkate_Cone_1_data
+	.word EWL_StreetSkate_Cone_1_data
 
 
 
