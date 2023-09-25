@@ -353,7 +353,7 @@ Draw_New_Collumn:
 		
 		tya
 		clc
-		adc #31
+		adc #32
 		tay
 
 		dex
