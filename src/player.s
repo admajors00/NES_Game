@@ -26,8 +26,8 @@ OAM_X    = 3
 
 .scope Player
 
-	 .import Load_Animation
-	 .import flags
+	.import Load_Animation
+	.import flags
 
 	player_movement_state = $10
 

@@ -1,7 +1,7 @@
 .ifndef _GAME_INC
 .scope Game_Const
  gravity = $10
-    ground = $98
+    ground = $A8
     friction = $01
     jump_speed_low = $80
     jump_speed_high = $01

@@ -105,7 +105,10 @@ OAM_DMA_X    = $203
         sta (pointer_1_LO),Y
 
         
-
+        lda #$10
+            sta OAM_DMA_X
+            lda #$1D 
+            sta OAM_DMA_Y 
 
         
 
@@ -500,8 +503,16 @@ OAM_DMA_X    = $203
             sta $200, X
             dex
             bne @loop
-        ldx #0
+        ldx #4
         stx oam_size
+            lda #$01
+            sta OAM_DMA_X
+            lda #$1C
+            sta OAM_DMA_Y 
+            lda #0
+                sta OAM_DMA_TILE
+   
+            sta OAM_DMA_ATTR
 
     rts
 

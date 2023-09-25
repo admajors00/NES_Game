@@ -22,6 +22,9 @@ new_background_HI = $39
 
 column_number = $3A
 
+temp1 = $1e
+temp2 = $1F
+
 .segment "RAM"
 
 
@@ -160,8 +163,9 @@ load_background:
 		INX
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
-inc scroll
+; inc scroll
 lda #$01
+sta scroll_HI
 jsr Animation::Init
 jsr Chaser::Init
 jsr Player::init_character
@@ -218,21 +222,44 @@ nmi:
 	STA $2006        ; clean up PPU address registers
 	STA $2006
 
-	LDA scroll
-	STA $2005        ; write the horizontal scroll count register
-
-	LDA #$00         ; no vertical scrolling
+	LDA #$00
+	STA $2005        ; write the horizontal scroll count register        ; no vertical scrolling
 	STA $2005
 
 	;;This is the PPU clean up section, so rendering the next frame starts properly.
 	LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-	ORA nametable    ; select correct nametable for bit 0
+;	ORA nametable    ; select correct nametable for bit 0
 	STA $2000
 
 	LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 	STA $2001	  
 
 
+WaitNotSprite0:
+  lda $2002
+  and #%01000000
+  bne WaitNotSprite0   ; wait until sprite 0 not hit
+
+WaitSprite0:
+  lda $2002
+  and #%01000000
+  beq WaitSprite0      ; wait until sprite 0 is hit
+
+
+  
+  ; now set the scroll and nametable to use for the rest of the screen down
+  
+  LDA scroll
+  STA $2005        ; write the horizontal scroll count register
+
+  LDA #$00         ; no vertical scrolling
+  STA $2005
+    
+  LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+  ORA nametable    ; select correct nametable for bit 0
+  STA $2000
+  
+   
 	jsr famistudio_update
 	
 	jsr Animation::Update
@@ -267,25 +294,28 @@ rts
 New_Column_Check:
 
 
-	; lda scroll_HI
-	; cmp #3
-	; bcc @continue
-	; 	lda #0
-	; 	sta scroll_HI		
-	; 	sta column_number
-	; @continue:
+	lda scroll_HI
+	cmp #3
+	bcc @continue
+		lda #0
+		sta scroll_HI
+		;sta scroll		
+		;sta column_number
+	@continue:
 	LDA scroll
 
 
 	and #%00000111
 	bne @done
-	jsr Draw_New_Collumn
-
+	
+	
 	lda column_number
 	clc
 	adc #$01
 	and #%01111111
 	sta column_number
+	jsr Draw_New_Collumn
+	
 	@done:
 		
 
@@ -300,41 +330,50 @@ Draw_New_Collumn:
 	sta column_LO
 
 	lda nametable
-
 	eor #$01
 	asl A
 	asl A
 	clc 
 	adc #$20
 	sta column_HI
-	lda #0
-	; lda scroll_HI
-	; asl A
-	; asl A
-	; asl A
-	; asl A
-	; asl A
+	
+	 
+	lda scroll_HI
+	asl 
+	asl
+	
 	sta new_background_HI
+	sta temp2
 	lda column_number
+	and #%00011111
 	sta new_background_LO
+	sta temp1
 
 
 	; lda column_number
-	; and #%11111000
+	; and #%11000000
 	; lsr A
 	; lsr A
 	; lsr A
-	; lda #0
+	
 	; sta new_background_HI
 
 	lda new_background_LO
 	clc 
 	adc #<Longer_street
 	sta new_background_LO
+
 	lda new_background_HI
 	adc #>Longer_street
 	sta new_background_HI
 
+	LDA column_LO
+	CLC
+	ADC #$80
+	STA column_LO
+	LDA column_HI
+	ADC #$00
+	STA column_HI 
 
 	lda #%00000100
 	sta $2000
@@ -344,17 +383,21 @@ Draw_New_Collumn:
 	lda column_LO
 	sta $2006
 
-	ldx #$1e
-	ldy #$00
+	ldx #$1C
+	ldy #$80
 
 	@loop:
 		lda (new_background_LO),Y
 		sta $2007
 		
-		tya
+		lda new_background_LO
 		clc
-		adc #32
-		tay
+		adc #$20
+		sta new_background_LO
+		lda new_background_HI
+		adc #$0
+		sta new_background_HI
+
 
 		dex
 		bne @loop
