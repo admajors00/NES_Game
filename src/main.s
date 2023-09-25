@@ -11,7 +11,16 @@ pointerLo = $00   ; pointer variables are declared in RAM
 pointerHi = $01   ; low byte first, high byte immediately after
 
 scroll =$33
-nametable = $34
+scroll_HI = $34
+nametable = $35
+
+column_LO = $36
+column_HI = $37
+
+new_background_LO = $38
+new_background_HI = $39
+
+column_number = $3A
 
 .segment "RAM"
 
@@ -26,7 +35,7 @@ nametable = $34
 
 .include "controller.s"
 
-.include "../graphics/StreetCanvas_2.s"
+;.include "../graphics/StreetCanvas_2.s"
 
 .include "player.s"
 .include "chaser.s"
@@ -131,9 +140,9 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<StreetCanvas_2 
+	LDA #<Longer_street 
 	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>StreetCanvas_2        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>Longer_street        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA pointerHi           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0
@@ -151,7 +160,8 @@ load_background:
 		INX
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
-
+inc scroll
+lda #$01
 jsr Animation::Init
 jsr Chaser::Init
 jsr Player::init_character
@@ -187,7 +197,18 @@ forever:
 
 nmi:
 	; sprite DMA from $0200
+	; jsr Scroll
+	lda scroll
+	clc
+	adc#$01
+	sta scroll
+	lda scroll_HI
+	adc #0
+	sta scroll_HI
+
 	
+	jsr Scroll
+	jsr New_Column_Check
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	$2003
@@ -210,9 +231,9 @@ nmi:
 
 	LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 	STA $2001	  
+
+
 	jsr famistudio_update
-
-
 	
 	jsr Animation::Update
 	jsr UpdateButtons
@@ -221,7 +242,6 @@ nmi:
 	jsr Obsticles::Update
 	
 	
-
 	@end:
 	rti
 
@@ -242,8 +262,108 @@ Scroll:
 		STA nametable    ; so if nametable was 0, now 1
 					;    if nametable was 1, now 0
 	@NTSwapCheckDone:
-  	rts
-  
+rts
+
+New_Column_Check:
+
+
+	; lda scroll_HI
+	; cmp #3
+	; bcc @continue
+	; 	lda #0
+	; 	sta scroll_HI		
+	; 	sta column_number
+	; @continue:
+	LDA scroll
+
+
+	and #%00000111
+	bne @done
+	jsr Draw_New_Collumn
+
+	lda column_number
+	clc
+	adc #$01
+	and #%01111111
+	sta column_number
+	@done:
+		
+
+rts
+
+
+Draw_New_Collumn:
+	lda scroll
+	lsr A
+	lsr A
+	lsr A
+	sta column_LO
+
+	lda nametable
+
+	eor #$01
+	asl A
+	asl A
+	clc 
+	adc #$20
+	sta column_HI
+	lda #0
+	; lda scroll_HI
+	; asl A
+	; asl A
+	; asl A
+	; asl A
+	; asl A
+	sta new_background_HI
+	lda column_number
+	sta new_background_LO
+
+
+	; lda column_number
+	; and #%11111000
+	; lsr A
+	; lsr A
+	; lsr A
+	; lda #0
+	; sta new_background_HI
+
+	lda new_background_LO
+	clc 
+	adc #<Longer_street
+	sta new_background_LO
+	lda new_background_HI
+	adc #>Longer_street
+	sta new_background_HI
+
+
+	lda #%00000100
+	sta $2000
+	lda $2002
+	lda column_HI
+	sta $2006
+	lda column_LO
+	sta $2006
+
+	ldx #$1e
+	ldy #$00
+
+	@loop:
+		lda (new_background_LO),Y
+		sta $2007
+		
+		tya
+		clc
+		adc #31
+		tay
+
+		dex
+		bne @loop
+		
+
+
+
+
+  rts
 
 
 
@@ -280,7 +400,7 @@ palette:
 	; .byte	$0F,$36,$17,$2C
 	; .byte	$0F,$30,$12,$2B
 
-
+.include "../graphics/Longer_street.s"
 
 .segment "SONG1"
 song_test:

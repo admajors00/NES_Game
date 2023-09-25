@@ -124,7 +124,7 @@ OAM_X    = 3
 	AirborneMoving:
 		jsr Apply_Friction_X
 		jsr Apply_Gravity_Y
-		jsr Update_Pos_X
+	;	jsr Update_Pos_X
 		jsr Update_Pos_Y
 	rts
 	AirborneNotMoving:
@@ -135,7 +135,7 @@ OAM_X    = 3
 
 	GroundedMoving:
 		jsr Apply_Friction_X
-		jsr Update_Pos_X
+		;jsr Update_Pos_X
 		;jsr Update_Pos_Y
 	rts
 
@@ -228,8 +228,12 @@ OAM_X    = 3
 			adc character_velocity_x_LOW
 			sta player_pos_x_LOW
 			lda scroll
+			clc
 			adc character_velocity_x_HIGH
 			sta scroll
+			lda scroll_HI
+			adc #0
+			sta scroll_HI
 			jsr Scroll
 		@done:
 	rts
