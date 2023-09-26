@@ -27,7 +27,8 @@ obs1_header_table:
 .reloc
 
 
-
+SPRITE_0_X = $FA
+SPRITE_0_Y = $1D
 
 
 .segment "CODE"
@@ -105,9 +106,9 @@ OAM_DMA_X    = $203
         sta (pointer_1_LO),Y
 
         
-        lda #$10
+        lda #SPRITE_0_X
             sta OAM_DMA_X
-            lda #$1D 
+            lda #SPRITE_0_Y
             sta OAM_DMA_Y 
 
         
@@ -505,13 +506,12 @@ OAM_DMA_X    = $203
             bne @loop
         ldx #4
         stx oam_size
-            lda #$01
+            lda #SPRITE_0_X
             sta OAM_DMA_X
-            lda #$1C
+            lda #SPRITE_0_Y
             sta OAM_DMA_Y 
             lda #0
-                sta OAM_DMA_TILE
-   
+            sta OAM_DMA_TILE
             sta OAM_DMA_ATTR
 
     rts
