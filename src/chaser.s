@@ -1,6 +1,6 @@
-.include "animations.inc"
+.include "/inc/animations.inc"
 .include "../graphics/Frames.inc"
-.include "game.inc"
+.include "/inc/game.inc"
 .segment "CODE"
 .scope Chaser
     movement_state = $40

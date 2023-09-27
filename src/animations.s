@@ -3,9 +3,9 @@
 ; ANIMATIONS_INC =1
 ; ;animation flags 
 
- .include "animations.inc"
+ .include "/inc/animations.inc"
  .include "../graphics/Frames.inc"
-.include "game.inc"
+.include "/inc/game.inc"
 ;.include "player.inc"
 ; BUTTON_A      = 1 << 7
 ; BUTTON_B      = 1 << 6

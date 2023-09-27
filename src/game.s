@@ -1,7 +1,7 @@
 
 ; .IFNDEF GAME_INC
 ; GAME_INC =1
-.include "game.inc"
+.include "/inc/game.inc"
 .scope Game
     ;some game constants
    

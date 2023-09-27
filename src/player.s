@@ -7,8 +7,8 @@
 
 ; .import Game
 
-.include "animations.inc"
-.include "game.inc"
+.include "/inc/animations.inc"
+.include "/inc/game.inc"
 .include "../graphics/Frames.inc"
 ; OAM address ($2003) > write / OAM data ($2004) > write
 ; Set the "sprite" address using OAMADDR ($2003)
