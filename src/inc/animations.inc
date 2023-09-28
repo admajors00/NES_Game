@@ -114,7 +114,7 @@ chaser_Ani_Header:
 
 
 cone_frame_timers:
-    .byte 8
+    .byte $FF
 
 Cone_Ani_Header:
       .byte 2
@@ -122,12 +122,12 @@ Cone_Ani_Header:
       .addr EWL_StreetSkate_pointers_cone
       .addr EWL_StreetSkate_Cone_1_data
       .addr cone_frame_timers
-      .byte 8
+      .byte $FF
       .byte %11010010
 
 
 pothole_frame_timers:
-    .byte 8
+    .byte $FF
 
 Pothole_Ani_Header:
       .byte 2
@@ -135,7 +135,7 @@ Pothole_Ani_Header:
       .addr EWL_StreetSkate_pointers_pothole
       .addr Pothole_1
       .addr pothole_frame_timers
-      .byte 8
+      .byte $FF
       .byte %11010010
 
 Empty_Ani_Header: 

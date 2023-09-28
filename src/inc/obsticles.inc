@@ -36,7 +36,7 @@ Pothole:
     .byte $10
     .byte $B0
     .byte $0F
-    .byte $0F
+    .byte $0A
     .byte $00
     .byte $00
     .addr Pothole_Ani_Header
