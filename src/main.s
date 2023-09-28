@@ -194,11 +194,12 @@ nmi:
 	jsr Handle_Scroll
 
 	jsr famistudio_update
-	
-	jsr Animation::Update
 	jsr Background::Update 
-	jsr UpdateButtons
 	jsr Game::Update
+	jsr Animation::Update
+	
+	jsr UpdateButtons
+	
 	jsr Player::updatePlayer
 	jsr Obsticles::Update
 	

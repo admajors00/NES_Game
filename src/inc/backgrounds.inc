@@ -9,43 +9,11 @@ _BACKGROUNDS_INC  =1
 .endstruct
 
 
-EWL_StreetSkate_Cone_1_data:
-
-
-	.byte 11,16,$60,0
-	.byte  8, 8,$63,0
-	.byte 16, 8,$62,0
-	.byte $80
 
 
 
 
 
-EWL_StreetSkate_pointers_cone:
-	.word EWL_StreetSkate_Cone_1_data
-	.word EWL_StreetSkate_Cone_1_data
-
-cone_frame_timers:
-    .byte 8
-
-Cone_Ani_Header:
-      .byte 2
-      .byte 2
-      .addr EWL_StreetSkate_pointers_cone
-      .addr EWL_StreetSkate_Cone_1_data
-      .addr cone_frame_timers
-      .byte 8
-      .byte %11010010
-
-
-Cone:
-    .byte $B0
-    .byte $B0
-    .byte $0F
-    .byte $0F
-    .byte $00
-    .byte $00
-    .addr Cone_Ani_Header
 
 
 Background_1_Objects:
@@ -63,13 +31,10 @@ Background_2:
 
 Background_3:
     .byte 1
-    .addr Cone
+    .addr Pothole
     .addr 0
 
-Background_4:
- .byte 1
-    .addr Cone
-    .addr 0
+
 .org $430
 Backgrounds_Array:
     .addr Background_1

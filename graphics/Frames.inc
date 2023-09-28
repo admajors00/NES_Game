@@ -446,22 +446,35 @@ EWL_StreetSkate_GuyRunning_1_data:
 	.byte $80
 
 
-; EWL_StreetSkate_Cone_1_data:
+EWL_StreetSkate_Cone_1_data:
 
 
-; 	.byte 11,16,$60,0
-; 	.byte  8, 8,$63,0
-; 	.byte 16, 8,$62,0
-; 	.byte $80
+	.byte 11,16,$60,0
+	.byte  8, 8,$63,0
+	.byte 16, 8,$62,0
+	.byte $80
 
 
 
 
 
-; EWL_StreetSkate_pointers_cone:
-; 	.word EWL_StreetSkate_Cone_1_data
-; 	.word EWL_StreetSkate_Cone_1_data
+EWL_StreetSkate_pointers_cone:
+	.word EWL_StreetSkate_Cone_1_data
+	.word EWL_StreetSkate_Cone_1_data
 
+Pothole_1:
+
+
+	.byte 16,16,$71,2
+	.byte  8,16,$74,2
+	.byte 16, 8,$73,2
+	.byte  8, 8,$76,2
+
+	.byte $80
+
+EWL_StreetSkate_pointers_pothole:
+	.word Pothole_1
+	.word Pothole_1
 
 
 
