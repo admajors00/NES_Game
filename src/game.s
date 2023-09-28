@@ -7,12 +7,14 @@
    
     hit_flag = $60
     Update:
+        lda active_flag
+        beq @done
         lda Obsticles::pos_x
         clc
         cmp Player::player_pos_x_HIGH
         bcc @done
         sec
-        sbc #$0F
+        sbc Obsticles::length
         clc
         cmp Player::player_pos_x_HIGH
         bcc @check_hit
@@ -27,7 +29,7 @@
         @check_hit:
             lda Obsticles::pos_y
             sec
-            sbc #$0f
+            sbc Obsticles::height
             clc
             cmp Player::player_pos_y_HIGH
             bcs @done

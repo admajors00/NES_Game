@@ -1,3 +1,162 @@
+ .include "/inc/animations.inc"
+.include "/inc/obsticles.inc"
+.include "/inc/backgrounds.inc"
+ 
+.segment "CODE"
+scroll =$3e
+scroll_HI = $3f
+
+nametable = $35
+
+column_LO = $36
+column_HI = $37
+
+new_background_LO = $38
+new_background_HI = $39
+
+column_number = $3A
+
+new_page_flag = $3B
+bg_header_pt_LO = $3C
+bg_header_pt_HI = $3D
+
+obst_header_pt_LO = $33
+obst_header_pt_HI = $34
+
+scroll_HI_prev = $30
+temp = $31
+
+
+
+
+; Backgrounds_Array:
+;     .addr Background_1
+;     .addr Background_2
+;     .addr Background_3
+
+
+
+.scope Background
+
+Init:
+
+    lda #<Backgrounds_Array
+    sta bg_header_pt_LO
+    lda #>Backgrounds_Array
+    sta bg_header_pt_HI
+
+    ldy #0
+    lda #<Background_1
+    sta (bg_header_pt_LO),Y
+    iny 
+    lda #>Background_1
+    sta (bg_header_pt_LO),Y
+
+    iny
+    lda #<Background_2
+    sta (bg_header_pt_LO),Y
+    iny 
+    lda #>Background_2
+    sta (bg_header_pt_LO),Y
+
+    iny
+    lda #<Background_3
+    sta (bg_header_pt_LO),Y
+    iny 
+    lda #>Background_3
+    sta (bg_header_pt_LO),Y
+
+
+    ; ldy #0
+    ; lda Backgrounds_Array, y
+    ; sta bg_header_pt_LO
+    ; iny
+    ; lda Backgrounds_Array,y
+    ; sta bg_header_pt_HI
+
+    lda #1
+    sta scroll_HI_prev
+
+
+rts
+
+
+Update:
+    lda scroll_HI
+    cmp scroll_HI_prev
+    beq @done
+        sta scroll_HI_prev
+      ;  jsr Update_Background_Obsticles
+
+        lda scroll_HI
+        asl A
+        tay
+
+        lda Backgrounds_Array,y
+        sta bg_header_pt_LO
+        iny
+        lda Backgrounds_Array, y
+        sta bg_header_pt_HI
+
+        ldy #Background_t::num_obsticles
+        lda (bg_header_pt_LO), Y ;if num obsticles == 0 jump to done
+        beq @remove_obsticles
+        
+
+        lda #1
+        sta active_flag
+
+        ldy #Background_t::obsticle_list
+        lda (bg_header_pt_LO), y ;get first item from obsticle list
+        sta obst_header_pt_LO
+        iny
+        lda (bg_header_pt_LO ), y 
+        sta obst_header_pt_HI
+
+        ldx obst_header_pt_HI
+        ldy obst_header_pt_LO
+
+        jsr Obsticles::Load 
+
+
+        ldy #Obstical_t::animation_header_addr ; load the animation 
+        lda (obst_header_pt_LO), Y
+        sta temp
+        iny
+        lda (obst_header_pt_LO ), Y
+        tax
+        ldy temp
+        ;  ldx #>Cone_Ani_Header
+        ;  ldy #<Cone_Ani_Header
+
+        jsr Animation::Load_Animation
+        jmp @done
+
+        @remove_obsticles:
+            lda #0
+            sta active_flag
+            ldx #>Empty_Ani_Header
+            ldy #<Empty_Ani_Header
+            jsr Animation::Load_Animation
+            jmp @done
+
+    @done:
+    
+
+rts
+
+
+Update_Background_Obsticles:
+    lda scroll_HI
+    asl A
+    tay
+    lda Backgrounds_Array,y
+    sta bg_header_pt_LO
+    iny
+    lda Backgrounds_Array,y
+    sta bg_header_pt_HI
+rts
+.endscope
 
 
 
@@ -17,6 +176,7 @@ Handle_Scroll:
 		bcc @continue
 			lda #0
 			sta scroll_HI
+            
 		@continue:
 		
 		New_Column_Check:
@@ -262,3 +422,4 @@ DrawNewAttributes:
 		DrawNewAttributesLoopDone:
 
 rts
+

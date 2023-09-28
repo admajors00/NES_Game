@@ -7,25 +7,12 @@
 
 
 .segment "ZEROPAGE"
-pointerLo = $60   ; pointer variables are declared in RAM
-pointerHi = $61   ; low byte first, high byte immediately after
+pointerLo = $f2  ; pointer variables are declared in RAM
+pointerHi = $f3  ; low byte first, high byte immediately after
 
-scroll =$33
-scroll_HI = $34
-nametable = $35
 
-column_LO = $36
-column_HI = $37
 
-new_background_LO = $38
-new_background_HI = $39
-
-column_number = $3A
-
-amount_to_scroll = $3B
-
-temp1 = $1e
-temp2 = $1F
+amount_to_scroll = $f4; .res 1
 
 .segment "RAM"
 
@@ -41,11 +28,12 @@ temp2 = $1F
 .include "controller.s"
 
 ;.include "../graphics/StreetCanvas_2.s"
-.include "background.s"
+
 .include "player.s"
 .include "chaser.s"
 .include "obsticles.s"
 .include "animations.s"
+.include "background.s"
 .include "game.s"
 .include "famistudio_ca65.s"
 
@@ -168,6 +156,7 @@ load_background:
 inc scroll
 lda #$01
 sta scroll_HI
+jsr Background::Init
 jsr Animation::Init
 jsr Chaser::Init
 jsr Player::init_character
@@ -202,15 +191,12 @@ forever:
 
 
 nmi:
-	; sprite DMA from $0200
-	; jsr Scroll
-	;ldx amount_to_scroll
 	jsr Handle_Scroll
-  
-   
+
 	jsr famistudio_update
 	
 	jsr Animation::Update
+	jsr Background::Update 
 	jsr UpdateButtons
 	jsr Game::Update
 	jsr Player::updatePlayer
@@ -251,28 +237,6 @@ palette:
 .byte $0f,$17,$16,$27
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-	;; Background palette
-	; .byte 	$0f,$21,$31,$30
-	; .byte 	$0f,$21,$39,$19
-	; .byte 	$0f,$39,$29,$19
-	; .byte 	$0f,$27,$17,$26
-	; 	;; Sprite palette
-	; .byte	$0F,$2E,$16,$26
-	; .byte	$0F,$2E,$27,$36
-	; .byte	$0F,$36,$17,$2C
-	; .byte	$0F,$30,$12,$2B
 
 .include "../graphics/Longer_street.s"
 

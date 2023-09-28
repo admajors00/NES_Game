@@ -1,31 +1,51 @@
 .include "/inc/animations.inc"
 .include "../graphics/Frames.inc"
 .include "/inc/game.inc"
+.include "/inc/obsticles.inc"
+
 
 
 .segment "CODE"
+
+active_flag = $57
 .scope Obsticles
 
 
     pos_x = $50
     pos_y = $51
 
+
+
     screen_pos_x = $52
 
+    header_pt_LO = $53
+    header_pt_HI = $54
+
+    length = $55
+    height  = $56
+
+    temp1 = $5E
+
     Init:
-        lda #$90
+        lda #$00
         sta pos_x 
         sta screen_pos_x
 
         lda #Game_Const::ground
         clc
-        adc #$0A
+        adc #$00
         sta pos_y
 
 
-        ldx #>Cone_Ani_Header
-		ldy #<Cone_Ani_Header
+        ldx #>Empty_Ani_Header
+		ldy #<Empty_Ani_Header
 		jsr Load_Animation
+
+        ldx #>Cone
+		ldy #<Cone
+		jsr Load
+        
+
     rts
 
 
@@ -35,4 +55,35 @@
         sbc scroll
         sta pos_x
     rts
+
+
+    Load:
+        inc temp1
+        sty header_pt_LO
+        stx header_pt_HI
+
+        ldy #Obstical_t::pos_x
+        lda (header_pt_LO), Y
+        sta pos_x
+
+        iny
+        lda (header_pt_LO), Y
+        sta pos_y
+
+        iny
+        lda (header_pt_LO), Y
+        sta  length
+
+        iny
+        lda (header_pt_LO), Y
+        sta  height
+    rts
+
 .endscope
+
+
+
+
+
+
+

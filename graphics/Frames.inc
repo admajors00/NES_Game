@@ -446,21 +446,21 @@ EWL_StreetSkate_GuyRunning_1_data:
 	.byte $80
 
 
-EWL_StreetSkate_Cone_1_data:
+; EWL_StreetSkate_Cone_1_data:
 
 
-	.byte 11,16,$60,0
-	.byte  8, 8,$63,0
-	.byte 16, 8,$62,0
-	.byte $80
+; 	.byte 11,16,$60,0
+; 	.byte  8, 8,$63,0
+; 	.byte 16, 8,$62,0
+; 	.byte $80
 
 
 
 
 
-EWL_StreetSkate_pointers_cone:
-	.word EWL_StreetSkate_Cone_1_data
-	.word EWL_StreetSkate_Cone_1_data
+; EWL_StreetSkate_pointers_cone:
+; 	.word EWL_StreetSkate_Cone_1_data
+; 	.word EWL_StreetSkate_Cone_1_data
 
 
 
