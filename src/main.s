@@ -40,10 +40,15 @@ amount_to_scroll = $f4; .res 1
 
 
 
-;.include "game.asm"
-
-
-
+PpuCtrl			= $2000
+PpuMask			= $2001
+PpuStatus		= $2002
+OamAddr			= $2003
+OamData			= $2004
+PpuScroll		= $2005
+PpuAddr			= $2006
+PpuData			= $2007
+OamDma			= $4014
 
 
 
@@ -133,9 +138,9 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<Longer_street 
+	LDA #<Longer_street_1
 	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>Longer_street        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>Longer_street_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA pointerHi           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0

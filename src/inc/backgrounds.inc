@@ -22,17 +22,17 @@ Background_1_Objects:
 Background_1:
     .byte 1
     .addr Cone
-    .addr 0
+    .addr Longer_street_1
 
 Background_2:
     .byte 0
     .addr 0
-    .addr 0
+    .addr Longer_street_2
 
 Background_3:
     .byte 1
     .addr Pothole
-    .addr 0
+    .addr Longer_street_3
 
 
 .org $430
@@ -41,5 +41,10 @@ Backgrounds_Array:
     .addr Background_2
     .addr Background_3
 
+.org $460
+Scroll_Buffer: .res 32
+Attribute_Buffer: .res 32
 .reloc
+
+
 .endif
