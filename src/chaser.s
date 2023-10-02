@@ -62,6 +62,8 @@
 
 		lda #2
 	 	sta velocity_x_HI
+		lda #$B0
+		sta velocity_x_LO
 	
         rts
     .endproc
@@ -105,6 +107,7 @@
 		@hide_chaser:
 			lda #$FF
 			sta pos_y_HI
+			;sta pos_x_HI
 		@done:
 		rts
 	
