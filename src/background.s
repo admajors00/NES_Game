@@ -68,6 +68,13 @@ Init:
     lda #>Background_3
     sta (bg_header_pt_LO),Y
 
+	    iny
+    lda #<Background_4
+    sta (bg_header_pt_LO),Y
+    iny 
+    lda #>Background_4
+    sta (bg_header_pt_LO),Y
+
     LDA #<Longer_street_2
 	STA bg_data_pt_LO           ; put the low byte of address of background into pointer
 	LDA #>Longer_street_2       ; #> is the same as HIGH() function in NESASM, used to get the high byte
@@ -86,8 +93,66 @@ Init:
 
 rts
 
-
 Update:
+    
+   
+    ldx amount_to_scroll
+	beq scroll_done
+
+	loop_1:
+		lda scroll
+		clc
+		adc#$01
+		sta scroll
+		lda scroll_HI
+		adc #0
+		sta scroll_HI
+		cmp #NUM_BACKGROUNDS	
+		bcc @continue
+			lda #0
+			sta scroll_HI
+            
+	 	@continue:
+		jsr Next_Background
+		jsr Scroll
+		New_Column_Check:
+			LDA scroll
+			and #%00000111
+			bne @New_Column_Check_done
+			
+			
+				lda column_number
+				clc
+				adc #$01
+				and #%01111111
+				sta column_number
+				
+				jsr Draw_New_Collumn_To_Buffer
+                lda #NEW_COLUMN_FLAG
+                ora scroll_flags
+                sta scroll_flags
+
+			
+				LDA scroll
+				AND #%00011111            ; check for multiple of 32
+				Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
+
+                    jsr Draw_New_Attributes_To_Buffer
+                    lda #NEW_ATTRIBUTE_FLAG
+                    ora scroll_flags
+                    sta scroll_flags
+			@New_Column_Check_done:
+
+
+		dec amount_to_scroll
+		bne loop_1
+		jmp scroll_done
+
+    scroll_done:
+
+rts
+
+Next_Background:
     
     lda scroll_HI
     cmp scroll_HI_prev
@@ -155,7 +220,7 @@ Update:
             jmp @done
 
     @done:
-    jsr Update_buffer
+    
     
 rts
 
@@ -172,63 +237,7 @@ Update_Background_Obsticles:
 rts
 .endscope
 
-Update_buffer:
-    
-   
-    ldx amount_to_scroll
-	beq scroll_done
 
-	loop_1:
-		lda scroll
-		clc
-		adc#$01
-		sta scroll
-		lda scroll_HI
-		adc #0
-		sta scroll_HI
-		cmp #3	
-		bcc @continue
-			lda #0
-			sta scroll_HI
-            
-	 	@continue:
-		 jsr Scroll
-		New_Column_Check:
-			LDA scroll
-			and #%00000111
-			bne @New_Column_Check_done
-			
-			
-				lda column_number
-				clc
-				adc #$01
-				and #%01111111
-				sta column_number
-				
-				jsr Draw_New_Collumn_To_Buffer
-                lda #NEW_COLUMN_FLAG
-                ora scroll_flags
-                sta scroll_flags
-
-			
-				LDA scroll
-				AND #%00011111            ; check for multiple of 32
-				Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
-
-                    jsr Draw_New_Attributes_To_Buffer
-                    lda #NEW_ATTRIBUTE_FLAG
-                    ora scroll_flags
-                    sta scroll_flags
-			@New_Column_Check_done:
-
-
-		dec amount_to_scroll
-		bne loop_1
-		jmp scroll_done
-
-    scroll_done:
-
-rts
 
 
 

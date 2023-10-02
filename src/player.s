@@ -77,8 +77,10 @@ OAM_X    = 3
 		stx player_pos_x_LOW
 		stx player_pos_y_LOW
 
-		ldx #$01
+		ldx #$ff
 		stx character_velocity_x_LOW
+		ldx #$02
+		stx character_velocity_x_HIGH
 		ldx #$30
 		stx player_pos_x_HIGH
 

@@ -208,7 +208,7 @@ nmi:
 	jsr UpdateButtons
 	
 	jsr Player::updatePlayer
-	
+	jsr Chaser::Update
 	
 	
 	@end:
@@ -244,9 +244,16 @@ palette:
 .byte $0f,$0f,$10,$20
 .byte $0f,$17,$16,$27
 
+Longer_street_1:
+	.incbin"../graphics/Longer_street_1.bin"
 
-
-.include "../graphics/Longer_street.s"
+Longer_street_2:
+	.incbin "../graphics/Longer_street_2.bin"
+Longer_street_3:
+	.incbin "../graphics/Longer_street_3.bin"
+Longer_street_4:
+	.incbin "../graphics/Longer_street_4.bin"
+; .include "../graphics/Longer_street.s"
 
 .segment "SONG1"
 song_test:

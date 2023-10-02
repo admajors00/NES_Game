@@ -11,7 +11,7 @@ _BACKGROUNDS_INC  =1
 
 
 
-
+NUM_BACKGROUNDS = 7
 
 
 
@@ -34,12 +34,22 @@ Background_3:
     .addr Pothole
     .addr Longer_street_3
 
+Background_4:
+    .byte 1
+    .addr Pothole
+    .addr Longer_street_4
 
-.org $430
+
+; .org $430
 Backgrounds_Array:
     .addr Background_1
     .addr Background_2
     .addr Background_3
+    .addr Background_4
+    .addr Background_4
+    .addr Background_4
+    .addr Background_4
+    .addr Background_4
 
 .org $460
 Scroll_Buffer: .res 32
