@@ -2,7 +2,7 @@
 .scope Game_Const
  gravity = $10
     ground = $A8
-    friction = $01
+    friction = $02
     jump_speed_low = $80
     jump_speed_high = $01
 

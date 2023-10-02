@@ -77,7 +77,7 @@
 		; @skip
 		; sta velocity_x_LO
 		
-
+		
 		lda velocity_x_HI
 		sbc amount_to_scroll
 		sta relative_velocity
@@ -89,15 +89,22 @@
 		sta pos_x_LO
 		lda pos_x_HI
 		adc relative_velocity
+
+		;lda pos_x_HI
+		cmp Player::player_pos_x_HIGH
+		bcs @done
 		sta pos_x_HI
 
 		lda pos_x_HI
 
 		cmp #$0f
-		bcs @done
+		bcc @hide_chaser
+			lda #Game_Const::ground
+       		sta pos_y_HI
+			jmp @done
+		@hide_chaser:
 			lda #$FF
 			sta pos_y_HI
-		
 		@done:
 		rts
 	
