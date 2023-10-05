@@ -54,6 +54,13 @@ active_flag = $57
         sec
         sbc scroll
         sta pos_x
+        
+        ldy #Sprite_Positions_e::obst_1_x
+		lda pos_x
+		sta Sprite_positions_table, y
+		iny 
+		lda pos_y
+		sta Sprite_positions_table, y
     rts
 
 

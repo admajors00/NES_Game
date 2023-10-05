@@ -420,7 +420,16 @@ Draw_New_Attributes_From_Buffer:
 		@done:
 
 rts
+; lda scroll_HI
+; 	asl 
+; 	asl	
+; 	sta new_background_HI
 
+; 	lda column_number
+; 	and #%00011111
+; 	lsr A
+; 	lsr A
+; 	sta new_background_LO
 Draw_New_Collumn_To_Buffer:
 	
 	lda #0 

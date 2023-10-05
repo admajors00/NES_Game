@@ -3,7 +3,7 @@
 
 _ANIMATIONS_INC = 1
 
-INTERUPTABLE = 1<<7
+ALT_FRAME_TIMER_F = 1<<7
 LOOP   = 1 << 6
 PAUSE   = 1 << 5
 ACTIVE  = 1 << 4
@@ -28,6 +28,14 @@ ANI_FLAGS_MASK = %11110000
     obstical_2 = $03
 .endenum
 
+.enum Sprite_Positions_e
+    player_x = 0
+    player_y = 1
+    chaser_x = 2
+    chaser_y = 3
+    obst_1_x = 4
+    obst_1_y = 5
+.endenum
 .struct Linked_List
     data_pt     .addr
     prev        .addr
@@ -46,12 +54,12 @@ Push_Ani_Header:
       .addr EWL_StreetSkate_Push_1_data
       .addr push_frame_timers
       .byte 8
-      .byte %10010000
+      .byte %00010000
 
 
 
 jump_frame_timers:
-    .byte 8,8,20,16,2
+    .byte 4,8,15,16,2
 
 Jump_Ani_Header:
       .byte 5
@@ -60,7 +68,7 @@ Jump_Ani_Header:
       .addr EWL_StreetSkate_Jump_1_data
       .addr jump_frame_timers
       .byte 2
-      .byte %10010000
+      .byte %00010000
 
 
 
@@ -86,7 +94,7 @@ Idle_Ani_Header:
       .addr EWL_StreetSkate_Coasting_4_data
       .addr idle_frame_timers
       .byte 2
-      .byte %11010000
+      .byte %01010000
 
 kickFlip_frame_timers:
     .byte 4,4,4,4,4,4,4,8,2
@@ -98,7 +106,7 @@ KickFlip_Ani_Header:
       .addr EWL_StreetSkate_KickFlip_1_data
       .addr kickFlip_frame_timers
       .byte 2
-      .byte %10010000
+      .byte %00010000
 
 chaser_frame_timers:
     .byte 8,8,8,8
@@ -123,7 +131,7 @@ Cone_Ani_Header:
       .addr EWL_StreetSkate_Cone_1_data
       .addr cone_frame_timers
       .byte $FF
-      .byte %11010010
+      .byte %01110010
 
 
 pothole_frame_timers:
@@ -136,7 +144,7 @@ Pothole_Ani_Header:
       .addr Pothole_1
       .addr pothole_frame_timers
       .byte $FF
-      .byte %11010010
+      .byte %01110010
 
 Empty_Ani_Header: 
     .byte 0

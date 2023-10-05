@@ -1,6 +1,8 @@
 .ifndef _GAME_INC
+_GAME_INC = 1
+
 .scope Game_Const
- gravity = $10
+    gravity = $10
     ground = $A8
     friction = $02
     jump_speed_low = $80
@@ -13,6 +15,14 @@
     max_speed = $04
 .endscope
 
-_GAME_INC = 1
+    score = $50
+
+.enum Game_States_e
+    start_screen =  0
+    running = 1
+    paused = 2
+    game_over = 3
+.endenum
+
 
 .endif

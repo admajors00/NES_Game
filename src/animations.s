@@ -24,6 +24,12 @@ chaser_header_table:
 
 obs1_header_table:
     .tag Animation_Header_t
+
+Sprite_positions_table:
+    .byte 0,0,0,0,0,0
+
+Alt_frametimer_table:
+    .byte 0, 0, 0 ,0
 .reloc
 
 
@@ -40,7 +46,6 @@ OAM_DMA_Y    = $200
 OAM_DMA_TILE = $201
 OAM_DMA_ATTR = $202
 OAM_DMA_X    = $203
-
 
 
 
@@ -136,24 +141,9 @@ OAM_DMA_X    = $203
         sta pointer_2_HI
         
 
-        ; lda (pointer_3_LO), Y
-        ; sta pointer_2_LO
         
-        
-        ; iny 
-        ; lda (pointer_3_LO), Y
-        ; sta pointer_2_HI
-        
-        ; ldy #Animation_Header_t::flags
-        ; lda (pointer_2_LO), Y
-        ; and #ACTIVE
-        ; beq @store_header ; jump if the corresponding animation spot is not active
-     
-        ; ldy #Animation_Header_t::flags
-        ; lda (pointer_2_LO), Y
         jmp @store_header
-       ;if not interruptable quit
-        ;if interruptable store header
+ 
 
 
 
@@ -195,7 +185,7 @@ OAM_DMA_X    = $203
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
 
-            ldy #Animation_Header_t::flags
+       ldy #Animation_Header_t::flags
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
 
@@ -209,7 +199,7 @@ OAM_DMA_X    = $203
      
         ; lda #0
         ; sta temp1
-        
+        jsr Clear_OAM_DMA
         lda #HEADER_TABLE_MAX_SIZE
         asl 
         sta header_table_index
@@ -224,11 +214,16 @@ OAM_DMA_X    = $203
             ;load the next addres from the header table
             lda animation_headers_table ,y
             sta pointer_1_HI
+            lda Sprite_positions_table, Y
+            sta sprite_pos_y
+       
             
             dey
             lda animation_headers_table ,y
             sta pointer_1_LO
-            
+            lda Sprite_positions_table, Y
+            sta sprite_pos_x
+      
 
             sty header_table_index
 
@@ -236,69 +231,18 @@ OAM_DMA_X    = $203
             lda #ANI_FLAGS_MASK 
             and (pointer_1_LO), y ; if flags are 0 do not update
             beq @loop
-            jsr  Update_Animation
+            ldy #Animation_Header_t::flags
+            lda #PAUSE 
+            and (pointer_1_LO), y ; if paused not update
+            bne @no_update
+            jsr Update_Animation
+            @no_update:
+            jsr Update_sprite_pos
             jmp @loop
-        @done:
-        jsr Clear_OAM_DMA
-        lda active_flag
-        beq @skip
-        
-        ldy #4
-        lda animation_headers_table,y
-        sta pointer_1_LO
-        
-        iny
-        lda animation_headers_table,y
-        sta pointer_1_HI
-        
-        lda Obsticles::pos_y
-        sta sprite_pos_y
-        lda Obsticles::pos_x
-        sta sprite_pos_x
-        jsr Update_sprite_pos
-        @skip:
-        ldy #0
-        lda animation_headers_table,y
-        sta pointer_1_LO
-        iny
-        lda animation_headers_table,y
-        sta pointer_1_HI
-
-        lda Player::player_pos_y_HIGH 
-        sta sprite_pos_y
-        lda Player::player_pos_x_HIGH 
-        sta sprite_pos_x
-        jsr Update_sprite_pos
-
-
-        ldy #2
-        lda animation_headers_table,y
-        sta pointer_1_LO
-        
-        iny
-        lda animation_headers_table,y
-        sta pointer_1_HI
-        
-        lda Chaser::pos_y_HI 
-        sta sprite_pos_y
-        lda Chaser::pos_x_HI 
-        sta sprite_pos_x
-        jsr Update_sprite_pos
-
-
-
-       
+        @done:           
 
 
     rts
-
-    Store_Pointer1_in_Temp:
-        lda pointer_1_LO
-        sta temp1
-        lda pointer_1_HI
-        sta temp2
-    rts
-
 
             
     Update_Animation: 
@@ -334,27 +278,31 @@ OAM_DMA_X    = $203
                     ldy #Animation_Header_t::frame_index
                     sta (pointer_1_LO), y
                     sta temp_frame_index
-                    ;dec temp_frame_index
-                    ;put frame timer table address into pointer 2
-                    ldy #Animation_Header_t::frame_timers_pt
-                    lda (pointer_1_LO), y
-                    sta pointer_2_LO
-                    iny 
-                    lda (pointer_1_LO), y
-                    sta pointer_2_HI
 
-                    ;put the current frame index into y
-                    LDY temp_frame_index
-                    ;get the frame timer from the table at current frame index 
-                    lda (pointer_2_LO), y
+                 
+                        ;dec temp_frame_index
+                        ;put frame timer table address into pointer 2
+                        ldy #Animation_Header_t::frame_timers_pt
+                        lda (pointer_1_LO), y
+                        sta pointer_2_LO
+                        iny 
+                        lda (pointer_1_LO), y
+                        sta pointer_2_HI
 
-                    ;store it in the frame timer
-                    ldy #Animation_Header_t::frame_timer
-                    sta (pointer_1_LO), y
-                    ; lda #0
-                    ; sta Player::player_animation_flag                   
+                        ;put the current frame index into y
+                        LDY temp_frame_index
+                        ;get the frame timer from the table at current frame index 
+                        lda (pointer_2_LO), y
 
-                     jmp @done
+                        ;store it in the frame timer
+                        ldy #Animation_Header_t::frame_timer
+                        sta (pointer_1_LO), y
+                        ; lda #0
+                        ; sta Player::player_animation_flag                   
+
+                        jmp @done
+                    
+
                 ;else 
                 @not_a_loop:  
                     lda #0
@@ -364,36 +312,49 @@ OAM_DMA_X    = $203
                 
             ;else
             @next_frame:
-                ;frame index is in a, decrement it
+                ;frame index is in register a, decrement it
                 sec
                 sbc #$01
                 sta (pointer_1_LO), y
                 sta temp_frame_index
                 
                 ;load the corresponding frame timer value from the table 
+                ldy #Animation_Header_t::flags
+                lda #ALT_FRAME_TIMER_F
+                and (pointer_1_LO), y
 
-                ;load the timer table addr into pointer 2
-                ldy #Animation_Header_t::frame_timers_pt 
-                lda (pointer_1_LO), y
-                sta pointer_2_LO
-                iny 
-                lda (pointer_1_LO), y
-                sta pointer_2_HI
+                bne @set_alt_frame_timer
+                    ;load the timer table addr into pointer 2
+                    ldy #Animation_Header_t::frame_timers_pt 
+                    lda (pointer_1_LO), y
+                    sta pointer_2_LO
+                    iny 
+                    lda (pointer_1_LO), y
+                    sta pointer_2_HI
 
-                ;put the current frame index into y
-                ldy temp_frame_index
-                ;get the frame timer from the table at current frame index 
-                lda (pointer_2_LO), y
+                    ;put the current frame index into y
+                    ldy temp_frame_index
+                    ;get the frame timer from the table at current frame index 
+                    lda (pointer_2_LO), y
 
-                ;store it in the frame timer
-                ldy #Animation_Header_t::frame_timer
-                sta (pointer_1_LO), y
+                    ;store it in the frame timer
+                    ldy #Animation_Header_t::frame_timer
+                    sta (pointer_1_LO), y
 
 
-                ;update the frame pointer
-                jsr Update_Frame_Pointer
-                jmp @done
-
+                    ;update the frame pointer
+                    jsr Update_Frame_Pointer
+                    jmp @done
+                @set_alt_frame_timer:
+                        lda #16
+                        sec
+                        sbc Player::frame_speed
+                       
+                        ;asl
+                        ldy #Animation_Header_t::frame_timer
+                        sta (pointer_1_LO), y
+                        jsr Update_Frame_Pointer
+                        jmp @done
         ;else continue
         @done:
     rts
@@ -427,19 +388,7 @@ OAM_DMA_X    = $203
     rts
     .proc Update_sprite_pos
         ;load frame pointer
-       ; jsr reset_oam_dma
 
-        ; ldy #0
-        ; lda animation_headers_table,y
-        ; sta pointer_1_LO
-        ; iny
-        ; lda animation_headers_table,y
-        ; sta pointer_1_HI
-
-        ; lda Player::player_pos_y_HIGH 
-        ; sta sprite_pos_y
-        ; lda Player::player_pos_x_HIGH 
-        ; sta sprite_pos_x
 
         
         ldy #Animation_Header_t::frame
@@ -450,10 +399,7 @@ OAM_DMA_X    = $203
         lda (pointer_1_LO), y
         sta pointer_2_HI
 
-        ;load oam address plus offset   
-        ; ldy #0
-       ; sty oam_size
-        ldy#0
+        ldy #0
         @loop:
 
             ldx oam_size

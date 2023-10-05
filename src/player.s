@@ -48,6 +48,8 @@ OAM_X    = 3
 
 	pointer_1_LO = $1C
 	pointer_1_HI = $1D
+
+	frame_speed = $1E
 	.enum PlayerMovementStates		
 		idle = 0
 		inAirMoving = 1
@@ -120,6 +122,20 @@ OAM_X    = 3
 		jsr checkButtons
 		jsr handle_states
 		
+		ldy #Sprite_Positions_e::player_x
+		lda player_pos_x_HIGH
+		sta Sprite_positions_table, y
+		iny 
+		lda player_pos_y_HIGH
+		sta Sprite_positions_table, y
+
+		lda character_velocity_x_HIGH
+		sta frame_speed
+		lda character_velocity_x_LOW
+		asl 
+		rol frame_speed
+		asl 
+		rol frame_speed
 	rts
 
 	

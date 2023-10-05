@@ -109,6 +109,14 @@
 			sta pos_y_HI
 			;sta pos_x_HI
 		@done:
+
+
+		ldy #Sprite_Positions_e::chaser_x
+		lda pos_x_HI
+		sta Sprite_positions_table, y
+		iny 
+		lda pos_y_HI
+		sta Sprite_positions_table, y
 		rts
 	
 .endscope

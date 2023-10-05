@@ -38,7 +38,15 @@ Background_4:
     .byte 1
     .addr Pothole
     .addr Longer_street_4
+Background_5:
+    .byte 1
+    .addr Cone
+    .addr Longer_street_4
 
+Background_6:
+    .byte 0
+    .addr 0
+    .addr Longer_street_4
 
 ; .org $430
 Backgrounds_Array:
@@ -46,10 +54,10 @@ Backgrounds_Array:
     .addr Background_2
     .addr Background_3
     .addr Background_4
-    .addr Background_4
-    .addr Background_4
-    .addr Background_4
-    .addr Background_4
+    .addr Background_6
+    .addr Background_5
+    .addr Background_6
+    .addr Background_6
 
 .org $460
 Scroll_Buffer: .res 32
