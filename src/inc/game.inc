@@ -5,8 +5,8 @@ _GAME_INC = 1
     gravity = $10
     ground = $A8
     friction = $02
-    jump_speed_low = $80
-    jump_speed_high = $01
+    jump_speed_max_low = $80
+    jump_speed_max_high = $01
 
     push_speed_low = $80
     push_speed_high = $00

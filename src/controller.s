@@ -17,7 +17,7 @@ Port_1_Down_Buttons = $F1;     = $31 ;held down
 Port_1_Released_Buttons = $F2
 UpdateButtons:
     lda Port_1_Down_Buttons
-    tay
+    sta Port_1_prev_Down_Buttons
     lda #$01
     sta Port_1
     sta Port_1_Down_Buttons
@@ -30,9 +30,16 @@ UpdateButtons:
         lsr
         rol Port_1_Down_Buttons
         bcc @loop
-        tya
+        lda Port_1_prev_Down_Buttons
         eor Port_1_Down_Buttons
         and Port_1_Down_Buttons
         sta Port_1_Pressed_Buttons
+
+        lda Port_1_prev_Down_Buttons
+        eor Port_1_Down_Buttons
+        and Port_1_prev_Down_Buttons
+        sta Port_1_Released_Buttons
+
+
     rts
 
