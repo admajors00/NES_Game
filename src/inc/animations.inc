@@ -92,8 +92,20 @@ LoadUp_Ani_Header:
     .addr EWL_StreetSkate_Jump_1_data
     .addr loadUp_frame_timers
     .byte 8
-    .byte %01010000
+    .byte %11010000
 
+
+crash_frame_timers:
+    .byte 32,4,4,4
+
+Crash_Ani_Header:
+      .byte 4
+      .byte 4
+      .addr EWL_StreetSkate_pointers_Crash
+      .addr EWL_StreetSkate_Crash_1_data
+      .addr crash_frame_timers
+      .byte 4
+      .byte %00010000
 
 idle_frame_timers:
     .byte 2

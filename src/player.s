@@ -58,6 +58,7 @@ OAM_X    = 3
 		inAirMoving = 1
 		inAirNotMoving = 2
 		onGroundMoving = 3
+		crash = 4
 		
 	.endenum
 	movementStateJumpTable:
@@ -70,9 +71,10 @@ OAM_X    = 3
 		ollie = 3
 		kickflip = 4
 		loadup = 5
+		crash = 6
 	.endenum
 actionStateJumpTable:
-	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation
+	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation
 
 
 
@@ -163,17 +165,28 @@ actionStateJumpTable:
 	rts
 
 	GroundedNotMoving:
-		lda #PlayerActionStates::idle
+		lda #PlayerActionStates::crash
 		cmp player_action_state
 		beq @done
 			sta player_action_state
 			inc state_change_flag
 		@done:
 	rts
+
+	; Crashed:
+	; 	lda #PlayerActionStates::crash
+	; 	sta player_action_state
+	; 	inc state_change_flag
+	; 	lda #PlayerMovementStates::idle
+	; 	sta player_movement_state
+		
+	; rts
 	
 
 	Handle_movement_state:
-		
+		lda #PlayerMovementStates::crash
+		cmp player_movement_state
+		beq @done
 		lda player_pos_y_HIGH
 		cmp #Game_Const::ground
 		bcc @airborne
@@ -506,7 +519,22 @@ actionStateJumpTable:
 	@done:
 	rts
 
-	
+	crashed_animation:
+		lda player_animation_flag
+		beq @crash_
+		lda #$10
+		and player_animation_flag
+		bne @crash_
+		
+		bne @done
+		@crash_:
+		lda #01
+		sta player_animation_flag
+		ldx #>Crash_Ani_Header
+		ldy #<Crash_Ani_Header
+		jsr Load_Animation
+		@done:
+	rts	
 	
 .endscope
 

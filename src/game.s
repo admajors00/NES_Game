@@ -42,7 +42,9 @@
             lda #0
             sta Player::character_velocity_x_HIGH
             sta Player::character_velocity_x_LOW
-
+            ; lda #Player::PlayerActionStates::crash
+            ; sta Player::player_action_state
+        
         @done:
     rts
 

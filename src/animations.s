@@ -405,8 +405,8 @@ OAM_DMA_X    = $203
             ldx oam_size
           
             lda sprite_pos_x
-            sec
-            sbc (pointer_2_LO),Y
+            clc
+            adc (pointer_2_LO),Y
             sta OAM_DMA_X, X
    
             iny
