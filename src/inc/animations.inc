@@ -83,6 +83,17 @@ Coast_Ani_Header:
       .addr coast_frame_timers
       .byte 8
       .byte %11010000
+loadUp_frame_timers:
+    .byte 4,8,8,8
+LoadUp_Ani_Header:
+    .byte 4
+    .byte 4
+    .addr EWL_StreetSkate_pointers_loadUp
+    .addr EWL_StreetSkate_Jump_1_data
+    .addr loadUp_frame_timers
+    .byte 8
+    .byte %01010000
+
 
 idle_frame_timers:
     .byte 2

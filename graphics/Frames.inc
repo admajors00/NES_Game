@@ -488,7 +488,7 @@ EWL_StreetSkate_LoadUp_3_data:
 	.byte 16, 4,$dc,0|OAM_FLIP_H
 	.byte 15, 7,$ed,0
 	.byte $80
-EWL_StreetSkate_LoadUp_3_data:
+EWL_StreetSkate_LoadUp_4_data:
 	.byte  8, 4,$d5,0
 	.byte 16,21,$04,2
 	.byte  8,21,$05,2
@@ -528,6 +528,14 @@ EWL_StreetSkate_pointers_chaser:
 	.word EWL_StreetSkate_GuyRunning_2_data
 	.word EWL_StreetSkate_GuyRunning_1_data
 
+EWL_StreetSkate_pointers_loadUp:
+	.word EWL_StreetSkate_Jump_1_data
+	.word EWL_StreetSkate_Jump_1_data
+	.word EWL_StreetSkate_Jump_1_data
+	.word EWL_StreetSkate_Jump_1_data
+	
+	
+	
 
 
 

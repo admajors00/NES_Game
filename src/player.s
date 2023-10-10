@@ -72,7 +72,7 @@ OAM_X    = 3
 		loadup = 5
 	.endenum
 actionStateJumpTable:
-	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation
+	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation
 
 
 
@@ -113,7 +113,7 @@ actionStateJumpTable:
 		ldx #0
 		stx state_change_flag
 
-		lda player_animation_flag;if 0 then an animation has finishjed, return to default state
+		lda player_animation_flag;if 0 then an animation has finished, return to default state
 		bne @action_not_done
 
 			lda #PlayerActionStates::coasting
@@ -367,10 +367,14 @@ actionStateJumpTable:
 		lda #0
 		sta jump_speed_HI
 		sta jump_speed_LO
+		ldx #PlayerActionStates::loadup
+		stx player_action_state
+		inc state_change_flag
 	rts
 
 
 	loadup:
+	
 		lda jump_speed_HI
 		cmp #Game_Const::jump_speed_max_high
 		bcc @add_speed
@@ -463,6 +467,24 @@ actionStateJumpTable:
 		ldx #>Coast_Ani_Header
 		ldy #<Coast_Ani_Header
 		jsr Load_Animation
+		@done:
+		rts
+	loadUp_animation:
+		lda player_animation_flag
+		beq @loadup
+		lda #$10
+		and player_animation_flag
+		bne @loadup
+		
+		bne @done
+		@loadup:
+			; lda player_animation_flag
+			; bne @done
+			lda #$01
+			sta player_animation_flag
+			ldx #>LoadUp_Ani_Header
+			ldy #<LoadUp_Ani_Header
+			jsr Load_Animation
 		@done:
 		rts
 
