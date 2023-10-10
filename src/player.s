@@ -50,6 +50,9 @@ OAM_X    = 3
 	pointer_1_HI = $1D
 
 	frame_speed = $1E
+
+	jump_speed_LO = $80
+	jump_speed_HI = $81
 	.enum PlayerMovementStates		
 		idle = 0
 		inAirMoving = 1
@@ -66,8 +69,10 @@ OAM_X    = 3
 		pushing = 2
 		ollie = 3
 		kickflip = 4
+		loadup = 5
 	.endenum
-
+actionStateJumpTable:
+	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation
 
 
 
@@ -206,7 +211,7 @@ OAM_X    = 3
 				sta player_movement_state
 				jmp @done
 		@done:
-	lda player_movement_state
+			lda player_movement_state
 			asl 
 			tax
 			lda movementStateJumpTable, x
@@ -264,9 +269,9 @@ OAM_X    = 3
 	rts
 
 	Apply_Jump_Y:
-		ldx #Game_Const::jump_speed_high			
+		ldx jump_speed_HI		
 		stx character_velocity_y_HIGH
-		ldx #Game_Const::jump_speed_low
+		ldx jump_speed_LO
 		stx character_velocity_y_LOW
 		dec player_pos_y_HIGH
 	rts
@@ -303,48 +308,86 @@ OAM_X    = 3
 
 		lda #BUTTON_A
 		and Port_1_Pressed_Buttons
-		bne @push
-
-		lda #BUTTON_B
-		and Port_1_Pressed_Buttons
-		bne @jump
+		bne push
 
 		lda#BUTTON_UP
 		and Port_1_Pressed_Buttons
-		bne @kickflip
+		bne kickflip
 
-		jmp @done
+		lda #BUTTON_B
+		and Port_1_Pressed_Buttons
+		bne loadup_start
 
-		@push:
-			lda player_action_state
-			cmp #PlayerActionStates::pushing
-			beq @done
-			lda character_velocity_x_HIGH
-			cmp #Game_Const::max_speed 
-			bcs @done
-			
-			jsr Apply_Push_X        
-			ldx #PlayerActionStates::pushing
-			stx player_action_state
-			inc state_change_flag
+		lda #BUTTON_B
+		and Port_1_Down_Buttons
+		bne loadup
 
-			jmp @done
+		lda #BUTTON_B
+		and Port_1_Released_Buttons
+		bne jump
+
 		
-		@jump:
-			jsr Apply_Jump_Y		
-			ldx #PlayerActionStates::ollie
-			stx player_action_state
-			inc state_change_flag
-			jmp @done
-
-		@kickflip:
-			jsr Apply_Jump_Y
-			ldx #PlayerActionStates::kickflip
-			stx player_action_state
-			inc state_change_flag
-			jmp @done
-
 		@done:
+		rts
+
+	push:
+		lda player_action_state
+		cmp #PlayerActionStates::pushing
+		beq @done
+		lda character_velocity_x_HIGH
+		cmp #Game_Const::max_speed 
+		bcs @done
+		
+		jsr Apply_Push_X        
+		ldx #PlayerActionStates::pushing
+		stx player_action_state
+		inc state_change_flag
+		@done:
+		rts
+	
+	jump:
+		jsr Apply_Jump_Y		
+		ldx #PlayerActionStates::ollie
+		stx player_action_state
+		inc state_change_flag
+	rts
+
+	kickflip:
+		jsr Apply_Jump_Y
+		lda #0
+		sta jump_speed_HI
+		sta jump_speed_LO
+		ldx #PlayerActionStates::kickflip
+		stx player_action_state
+		inc state_change_flag
+	rts
+
+	
+	loadup_start:
+		lda #0
+		sta jump_speed_HI
+		sta jump_speed_LO
+	rts
+
+
+	loadup:
+		lda jump_speed_HI
+		cmp #Game_Const::jump_speed_max_high
+		bcc @add_speed
+		lda jump_speed_LO
+		cmp #Game_Const::jump_speed_max_low
+		bcs	@done
+		
+		@add_speed:
+		lda jump_speed_LO
+		clc
+		adc #$0F
+		sta jump_speed_LO
+		lda jump_speed_HI
+		adc#0
+		sta jump_speed_HI
+		jmp @done
+	@done:
 
 	rts
 	
@@ -353,95 +396,92 @@ OAM_X    = 3
 		; and #ACTIVE
 		; bne @done
 		lda state_change_flag
-		beq @done1
-
+		beq @done
 		lda player_action_state
-
-		cmp #PlayerActionStates::idle
-		beq @idle_ani
-
-		cmp #PlayerActionStates::pushing
-		beq @pushing_animation
-
-		cmp #PlayerActionStates::ollie
-		beq @jumping_animation
-
-		cmp #PlayerActionStates::coasting
-		beq @coasting
-
-		cmp #PlayerActionStates::kickflip
-		beq @kickflip
+			asl 
+			tax
+			lda actionStateJumpTable, x
+			sta pointer_1_LO
+			lda actionStateJumpTable+1, x
+			sta pointer_1_LO+1
+			jmp (pointer_1_LO)
 		
-		jmp @done1
+	@done:	
+	rts	
 
-		@idle_ani:
-			lda #$11
+	idle_ani:
+		lda #$11
+		sta player_animation_flag
+		ldx #>Idle_Ani_Header
+		ldy #<Idle_Ani_Header
+		jsr Load_Animation
+		
+
+	rts
+
+	pushing_animation:
+		lda player_animation_flag
+		beq @load_push
+		lda #$10
+		and player_animation_flag
+		bne @load_push
+		bne @done
+		@load_push:
+			lda #11
 			sta player_animation_flag
-			ldx #>Idle_Ani_Header
-			ldy #<Idle_Ani_Header
-			jsr Load_Animation
-			jmp @done1
 
-		jmp	@done1
-		@pushing_animation:
-			lda player_animation_flag
-			beq @load_push
-			lda #$10
-			and player_animation_flag
-			bne @load_push
-			bne @done
-			@load_push:
-				lda #11
-				sta player_animation_flag
-
-				ldx #>Push_Ani_Header
-				ldy #<Push_Ani_Header
-				jsr Load_Animation
-				jmp @done
-		@done1:
-			jmp @done
-		@jumping_animation:
-			
-			lda player_animation_flag
-			beq @load_jump
-			lda #$10
-			and player_animation_flag
-			bne @load_jump
-			bne @done
-			@load_jump:
-				lda #01
-				sta player_animation_flag
-				ldx #>Jump_Ani_Header
-				ldy #<Jump_Ani_Header
-				jsr Load_Animation
-				jmp @done
-
-		@coasting:
-			lda player_animation_flag
-			bne @done
-			lda #$11
-			sta player_animation_flag
-			ldx #>Coast_Ani_Header
-			ldy #<Coast_Ani_Header
+			ldx #>Push_Ani_Header
+			ldy #<Push_Ani_Header
 			jsr Load_Animation
 			jmp @done
-
-		@kickflip:
-			lda player_animation_flag
-			beq @load_kf
-			lda #$10
-			and player_animation_flag
-			bne @load_kf
-			
-			bne @done
-			@load_kf:
-				lda #01
-				sta player_animation_flag
-				ldx #>KickFlip_Ani_Header
-				ldy #<KickFlip_Ani_Header
-				jsr Load_Animation
-				jmp @done
 		@done:
+	rts
+
+
+	jumping_animation:
+		
+		lda player_animation_flag
+		beq @load_jump
+		lda #$10
+		and player_animation_flag
+		bne @load_jump
+		bne @done
+		@load_jump:
+			lda #01
+			sta player_animation_flag
+			ldx #>Jump_Ani_Header
+			ldy #<Jump_Ani_Header
+			jsr Load_Animation
+		@done:
+		rts
+
+	coasting:
+		lda player_animation_flag
+		bne @done
+		lda #$11
+		sta player_animation_flag
+		ldx #>Coast_Ani_Header
+		ldy #<Coast_Ani_Header
+		jsr Load_Animation
+		@done:
+		rts
+
+	kickflip_animation:
+		lda player_animation_flag
+		beq @load_kf
+		lda #$10
+		and player_animation_flag
+		bne @load_kf
+		
+		bne @done
+		@load_kf:
+			lda #01
+			sta player_animation_flag
+			ldx #>KickFlip_Ani_Header
+			ldy #<KickFlip_Ani_Header
+			jsr Load_Animation
+			jmp @done
+	@done:
 	rts
 
 	

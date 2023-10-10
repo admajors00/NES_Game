@@ -455,8 +455,50 @@ EWL_StreetSkate_Cone_1_data:
 	.byte $80
 
 
+EWL_StreetSkate_LoadUp_1_data:
+	.byte  8, 4,$d5,0
+	.byte 16,21,$04,2
+	.byte  8,21,$05,2
+	.byte 16,13,$06,2
 
+	.byte  8,13,$07,2
+	.byte  7, 7,$ec,0
+	.byte 16, 4,$dc,0|OAM_FLIP_H
+	.byte 15, 7,$ed,0
+	.byte $80
+EWL_StreetSkate_LoadUp_2_data:
+	.byte  8, 4,$d5,0
+	.byte 16,21,$04,2
+	.byte  8,21,$05,2
+	.byte 16,13,$06,2
 
+	.byte  8,13,$07,2
+	.byte  7, 7,$ec,0
+	.byte 16, 4,$dc,0|OAM_FLIP_H
+	.byte 15, 7,$ed,0
+	.byte $80
+EWL_StreetSkate_LoadUp_3_data:
+	.byte  8, 4,$d5,0
+	.byte 16,21,$04,2
+	.byte  8,21,$05,2
+	.byte 16,13,$06,2
+
+	.byte  8,13,$07,2
+	.byte  7, 7,$ec,0
+	.byte 16, 4,$dc,0|OAM_FLIP_H
+	.byte 15, 7,$ed,0
+	.byte $80
+EWL_StreetSkate_LoadUp_3_data:
+	.byte  8, 4,$d5,0
+	.byte 16,21,$04,2
+	.byte  8,21,$05,2
+	.byte 16,13,$06,2
+
+	.byte  8,13,$07,2
+	.byte  7, 7,$ec,0
+	.byte 16, 4,$dc,0|OAM_FLIP_H
+	.byte 15, 7,$ed,0
+	.byte $80
 
 EWL_StreetSkate_pointers_cone:
 	.word EWL_StreetSkate_Cone_1_data
