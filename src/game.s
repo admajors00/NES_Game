@@ -11,12 +11,12 @@
         beq @done
         lda Obsticles::pos_x
         clc
-        cmp Player::player_pos_x_HIGH
+        cmp Player::pos_x_HI
         bcc @done
         sec
         sbc Obsticles::length
         clc
-        cmp Player::player_pos_x_HIGH
+        cmp Player::pos_x_HI
         bcc @check_hit
 
 
@@ -31,7 +31,7 @@
             sec
             sbc Obsticles::height
             clc
-            cmp Player::player_pos_y_HIGH
+            cmp Player::pos_y_HI
             bcs @done
 
             lda hit_flag
@@ -40,8 +40,8 @@
             adc #1
             sta hit_flag
             lda #0
-            sta Player::character_velocity_x_HIGH
-            sta Player::character_velocity_x_LOW
+            sta Player::velocity_x_HI
+            sta Player::velocity_x_LO
             ; lda #Player::PlayerActionStates::crash
             ; sta Player::player_action_state
         

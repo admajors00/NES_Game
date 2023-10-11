@@ -93,7 +93,7 @@
 		adc relative_velocity
 
 		;lda pos_x_HI
-		cmp Player::player_pos_x_HIGH
+		cmp Player::pos_x_HI
 		bcs @done
 		sta pos_x_HI
 

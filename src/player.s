@@ -31,17 +31,17 @@ OAM_X    = 3
 
 	player_movement_state = $10
 
-	player_pos_x_LOW = $11
-	player_pos_x_HIGH = $12
-	player_pos_y_LOW = $13
-	player_pos_y_HIGH = $14
+	pos_x_LO = $11
+	pos_x_HI = $12
+	pos_y_LO = $13
+	pos_y_HI = $14
 
-	character_velocity_x_LOW = $15
-	character_velocity_x_HIGH = $16
-	character_velocity_y_LOW = $17
-	character_velocity_y_HIGH = $18
+	velocity_x_LO = $15
+	velocity_x_HI = $16
+	velocity_Y_LO = $17
+	velocity_Y_HI = $18
 
-	player_animation_flag = $19
+	player_animation_flag = $19;$10 is interruptable $01 is active 
 	state_change_flag = $1A ;state change this frame if 1, otherwise 0
 
 	player_action_state = $1B
@@ -58,7 +58,7 @@ OAM_X    = 3
 		inAirMoving = 1
 		inAirNotMoving = 2
 		onGroundMoving = 3
-		crash = 4
+		
 		
 	.endenum
 	movementStateJumpTable:
@@ -81,20 +81,20 @@ actionStateJumpTable:
 	.proc init_character
 		ldx #$00
 		
-		stx character_velocity_y_HIGH
+		stx velocity_Y_HI
 		
-		stx player_pos_x_LOW
-		stx player_pos_y_LOW
+		stx pos_x_LO
+		stx pos_y_LO
 
 		ldx #$ff
-		stx character_velocity_x_LOW
+		stx velocity_x_LO
 		ldx #$02
-		stx character_velocity_x_HIGH
+		stx velocity_x_HI
 		ldx #$30
-		stx player_pos_x_HIGH
+		stx pos_x_HI
 
 		ldx #Game_Const::ground
-		stx player_pos_y_HIGH
+		stx pos_y_HI
 
 
 	
@@ -127,18 +127,18 @@ actionStateJumpTable:
 
 		
 		jsr checkButtons
-		jsr handle_states
+		jsr handle_action_states
 		
 		ldy #Sprite_Positions_e::player_x
-		lda player_pos_x_HIGH
+		lda pos_x_HI
 		sta Sprite_positions_table, y
 		iny 
-		lda player_pos_y_HIGH
+		lda pos_y_HI
 		sta Sprite_positions_table, y
 
-		lda character_velocity_x_HIGH
+		lda velocity_x_HI
 		sta frame_speed
-		lda character_velocity_x_LOW
+		lda velocity_x_LO
 		asl 
 		rol frame_speed
 		asl 
@@ -184,19 +184,19 @@ actionStateJumpTable:
 	
 
 	Handle_movement_state:
-		lda #PlayerMovementStates::crash
-		cmp player_movement_state
-		beq @done
-		lda player_pos_y_HIGH
+		; lda #PlayerMovementStates::crash
+		; cmp player_movement_state
+		; beq @done
+		lda pos_y_HI
 		cmp #Game_Const::ground
 		bcc @airborne
 			lda #Game_Const::ground
-			sta player_pos_y_HIGH
+			sta pos_y_HI
 			lda #0
-			sta player_pos_y_LOW
-			lda character_velocity_x_HIGH
+			sta pos_y_LO
+			lda velocity_x_HI
 			bne @groundedmoving
-			lda character_velocity_x_LOW
+			lda velocity_x_LO
 
 
 			bne @groundedmoving
@@ -211,9 +211,9 @@ actionStateJumpTable:
 			
 		@airborne:
 		;airborne
-			lda character_velocity_x_HIGH
+			lda velocity_x_HI
 			bne @airborneMoving
-			lda character_velocity_x_LOW
+			lda velocity_x_LO
 			bne @airborneMoving
 				;AIRBORNE NOT MOVING
 				lda #PlayerMovementStates::inAirNotMoving
@@ -237,76 +237,76 @@ actionStateJumpTable:
 
 
 	Apply_Friction_X:
-		lda character_velocity_x_LOW
+		lda velocity_x_LO
 		sec
 		sbc #Game_Const::friction
-		sta character_velocity_x_LOW
-		lda character_velocity_x_HIGH
+		sta velocity_x_LO
+		lda velocity_x_HI
 		sbc #$00
-		sta character_velocity_x_HIGH
+		sta velocity_x_HI
 	rts
 
 	Update_Pos_X:
-		lda player_pos_x_HIGH
+		lda pos_x_HI
 		cmp #Game_Const::scroll_wall
 		bcs @scroll_screen
-		lda player_pos_x_LOW
+		lda pos_x_LO
 		clc
-		adc character_velocity_x_LOW
-		sta player_pos_x_LOW
-		lda player_pos_x_HIGH
-		adc character_velocity_x_HIGH
-		sta player_pos_x_HIGH
+		adc velocity_x_LO
+		sta pos_x_LO
+		lda pos_x_HI
+		adc velocity_x_HI
+		sta pos_x_HI
 		jmp @done
 		@scroll_screen:
-			lda player_pos_x_LOW
+			lda pos_x_LO
 			clc
-			adc character_velocity_x_LOW
-			sta player_pos_x_LOW
+			adc velocity_x_LO
+			sta pos_x_LO
 			lda amount_to_scroll
 			;clc
-			adc character_velocity_x_HIGH
+			adc velocity_x_HI
 			sta amount_to_scroll
 
 		@done:
 	rts
 
 	Apply_Gravity_Y:
-		lda character_velocity_y_LOW
+		lda velocity_Y_LO
 		sec
 		sbc #Game_Const::gravity
-		sta character_velocity_y_LOW
-		lda character_velocity_y_HIGH
+		sta velocity_Y_LO
+		lda velocity_Y_HI
 		sbc #$00
-		sta character_velocity_y_HIGH
+		sta velocity_Y_HI
 	rts
 
 	Apply_Jump_Y:
 		ldx jump_speed_HI		
-		stx character_velocity_y_HIGH
+		stx velocity_Y_HI
 		ldx jump_speed_LO
-		stx character_velocity_y_LOW
-		dec player_pos_y_HIGH
+		stx velocity_Y_LO
+		dec pos_y_HI
 	rts
 
 	Apply_Push_X:
-		lda character_velocity_x_LOW
+		lda velocity_x_LO
 		clc
 		adc #Game_Const::push_speed_low
-		sta character_velocity_x_LOW
-		lda character_velocity_x_HIGH
+		sta velocity_x_LO
+		lda velocity_x_HI
 		adc #Game_Const::push_speed_high
-		sta character_velocity_x_HIGH
+		sta velocity_x_HI
 	rts
 
 	Update_Pos_Y:
-		lda player_pos_y_LOW
+		lda pos_y_LO
 		sec
-		sbc character_velocity_y_LOW
-		sta player_pos_y_LOW
-		lda player_pos_y_HIGH
-		sbc character_velocity_y_HIGH
-		sta player_pos_y_HIGH
+		sbc velocity_Y_LO
+		sta pos_y_LO
+		lda pos_y_HI
+		sbc velocity_Y_HI
+		sta pos_y_HI
 	rts
 
 	
@@ -347,7 +347,10 @@ actionStateJumpTable:
 		lda player_action_state
 		cmp #PlayerActionStates::pushing
 		beq @done
-		lda character_velocity_x_HIGH
+		cmp #PlayerActionStates::loadup
+		beq @done
+
+		lda velocity_x_HI
 		cmp #Game_Const::max_speed 
 		bcs @done
 		
@@ -408,7 +411,7 @@ actionStateJumpTable:
 
 	rts
 	
-	handle_states:
+	handle_action_states:
 		; lda flags
 		; and #ACTIVE
 		; bne @done
@@ -510,7 +513,7 @@ actionStateJumpTable:
 		
 		bne @done
 		@load_kf:
-			lda #01
+			lda #$01
 			sta player_animation_flag
 			ldx #>KickFlip_Ani_Header
 			ldy #<KickFlip_Ani_Header
@@ -528,7 +531,7 @@ actionStateJumpTable:
 		
 		bne @done
 		@crash_:
-		lda #01
+		lda #$01
 		sta player_animation_flag
 		ldx #>Crash_Ani_Header
 		ldy #<Crash_Ani_Header

@@ -96,7 +96,7 @@ LoadUp_Ani_Header:
 
 
 crash_frame_timers:
-    .byte 32,4,4,4
+    .byte $FF, 4,4,4
 
 Crash_Ani_Header:
       .byte 4
@@ -161,13 +161,13 @@ pothole_frame_timers:
     .byte $FF
 
 Pothole_Ani_Header:
-      .byte 2
-      .byte 2
-      .addr EWL_StreetSkate_pointers_pothole
-      .addr Pothole_1
-      .addr pothole_frame_timers
-      .byte $FF
-      .byte %01110010
+    .byte 2
+    .byte 2
+    .addr EWL_StreetSkate_pointers_pothole
+    .addr EWL_StreetSkate_Pothole_1_data
+    .addr pothole_frame_timers
+    .byte $FF
+    .byte %01110010
 
 Empty_Ani_Header: 
     .byte 0
