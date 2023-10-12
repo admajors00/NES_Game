@@ -72,9 +72,10 @@ OAM_X    = 3
 		kickflip = 4
 		loadup = 5
 		crash = 6
+		shuvit=7
 	.endenum
 actionStateJumpTable:
-	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation
+	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
 
 
 
@@ -173,20 +174,10 @@ actionStateJumpTable:
 		@done:
 	rts
 
-	; Crashed:
-	; 	lda #PlayerActionStates::crash
-	; 	sta player_action_state
-	; 	inc state_change_flag
-	; 	lda #PlayerMovementStates::idle
-	; 	sta player_movement_state
-		
-	; rts
+
 	
 
 	Handle_movement_state:
-		; lda #PlayerMovementStates::crash
-		; cmp player_movement_state
-		; beq @done
 		lda pos_y_HI
 		cmp #Game_Const::ground
 		bcc @airborne
@@ -327,6 +318,10 @@ actionStateJumpTable:
 		and Port_1_Pressed_Buttons
 		bne kickflip
 
+		lda#BUTTON_LEFT
+		and Port_1_Pressed_Buttons
+		bne shuv_it
+
 		lda #BUTTON_B
 		and Port_1_Pressed_Buttons
 		bne loadup_start
@@ -374,6 +369,15 @@ actionStateJumpTable:
 		sta jump_speed_HI
 		sta jump_speed_LO
 		ldx #PlayerActionStates::kickflip
+		stx player_action_state
+		inc state_change_flag
+	rts
+	shuv_it:
+		jsr Apply_Jump_Y
+		lda #0
+		sta jump_speed_HI
+		sta jump_speed_LO
+		ldx #PlayerActionStates::shuvit
 		stx player_action_state
 		inc state_change_flag
 	rts
@@ -521,7 +525,23 @@ actionStateJumpTable:
 			jmp @done
 	@done:
 	rts
-
+	shuv_it_animation:
+		lda player_animation_flag
+		beq @load_si
+		lda #$10
+		and player_animation_flag
+		bne @load_si
+		
+		bne @done
+		@load_si:
+			lda #$01
+			sta player_animation_flag
+			ldx #>ShuvIt_Ani_Header
+			ldy #<ShuvIt_Ani_Header
+			jsr Load_Animation
+			jmp @done
+	@done:
+	rts
 	crashed_animation:
 		lda player_animation_flag
 		beq @crash_

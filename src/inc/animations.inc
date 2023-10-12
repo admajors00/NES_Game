@@ -131,6 +131,18 @@ KickFlip_Ani_Header:
       .byte 2
       .byte %00010000
 
+shuvIt_frame_timers:
+    .byte 4,4,4,4,4,4,8,2
+
+ShuvIt_Ani_Header:
+      .byte 8
+      .byte 8
+      .addr EWL_StreetSkate_pointers_shuvIt
+      .addr EWL_StreetSkate_ShuvIt_0_data
+      .addr shuvIt_frame_timers
+      .byte 2
+      .byte %00010000
+
 chaser_frame_timers:
     .byte 8,8,8,8
 
