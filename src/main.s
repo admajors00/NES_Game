@@ -7,8 +7,8 @@
 
 
 .segment "ZEROPAGE"
-pointerLo = $f2  ; pointer variables are declared in RAM
-pointerHi = $f3  ; low byte first, high byte immediately after
+main_pointer_LO = $f2  ; pointer variables are declared in RAM
+main_pointer_HI = $f3  ; low byte first, high byte immediately after
 
 
 
@@ -35,6 +35,7 @@ amount_to_scroll = $f4; .res 1
 .include "animations.s"
 .include "background.s"
 .include "game.s"
+.include "StatusBar.s"
 .include "famistudio_ca65.s"
 
 
@@ -139,22 +140,22 @@ load_background:
 	STA $2006             ; write the low byte of $2000 address
 
 	LDA #<Longer_street_1
-	STA pointerLo           ; put the low byte of address of background into pointer
+	STA main_pointer_LO           ; put the low byte of address of background into pointer
 	LDA #>Longer_street_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-	STA pointerHi           ; put high byte of address into pointer
+	STA main_pointer_HI           ; put high byte of address into pointer
 
 	LDX #$00            ; start at pointer + 0
 	LDY #$00
 	OutsideLoop:
 		
 		InsideLoop:
-			LDA (pointerLo), y  ; copy one background byte from address in pointer plus Y
+			LDA (main_pointer_LO), y  ; copy one background byte from address in pointer plus Y
 			STA $2007           ; this runs 256 * 4 times		
 			INY                 ; inside loop counter
 			CPY #$00
 			BNE InsideLoop      ; run the inside loop 256 times before continuing down
 		
-		INC pointerHi       ; low byte went 0 to 256, so high byte needs to be changed now
+		INC main_pointer_HI       ; low byte went 0 to 256, so high byte needs to be changed now
 		INX
 		CPX #$08
 		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
@@ -209,7 +210,7 @@ nmi:
 	
 	jsr Player::updatePlayer
 	jsr Chaser::Update
-	
+	jsr Update_Score
 	
 	@end:
 rti

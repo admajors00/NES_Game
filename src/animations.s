@@ -451,8 +451,8 @@ OAM_DMA_X    = $203
             sta $200, X
             dex
             bne @loop
-        ldx #4
-        stx oam_size
+            ldx #4
+            stx oam_size
             lda #SPRITE_0_X
             sta OAM_DMA_X
             lda #SPRITE_0_Y

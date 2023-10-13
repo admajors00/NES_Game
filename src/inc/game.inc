@@ -15,7 +15,7 @@ _GAME_INC = 1
     max_speed = $04
 .endscope
 
-    score = $50
+   
 
 .enum Game_States_e
     start_screen =  0
