@@ -27,8 +27,8 @@ HUNDRED = $64
 TEN = $0a
 ONE = $01
 
-SCORE_POX_X = $58
-SCORE_POS_Y = $10
+SCORE_POS_X = $58
+SCORE_POS_Y = $18
 
 Update_Score:
     lda #0 
@@ -43,6 +43,7 @@ Update_Score:
     lda Game::score_HI
     sta temp_score_HI
     jsr convert_to_decimal
+    jsr Send_Score_To_OAM_Buff
 rts
 
 convert_to_decimal:
@@ -150,13 +151,15 @@ convert_to_decimal:
  Send_Score_To_OAM_Buff:
         ;load frame pointer
 
-        
-        ldx #0
+          ldx #1
         stx status_oam_size
+        ldx #0
+        
         stx score_pos_x_
+      
         @loop:
             
-            sta status_oam_size
+            
             
             ldy ten_thousands_place, x
             tya
@@ -171,7 +174,7 @@ convert_to_decimal:
             sta main_pointer_HI
 
             stx temp
-            ldx status_oam_size
+            ldx Animation::oam_size
           
             ldy #0
 
@@ -197,14 +200,17 @@ convert_to_decimal:
             lda (main_pointer_LO),Y
             sta OAM_DMA_ATTR, X 
 
-            lda status_oam_size
+            lda Animation::oam_size
+            clc
             adc #4
+            sta Animation::oam_size
             ldx temp
             INX
-            txa 
-            cmp #5
-            bne @loop
+             
+            cpx #5
+            bcc @loop
         
         @done:
+     
     rts
     

@@ -204,6 +204,7 @@ nmi:
 	jsr Background::Update 
 	jsr Obsticles::Update
 	jsr Game::Update
+	
 	jsr Animation::Update
 	
 	jsr UpdateButtons

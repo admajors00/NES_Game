@@ -49,7 +49,7 @@
                 
                 lda score_LO
                 clc
-                adc #101
+                adc #01
                 sta score_LO
                 lda score_HI
                 adc#0
