@@ -59,7 +59,7 @@ Push_Ani_Header:
 
 
 jump_frame_timers:
-    .byte 4,8,15,16,2
+    .byte 4,8,15,16,8
 
 Jump_Ani_Header:
       .byte 5
@@ -89,7 +89,7 @@ LoadUp_Ani_Header:
     .byte 4
     .byte 4
     .addr EWL_StreetSkate_pointers_loadUp
-    .addr EWL_StreetSkate_Jump_1_data
+    .addr EWL_StreetSkate_LoadUp_1_data
     .addr loadUp_frame_timers
     .byte 8
     .byte %11010000
@@ -114,13 +114,13 @@ Idle_Ani_Header:
       .byte 1
       .byte 1
       .addr EWL_StreetSkate_pointers_idle
-      .addr EWL_StreetSkate_Coasting_4_data
+      .addr EWL_StreetSkate_Coasting_1_data
       .addr idle_frame_timers
       .byte 2
       .byte %01010000
 
 kickFlip_frame_timers:
-    .byte 4,4,4,4,4,4,4,8,2
+    .byte 4,4,4,4,4,4,4,8,4
 
 KickFlip_Ani_Header:
       .byte 9
@@ -132,7 +132,7 @@ KickFlip_Ani_Header:
       .byte %00010000
 
 shuvIt_frame_timers:
-    .byte 4,4,4,4,4,4,8,2
+    .byte 4,4,4,4,4,4,8,4
 
 ShuvIt_Ani_Header:
       .byte 8

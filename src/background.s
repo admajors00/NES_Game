@@ -40,201 +40,200 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 .scope Background
 
-Init:
+	Init:
 
-    lda #<Backgrounds_Array
-    sta bg_header_pt_LO
-    lda #>Backgrounds_Array
-    sta bg_header_pt_HI
+		lda #<Backgrounds_Array
+		sta bg_header_pt_LO
+		lda #>Backgrounds_Array
+		sta bg_header_pt_HI
 
-    ldy #0
-    lda #<Background_1
-    sta (bg_header_pt_LO),Y
-    iny 
-    lda #>Background_1
-    sta (bg_header_pt_LO),Y
+		; ldy #0
+		; lda #<Background_1
+		; sta (bg_header_pt_LO),Y
+		; iny 
+		; lda #>Background_1
+		; sta (bg_header_pt_LO),Y
 
-    iny
-    lda #<Background_2
-    sta (bg_header_pt_LO),Y
-    iny 
-    lda #>Background_2
-    sta (bg_header_pt_LO),Y
+		; iny
+		; lda #<Background_2
+		; sta (bg_header_pt_LO),Y
+		; iny 
+		; lda #>Background_2
+		; sta (bg_header_pt_LO),Y
 
-    iny
-    lda #<Background_3
-    sta (bg_header_pt_LO),Y
-    iny 
-    lda #>Background_3
-    sta (bg_header_pt_LO),Y
+		; iny
+		; lda #<Background_3
+		; sta (bg_header_pt_LO),Y
+		; iny 
+		; lda #>Background_3
+		; sta (bg_header_pt_LO),Y
 
-	    iny
-    lda #<Background_4
-    sta (bg_header_pt_LO),Y
-    iny 
-    lda #>Background_4
-    sta (bg_header_pt_LO),Y
+		; 	iny
+		; lda #<Background_4
+		; sta (bg_header_pt_LO),Y
+		; iny 
+		; lda #>Background_4
+		; sta (bg_header_pt_LO),Y
 
-    LDA #<Longer_street_2
-	STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-	LDA #>Longer_street_2       ; #> is the same as HIGH() function in NESASM, used to get the high byte
-	STA bg_data_pt_HI    
+		LDA #<Longer_street_1
+		STA bg_data_pt_LO           ; put the low byte of address of background into pointer
+		LDA #>Longer_street_1       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+		STA bg_data_pt_HI    
 
-    ; ldy #0
-    ; lda Backgrounds_Array, y
-    ; sta bg_header_pt_LO
-    ; iny
-    ; lda Backgrounds_Array,y
-    ; sta bg_header_pt_HI
+		; ldy #0
+		; lda Backgrounds_Array, y
+		; sta bg_header_pt_LO
+		; iny
+		; lda Backgrounds_Array,y
+		; sta bg_header_pt_HI
 
-    lda #1
-    sta scroll_HI_prev
+		lda #2
+		sta scroll_HI_prev
 
 
-rts
+	rts
 
-Update:
-    
-   
-    ldx amount_to_scroll
-	beq scroll_done
+	Update:
+		
+	
+		ldx amount_to_scroll
+		beq scroll_done
 
-	loop_1:
-		lda scroll
-		clc
-		adc#$01
-		sta scroll
-		lda scroll_HI
-		adc #0
-		sta scroll_HI
-		cmp #NUM_BACKGROUNDS	
-		bcc @continue
-			lda #0
+		loop_1:
+			lda scroll
+			clc
+			adc#$01
+			sta scroll
+			lda scroll_HI
+			adc #0
 			sta scroll_HI
-            
-	 	@continue:
-		jsr Next_Background
-		jsr Scroll
-		New_Column_Check:
-			LDA scroll
-			and #%00000111
-			bne @New_Column_Check_done
-			
-			
-				lda column_number
-				clc
-				adc #$01
-				and #%01111111
-				sta column_number
+			cmp #NUM_BACKGROUNDS	
+			bcc @continue
+				lda #0
+				sta scroll_HI
 				
-				jsr Draw_New_Collumn_To_Buffer
-                lda #NEW_COLUMN_FLAG
-                ora scroll_flags
-                sta scroll_flags
-
-			
+			@continue:
+			jsr Next_Background
+			jsr Scroll
+			New_Column_Check:
 				LDA scroll
-				AND #%00011111            ; check for multiple of 32
-				Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
+				and #%00000111
+				bne @New_Column_Check_done
+				
+				
+					lda column_number
+					clc
+					adc #$01
+					and #%01111111
+					sta column_number
+					
+					jsr Draw_New_Collumn_To_Buffer
+					lda #NEW_COLUMN_FLAG
+					ora scroll_flags
+					sta scroll_flags
 
-                    jsr Draw_New_Attributes_To_Buffer
-                    lda #NEW_ATTRIBUTE_FLAG
-                    ora scroll_flags
-                    sta scroll_flags
-			@New_Column_Check_done:
+				
+					LDA scroll
+					AND #%00011111            ; check for multiple of 32
+					Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
 
-
-		dec amount_to_scroll
-		bne loop_1
-		jmp scroll_done
-
-    scroll_done:
-
-rts
-
-Next_Background:
-    
-    lda scroll_HI
-    cmp scroll_HI_prev
-    beq @done
-        sta scroll_HI_prev
-      ;  jsr Update_Background_Obsticles
-
-        lda scroll_HI
-        asl A
-        tay
-
-        lda Backgrounds_Array,y
-        sta bg_header_pt_LO
-        iny
-        lda Backgrounds_Array, y
-        sta bg_header_pt_HI
+						jsr Draw_New_Attributes_To_Buffer
+						lda #NEW_ATTRIBUTE_FLAG
+						ora scroll_flags
+						sta scroll_flags
+				@New_Column_Check_done:
 
 
-        ldy #Background_t::background_data
-        lda (bg_header_pt_LO), Y
-        sta bg_data_pt_LO
-        iny
-        lda (bg_header_pt_LO), Y
-        sta bg_data_pt_HI
+			dec amount_to_scroll
+			bne loop_1
+			jmp scroll_done
 
-        ldy #Background_t::num_obsticles
-        lda (bg_header_pt_LO), Y ;if num obsticles == 0 jump to done
-        beq @remove_obsticles
-        
+		scroll_done:
 
-        lda #1
-        sta active_flag
+	rts
 
-        ldy #Background_t::obsticle_list
-        lda (bg_header_pt_LO), y ;get first item from obsticle list
-        sta obst_header_pt_LO
-        iny
-        lda (bg_header_pt_LO ), y 
-        sta obst_header_pt_HI
+	Next_Background:
+		
+		lda scroll_HI
+		cmp scroll_HI_prev
+		beq @done
+			sta scroll_HI_prev
+		;  jsr Update_Background_Obsticles
 
-        ldx obst_header_pt_HI
-        ldy obst_header_pt_LO
+			lda scroll_HI
+			asl A
+			tay
 
-        jsr Obsticles::Load 
-
-
-        ldy #Obstical_t::animation_header_addr ; load the animation 
-        iny 
-        lda (obst_header_pt_LO), Y
-        tax
-        dey
-        lda (obst_header_pt_LO ), Y
-        tay
+			lda Backgrounds_Array,y
+			sta bg_header_pt_LO
+			iny
+			lda Backgrounds_Array, y
+			sta bg_header_pt_HI
 
 
-        jsr Animation::Load_Animation
-        jmp @done
+			ldy #Background_t::background_data
+			lda (bg_header_pt_LO), Y
+			sta bg_data_pt_LO
+			iny
+			lda (bg_header_pt_LO), Y
+			sta bg_data_pt_HI
 
-        @remove_obsticles:
-            lda #0
-            sta active_flag
-            ldx #>Empty_Ani_Header
-            ldy #<Empty_Ani_Header
-            jsr Animation::Load_Animation
-            jmp @done
+			ldy #Background_t::num_obsticles
+			lda (bg_header_pt_LO), Y ;if num obsticles == 0 jump to done
+			beq @remove_obsticles
+			
 
-    @done:
-    
-    
-rts
+			lda #1
+			sta active_flag
+
+			ldy #Background_t::obsticle_list
+			lda (bg_header_pt_LO), y ;get first item from obsticle list
+			sta obst_header_pt_LO
+			iny
+			lda (bg_header_pt_LO ), y 
+			sta obst_header_pt_HI
+
+			ldx obst_header_pt_HI
+			ldy obst_header_pt_LO
+
+			jsr Obsticles::Load 
 
 
-Update_Background_Obsticles:
-    lda scroll_HI
-    asl A
-    tay
-    lda Backgrounds_Array,y
-    sta bg_header_pt_LO
-    iny
-    lda Backgrounds_Array,y
-    sta bg_header_pt_HI
-rts
+			ldy #Obstical_t::animation_header_addr ; load the animation 
+			iny 
+			lda (obst_header_pt_LO), Y
+			tax
+			dey
+			lda (obst_header_pt_LO ), Y
+			tay
+
+
+			jsr Animation::Load_Animation
+			jmp @done
+
+			@remove_obsticles:
+				lda #0
+				sta active_flag
+				ldx #>Empty_Ani_Header
+				ldy #<Empty_Ani_Header
+				jsr Animation::Load_Animation
+				jmp @done
+
+		@done:
+		
+		
+	rts
+
+	Update_Background_Obsticles:
+		lda scroll_HI
+		asl A
+		tay
+		lda Backgrounds_Array,y
+		sta bg_header_pt_LO
+		iny
+		lda Backgrounds_Array,y
+		sta bg_header_pt_HI
+	rts
 .endscope
 
 

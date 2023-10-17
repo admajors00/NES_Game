@@ -74,6 +74,8 @@ OAM_X    = 3
 		crash = 6
 		shuvit=7
 	.endenum
+
+	
 actionStateJumpTable:
 	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
 
@@ -228,13 +230,24 @@ actionStateJumpTable:
 
 
 	Apply_Friction_X:
-		lda velocity_x_LO
-		sec
-		sbc #Game_Const::friction
-		sta velocity_x_LO
 		lda velocity_x_HI
-		sbc #$00
-		sta velocity_x_HI
+		bne @continue
+			LDA velocity_x_LO
+			cmp #Game_Const::friction
+			bcs @continue
+			lda #0
+			sta velocity_x_LO
+			jmp @done
+		@continue:
+			lda velocity_x_LO
+			sec
+			sbc #Game_Const::friction
+
+			sta velocity_x_LO
+			lda velocity_x_HI
+			sbc #$00
+			sta velocity_x_HI
+		@done:
 	rts
 
 	Update_Pos_X:

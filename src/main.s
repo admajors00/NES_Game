@@ -139,11 +139,11 @@ load_background:
 	LDA #$00
 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<Longer_street_1
+	LDA #<Start_Screen
 	STA main_pointer_LO           ; put the low byte of address of background into pointer
-	LDA #>Longer_street_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+	LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
 	STA main_pointer_HI           ; put high byte of address into pointer
-
+	;jsr Background::load_background
 	LDX #$00            ; start at pointer + 0
 	LDY #$00
 	OutsideLoop:
@@ -164,9 +164,9 @@ lda #$01
 sta scroll_HI
 jsr Background::Init
 jsr Animation::Init
-jsr Chaser::Init
-jsr Player::init_character
+
 jsr Obsticles::Init
+;jsr Game::Init
 
 
 ldx #.lobyte(music_data_untitled)
@@ -201,17 +201,9 @@ nmi:
 
 	jsr famistudio_update
 	
-	jsr Background::Update 
-	jsr Obsticles::Update
+	
 	jsr Game::Update
 	
-	jsr Animation::Update
-	
-	jsr UpdateButtons
-	
-	jsr Player::updatePlayer
-	jsr Chaser::Update
-	jsr Update_Score
 	
 	@end:
 rti
@@ -246,6 +238,10 @@ palette:
 .byte $0f,$0f,$10,$20
 .byte $0f,$17,$16,$27
 
+Start_Screen:
+	.incbin "../graphics/Longer_street_start.bin"
+Longer_street_4:
+	.incbin "../graphics/Longer_street_4.bin"
 Longer_street_1:
 	.incbin"../graphics/Longer_street_1.bin"
 
@@ -253,8 +249,9 @@ Longer_street_2:
 	.incbin "../graphics/Longer_street_2.bin"
 Longer_street_3:
 	.incbin "../graphics/Longer_street_3.bin"
-Longer_street_4:
-	.incbin "../graphics/Longer_street_4.bin"
+
+
+
 ; .include "../graphics/Longer_street.s"
 
 .segment "SONG1"

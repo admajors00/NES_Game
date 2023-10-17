@@ -44,6 +44,7 @@ Update_Score:
     sta temp_score_HI
     jsr convert_to_decimal
     jsr Send_Score_To_OAM_Buff
+    jsr Send_Lives_To_OAM_Buff
 rts
 
 convert_to_decimal:
@@ -151,29 +152,86 @@ convert_to_decimal:
  Send_Score_To_OAM_Buff:
         ;load frame pointer
 
-          ldx #1
-        stx status_oam_size
+        ldx #1
+    stx status_oam_size
+    ldx #0
+    
+    stx score_pos_x_
+    
+    @loop:
+        
+        
+        
+        ldy ten_thousands_place, x
+        tya
+        asl
+        tay
+
+        lda EWL_StreetSkate_pointers_score, y
+        sta main_pointer_LO
+        
+        iny
+        lda EWL_StreetSkate_pointers_score, y
+        sta main_pointer_HI
+
+        stx temp
+        ldx Animation::oam_size
+        
+        ldy #0
+
+        lda score_pos_x_
+        clc
+        adc #8
+        sta score_pos_x_
+        adc #SCORE_POS_X
+        adc (main_pointer_LO),Y
+        sta OAM_DMA_X, X
+
+        iny
+        lda #SCORE_POS_Y   
+        clc   
+        adc (main_pointer_LO),Y
+        sta OAM_DMA_Y ,X
+
+        iny
+        lda (main_pointer_LO),Y
+        sta OAM_DMA_TILE,X
+    
+        iny
+        lda (main_pointer_LO),Y
+        sta OAM_DMA_ATTR, X 
+
+        lda Animation::oam_size
+        clc
+        adc #4
+        sta Animation::oam_size
+        ldx temp
+        INX
+            
+        cpx #5
+        bcc @loop
+    
+    @done:
+     
+    rts
+    
+ Send_Lives_To_OAM_Buff:
+        ;load frame pointer
+        ; lda <EWL_StreetSkate_pointers_eggLife
+
+        ; sta main_pointer_LO
+        ; lda >EWL_StreetSkate_pointers_eggLife
+
+        ; sta main_pointer_HI
+        ldx Game::lives
+        stx temp
         ldx #0
         
         stx score_pos_x_
-      
+       
         @loop:
-            
-            
-            
-            ldy ten_thousands_place, x
-            tya
-            asl
-            tay
-
-            lda EWL_StreetSkate_pointers_score, y
-            sta main_pointer_LO
-            
-            iny
-            lda EWL_StreetSkate_pointers_score, y
-            sta main_pointer_HI
-
-            stx temp
+            lda temp
+            beq @done    
             ldx Animation::oam_size
           
             ldy #0
@@ -182,35 +240,31 @@ convert_to_decimal:
             clc
             adc #8
             sta score_pos_x_
-            adc #SCORE_POS_X
-            adc (main_pointer_LO),Y
+            adc #$C0
+            adc EWL_StreetSkate_Egg_life_data,Y
             sta OAM_DMA_X, X
    
             iny
             lda #SCORE_POS_Y   
             clc   
-            adc (main_pointer_LO),Y
+            adc EWL_StreetSkate_Egg_life_data,Y
             sta OAM_DMA_Y ,X
    
             iny
-            lda (main_pointer_LO),Y
+            lda EWL_StreetSkate_Egg_life_data,Y
             sta OAM_DMA_TILE,X
       
             iny
-            lda (main_pointer_LO),Y
+            lda EWL_StreetSkate_Egg_life_data,Y
             sta OAM_DMA_ATTR, X 
 
             lda Animation::oam_size
             clc
             adc #4
             sta Animation::oam_size
-            ldx temp
-            INX
-             
-            cpx #5
-            bcc @loop
+            dec temp
+            jmp @loop
         
         @done:
      
     rts
-    

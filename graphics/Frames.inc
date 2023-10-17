@@ -12,8 +12,7 @@ EWL_StreetSkate_Walk_4_data:
 	.byte <-16,<-16,$03,2
 	.byte <- 8,<-16,$03,2|OAM_FLIP_H
 
-	.byte <-16,<- 8,$48,2
-	.byte <- 8,<- 8,$5c,0
+	.byte <-11,<- 8,$41,0
 	.byte $80
 
 
@@ -21,12 +20,11 @@ EWL_StreetSkate_Walk_3_data:
 
 
 	.byte <-16,<-24,$01,2
-	.byte <- 8,<-24,$04,2
+	.byte <- 8,<-24,$01,2|OAM_FLIP_H
 	.byte <-16,<-16,$03,2
-	.byte <- 8,<-16,$06,2
+	.byte <- 8,<-16,$03,2|OAM_FLIP_H
 
-	.byte <-16,<- 8,$44,0
-	.byte <- 8,<- 8,$45,0
+	.byte <-11,<- 8,$40,0
 	.byte $80
 
 
@@ -38,8 +36,7 @@ EWL_StreetSkate_Walk_2_data:
 	.byte <-16,<-16,$03,2
 	.byte <- 8,<-16,$03,2|OAM_FLIP_H
 
-	.byte <-16,<- 8,$40,0
-	.byte <- 8,<- 8,$41,0
+	.byte <-13,<- 8,$48,0
 	.byte $80
 
 
@@ -51,8 +48,8 @@ EWL_StreetSkate_Walk_1_data:
 	.byte <-16,<-16,$03,2
 	.byte <- 8,<-16,$03,2|OAM_FLIP_H
 
-	.byte <-16,<- 8,$2e,0
-	.byte <- 8,<- 8,$2f,0
+	.byte <-16,<- 8,$44,0
+	.byte <- 8,<- 8,$45,0
 	.byte $80
 
 
@@ -139,6 +136,21 @@ EWL_StreetSkate_Jump_4_data:
 EWL_StreetSkate_Jump_3_data:
 
 
+	.byte <- 8,<- 6,$d5,0
+	.byte <-16,<-23,$01,2
+	.byte <- 8,<-23,$01,2|OAM_FLIP_H
+	.byte <-16,<-15,$03,2
+
+	.byte <- 8,<-15,$03,2|OAM_FLIP_H
+	.byte <- 7,<- 9,$ec,0
+	.byte <-16,<- 6,$dc,0|OAM_FLIP_H
+	.byte <-15,<- 9,$ed,0
+	.byte $80
+
+
+EWL_StreetSkate_Jump_2_data:
+
+
 	.byte <-16,<-26,$01,2
 	.byte <- 8,<-26,$01,2|OAM_FLIP_H
 	.byte <-16,<-18,$03,2
@@ -151,7 +163,7 @@ EWL_StreetSkate_Jump_3_data:
 	.byte $80
 
 
-EWL_StreetSkate_Jump_2_data:
+EWL_StreetSkate_Jump_1_data:
 
 
 	.byte <-16,<-30,$01,2
@@ -166,21 +178,6 @@ EWL_StreetSkate_Jump_2_data:
 
 	.byte <- 8,<- 6,$ff,0
 	.byte <- 8,<-14,$fd,0
-	.byte $80
-
-
-EWL_StreetSkate_Jump_1_data:
-
-
-	.byte <- 8,<- 4,$d5,0
-	.byte <-16,<-21,$01,2
-	.byte <- 8,<-21,$01,2|OAM_FLIP_H
-	.byte <-16,<-13,$03,2
-
-	.byte <- 8,<-13,$03,2|OAM_FLIP_H
-	.byte <- 7,<- 7,$ec,0
-	.byte <-16,<- 4,$dc,0|OAM_FLIP_H
-	.byte <-15,<- 7,$ed,0
 	.byte $80
 
 
@@ -268,6 +265,21 @@ EWL_StreetSkate_KickFlip_9_data:
 EWL_StreetSkate_KickFlip_8_data:
 
 
+	.byte <-16,<-21,$01,2
+	.byte <- 8,<-21,$01,2|OAM_FLIP_H
+	.byte <-16,<-13,$03,2
+	.byte <- 8,<-13,$03,2|OAM_FLIP_H
+
+	.byte <- 8,<- 4,$d5,0
+	.byte <- 7,<- 7,$ec,0
+	.byte <-16,<- 4,$dc,0|OAM_FLIP_H
+	.byte <-15,<- 7,$ed,0
+	.byte $80
+
+
+EWL_StreetSkate_KickFlip_7_data:
+
+
 	.byte <-16,<-26,$01,2
 	.byte <- 8,<-26,$01,2|OAM_FLIP_H
 	.byte <-16,<-18,$03,2
@@ -280,7 +292,7 @@ EWL_StreetSkate_KickFlip_8_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_7_data:
+EWL_StreetSkate_KickFlip_6_data:
 
 
 	.byte <-16,<-29,$01,2
@@ -295,7 +307,7 @@ EWL_StreetSkate_KickFlip_7_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_6_data:
+EWL_StreetSkate_KickFlip_5_data:
 
 
 	.byte <-16,<-30,$01,2
@@ -310,7 +322,7 @@ EWL_StreetSkate_KickFlip_6_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_5_data:
+EWL_StreetSkate_KickFlip_4_data:
 
 
 	.byte <-16,<-31,$01,2
@@ -325,7 +337,7 @@ EWL_StreetSkate_KickFlip_5_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_4_data:
+EWL_StreetSkate_KickFlip_3_data:
 
 
 	.byte <-16,<-32,$01,2
@@ -340,7 +352,7 @@ EWL_StreetSkate_KickFlip_4_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_3_data:
+EWL_StreetSkate_KickFlip_2_data:
 
 
 	.byte <-16,<-33,$01,2
@@ -355,7 +367,7 @@ EWL_StreetSkate_KickFlip_3_data:
 	.byte $80
 
 
-EWL_StreetSkate_KickFlip_2_data:
+EWL_StreetSkate_KickFlip_1_data:
 
 
 	.byte <-16,<-29,$01,2
@@ -370,21 +382,6 @@ EWL_StreetSkate_KickFlip_2_data:
 
 	.byte <- 8,<- 5,$ff,0
 	.byte <- 8,<-13,$fd,0
-	.byte $80
-
-
-EWL_StreetSkate_KickFlip_1_data:
-
-
-	.byte <-16,<-21,$01,2
-	.byte <- 8,<-21,$01,2|OAM_FLIP_H
-	.byte <-16,<-13,$03,2
-	.byte <- 8,<-13,$03,2|OAM_FLIP_H
-
-	.byte <- 8,<- 4,$d5,0
-	.byte <- 7,<- 7,$ec,0
-	.byte <-16,<- 4,$dc,0|OAM_FLIP_H
-	.byte <-15,<- 7,$ed,0
 	.byte $80
 
 
@@ -707,17 +704,20 @@ EWL_StreetSkate_ShuvIt_7_data:
 EWL_StreetSkate_Grate_data:
 
 
-	.byte <-16,<- 8,$7e,2
-	.byte <- 8,<- 8,$7f,2
-	.byte   0,<- 8,$7f,2
+	.byte <-24,<- 8,$7e,2
+	.byte <-16,<- 8,$7f,2
+	.byte <- 8,<- 8,$9d,2
 	.byte   8,<- 8,$7e,2|OAM_FLIP_H|OAM_FLIP_V
 
-	.byte <- 8,<-16,$7f,2
-	.byte   0,<-16,$7e,2|OAM_FLIP_H|OAM_FLIP_V
-	.byte <-16,<- 8,$7e,2
-	.byte <-24,<-16,$7e,2
+	.byte  24,<- 8,$7f,2
+	.byte   0,<- 8,$9d,2
+	.byte $80
 
-	.byte <-16,<-16,$7f,2
+
+EWL_StreetSkate_Egg_life_data:
+
+
+	.byte <- 8,<- 8,$2b,2
 	.byte $80
 
 
@@ -791,6 +791,10 @@ EWL_StreetSkate_Number_9_data:
 	.byte $80
 
 
+
+
+EWL_StreetSkate_pointers_eggLife:
+	.word EWL_StreetSkate_Egg_life_data
 EWL_StreetSkate_pointers_grate:
 	.word EWL_StreetSkate_Grate_data
 
@@ -866,12 +870,12 @@ EWL_StreetSkate_pointers_kickflip:
 
 
 
-; EWL_StreetSkate_pointers_walk:
+EWL_StreetSkate_pointers_walk:
 
-; 	.word EWL_StreetSkate_Walk_1_data
-; 	.word EWL_StreetSkate_Walk_2_data
-; 	.word EWL_StreetSkate_Walk_3_data
-; 	.word EWL_StreetSkate_Walk_4_data
+	.word EWL_StreetSkate_Walk_1_data
+	.word EWL_StreetSkate_Walk_2_data
+	.word EWL_StreetSkate_Walk_3_data
+	.word EWL_StreetSkate_Walk_4_data
 
 	
 
