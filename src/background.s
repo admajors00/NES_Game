@@ -41,56 +41,50 @@ NEW_ATTRIBUTE_FLAG = %00000010
 .scope Background
 
 	Init:
-
-		lda #<Backgrounds_Array
-		sta bg_header_pt_LO
-		lda #>Backgrounds_Array
-		sta bg_header_pt_HI
-
-		; ldy #0
-		; lda #<Background_1
-		; sta (bg_header_pt_LO),Y
-		; iny 
-		; lda #>Background_1
-		; sta (bg_header_pt_LO),Y
-
-		; iny
-		; lda #<Background_2
-		; sta (bg_header_pt_LO),Y
-		; iny 
-		; lda #>Background_2
-		; sta (bg_header_pt_LO),Y
-
-		; iny
-		; lda #<Background_3
-		; sta (bg_header_pt_LO),Y
-		; iny 
-		; lda #>Background_3
-		; sta (bg_header_pt_LO),Y
-
-		; 	iny
-		; lda #<Background_4
-		; sta (bg_header_pt_LO),Y
-		; iny 
-		; lda #>Background_4
-		; sta (bg_header_pt_LO),Y
-
-		LDA #<Longer_street_1
-		STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-		LDA #>Longer_street_1       ; #> is the same as HIGH() function in NESASM, used to get the high byte
-		STA bg_data_pt_HI    
-
-		; ldy #0
-		; lda Backgrounds_Array, y
+		lda #2
+		sta scroll_HI_prev
+		ldy #0 
+		sty scroll_HI
+		sty scroll
+		sty nametable
+		; lda Backgrounds_Array,y
 		; sta bg_header_pt_LO
 		; iny
 		; lda Backgrounds_Array,y
 		; sta bg_header_pt_HI
 
-		lda #2
-		sta scroll_HI_prev
+		; ldy #Background_t::background_data ;get the background data
+		; lda (bg_header_pt_LO), Y
+		; sta bg_data_pt_LO
+		; iny
+		; lda (bg_header_pt_LO), Y
+		; sta bg_data_pt_HI   
 
+		LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+		STA $2000
+		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
+		STA $2001   
+		jsr Next_Background
+		jsr Background::load_background_nt1
+		inc scroll_HI
+		jsr Next_Background
+		jsr Background::load_background_nt2
+		
+		jsr Reset_Buffers
 
+		ldy #0
+		sty scroll_HI
+		sty amount_to_scroll
+		sty column_number
+		jsr Next_Background
+		;inc scroll
+
+		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+		STA $2000
+		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+		STA $2001
+
+		
 	rts
 
 	Update:
@@ -152,10 +146,10 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 	rts
 
-	Next_Background:
+	Next_Background: ;update bg header and bg data pointers
 		
 		lda scroll_HI
-		cmp scroll_HI_prev
+		cmp scroll_HI_prev ;check that scroll high has changed
 		beq @done
 			sta scroll_HI_prev
 		;  jsr Update_Background_Obsticles
@@ -164,14 +158,14 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			asl A
 			tay
 
-			lda Backgrounds_Array,y
+			lda Backgrounds_Array,y ;get bg header at the index of scroll hi
 			sta bg_header_pt_LO
 			iny
 			lda Backgrounds_Array, y
 			sta bg_header_pt_HI
 
 
-			ldy #Background_t::background_data
+			ldy #Background_t::background_data ;get the background data
 			lda (bg_header_pt_LO), Y
 			sta bg_data_pt_LO
 			iny
@@ -223,7 +217,55 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		
 		
 	rts
+	load_background_nt1: ;rendering should be stopped before calling this function
+		LDA $2002             ; read PPU status to reset the high/low latch
+		LDA #$20
+		STA $2006             ; write the high byte of $2000 address
+		LDA #$00
+		STA $2006             ; write the low byte of $2000 address
 
+
+		LDX #$00            ; start at pointer + 0
+		LDY #$00
+		@OutsideLoop:
+			
+			@InsideLoop:
+				LDA (bg_data_pt_LO), y  ; copy one background byte from address in pointer plus Y
+				STA $2007           ; this runs 256 * 4 times		
+				INY                 ; inside loop counter
+				CPY #$00
+				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
+			
+			INC bg_data_pt_HI       ; low byte went 0 to 256, so high byte needs to be changed now
+			INX
+			CPX #$04
+			BNE @OutsideLoop     ; run the outside loop 256 times before continuing down
+	rts
+		rts
+	load_background_nt2: ;rendering should be stopped before calling this function
+		LDA $2002             ; read PPU status to reset the high/low latch
+		LDA #$24
+		STA $2006             ; write the high byte of $2000 address
+		LDA #$00
+		STA $2006             ; write the low byte of $2000 address
+
+
+		LDX #$04            ; start at pointer + 0
+		LDY #$00
+		@OutsideLoop:
+			
+			@InsideLoop:
+				LDA (bg_data_pt_LO), y  ; copy one background byte from address in pointer plus Y
+				STA $2007           ; this runs 256 * 4 times		
+				INY                 ; inside loop counter
+				CPY #$00
+				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
+			
+			INC bg_data_pt_HI       ; low byte went 0 to 256, so high byte needs to be changed now
+			INX
+			CPX #$08
+			BNE @OutsideLoop     ; run the outside loop 256 times before continuing down
+	rts
 	Update_Background_Obsticles:
 		lda scroll_HI
 		asl A
@@ -233,6 +275,19 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		iny
 		lda Backgrounds_Array,y
 		sta bg_header_pt_HI
+	rts
+
+	Reset_Buffers:
+		ldy #32
+
+		lda #0
+		@loop:
+		sta Attribute_Buffer, y 
+		sta Scroll_Buffer, Y
+		dey
+		beq @loop
+
+
 	rts
 .endscope
 

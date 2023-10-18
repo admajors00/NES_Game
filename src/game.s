@@ -16,6 +16,12 @@
         sta lives
         lda #Game_States_e::start_screen
         sta game_state
+
+        lda #0
+        sta score_HI
+        sta score_LO
+        
+
     rts
 
     game_state_jump_table:
@@ -39,18 +45,15 @@
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
-            ; LDA #<Longer_street_1
-            ; STA main_pointer_LO           ; put the low byte of address of background into pointer
-            ; LDA #>Longer_street_1        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-            ; STA main_pointer_HI           ; put high byte of address into pointer
-            ; jsr Background::load_background
-            ; 	LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-            ; ;	ORA nametable    ; select correct nametable for bit 0
-            ; STA $2000
-            ; inc scroll
-            ; lda #$01
-            ; sta scroll_HI
+            ldx #<music_data_untitled
+            ldy #>music_data_untitled
+            lda #1 ; NTSC
+            jsr famistudio_init
+            lda #0
+            jsr famistudio_music_play
+
             jsr Init
+            jsr Background::Init
             jsr Chaser::Init
             jsr Player::init_character
 
@@ -60,9 +63,7 @@
     rts
 
     Game_Loop:
-        ; jsr Handle_Scroll
-
-	    ; jsr famistudio_update
+       
         jsr Background::Update 
         jsr Obsticles::Update
         jsr Check_For_Hit
@@ -82,8 +83,42 @@
     rts
 
     GameOver_Loop:
+        
+        LDA #%00000000   ;disable nmi
+        STA $2000
+        LDA #%00000000   ; disable rendering
+        STA $2001    
+
+
         lda #Game_States_e::start_screen
-        sta game_state
+        sta game_state   
+
+        ldx #<music_data_get_fucked
+        ldy #>music_data_get_fucked
+        lda #1 ; NTSC
+        jsr famistudio_init
+
+        lda #0
+        jsr famistudio_music_play
+        lda#0 
+        sta nametable
+        sta scroll
+        LDA #<End_Screen
+        STA bg_data_pt_LO           ; put the low byte of address of background into pointer
+        LDA #>End_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+        STA bg_data_pt_HI           ; put high byte of address into pointer
+        jsr Background::load_background_nt1
+
+
+
+
+        LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+        STA $2000
+        LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+        STA $2001  
+        
+       
+
     rts
 
     Check_For_Hit:

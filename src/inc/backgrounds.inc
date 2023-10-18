@@ -20,7 +20,7 @@ Background_1_Objects:
     .addr   Cone, Cone
 
 Background_1:
-    .byte 0
+    .byte 1
     .addr Cone
     .addr Longer_street_1
 
@@ -51,7 +51,7 @@ Background_6:
 ; .org $430
 Backgrounds_Array:
     .addr Background_6
-    .addr Background_6
+    .addr Background_5
     .addr Background_1
     .addr Background_2
     .addr Background_3

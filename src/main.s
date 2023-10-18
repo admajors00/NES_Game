@@ -51,7 +51,8 @@ PpuAddr			= $2006
 PpuData			= $2007
 OamDma			= $4014
 
-
+playList:
+	.addr music_data_untitled, music_data_get_fucked
 
 reset:
 	sei			; disable IRQs
@@ -132,49 +133,43 @@ load_palettes:
 
 
 
-load_background:
-	LDA $2002             ; read PPU status to reset the high/low latch
-	LDA #$20
-	STA $2006             ; write the high byte of $2000 address
-	LDA #$00
-	STA $2006             ; write the low byte of $2000 address
+; load_background:
+; 	LDA $2002             ; read PPU status to reset the high/low latch
+; 	LDA #$20
+; 	STA $2006             ; write the high byte of $2000 address
+; 	LDA #$00
+; 	STA $2006             ; write the low byte of $2000 address
 
 	LDA #<Start_Screen
-	STA main_pointer_LO           ; put the low byte of address of background into pointer
+	STA bg_data_pt_LO           ; put the low byte of address of background into pointer
 	LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-	STA main_pointer_HI           ; put high byte of address into pointer
-	;jsr Background::load_background
-	LDX #$00            ; start at pointer + 0
-	LDY #$00
-	OutsideLoop:
+	STA bg_data_pt_HI           ; put high byte of address into pointer
+	jsr Background::load_background_nt1
+	; LDX #$00            ; start at pointer + 0
+	; LDY #$00
+	; OutsideLoop:
 		
-		InsideLoop:
-			LDA (main_pointer_LO), y  ; copy one background byte from address in pointer plus Y
-			STA $2007           ; this runs 256 * 4 times		
-			INY                 ; inside loop counter
-			CPY #$00
-			BNE InsideLoop      ; run the inside loop 256 times before continuing down
+	; 	InsideLoop:
+	; 		LDA (main_pointer_LO), y  ; copy one background byte from address in pointer plus Y
+	; 		STA $2007           ; this runs 256 * 4 times		
+	; 		INY                 ; inside loop counter
+	; 		CPY #$00
+	; 		BNE InsideLoop      ; run the inside loop 256 times before continuing down
 		
-		INC main_pointer_HI       ; low byte went 0 to 256, so high byte needs to be changed now
-		INX
-		CPX #$08
-		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
-inc scroll
-lda #$01
-sta scroll_HI
-jsr Background::Init
+	; 	INC main_pointer_HI       ; low byte went 0 to 256, so high byte needs to be changed now
+	; 	INX
+	; 	CPX #$08
+	; 	BNE OutsideLoop     ; run the outside loop 256 times before continuing down
+; inc scroll
+; lda #$01
+; sta scroll_HI
+; jsr Background::Init
 jsr Animation::Init
 
 jsr Obsticles::Init
 ;jsr Game::Init
 
 
-ldx #.lobyte(music_data_untitled)
-ldy #.hibyte(music_data_untitled)
-lda #1 ; NTSC
-jsr famistudio_init
-lda #0
-jsr famistudio_music_play
 
 
 LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -197,10 +192,10 @@ forever:
 
 
 nmi:
+	
 	jsr Handle_Scroll
 
 	jsr famistudio_update
-	
 	
 	jsr Game::Update
 	
@@ -249,7 +244,8 @@ Longer_street_2:
 	.incbin "../graphics/Longer_street_2.bin"
 Longer_street_3:
 	.incbin "../graphics/Longer_street_3.bin"
-
+End_Screen:
+	.incbin "../graphics/Longer_street_end.bin"
 
 
 ; .include "../graphics/Longer_street.s"
@@ -257,6 +253,10 @@ Longer_street_3:
 .segment "SONG1"
 song_test:
 .include "../audio/Song2.s"
+
+.segment "SONG2"
+song_game_over:
+.include "../audio/gameover_get_fucked.s"
 
 
 ;;;;;;;;;;;;;;  

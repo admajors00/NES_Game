@@ -59,7 +59,7 @@ Push_Ani_Header:
 
 
 jump_frame_timers:
-    .byte 4,8,15,16,8
+    .byte 4,8,10,10,8
 
 Jump_Ani_Header:
       .byte 5

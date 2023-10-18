@@ -480,8 +480,8 @@ EWL_StreetSkate_LoadUp_3_data:
 EWL_StreetSkate_LoadUp_2_data:
 
 
-	.byte <- 8,<- 4,$d5,0
-	.byte <-16,<- 4,$dc,0|OAM_FLIP_H
+	.byte <- 8,<- 4,$d8,0
+	.byte <-16,<- 4,$d9,0|OAM_FLIP_H
 	.byte <-16,<-21,$01,2
 	.byte <- 8,<-21,$01,2|OAM_FLIP_H
 
@@ -495,8 +495,8 @@ EWL_StreetSkate_LoadUp_2_data:
 EWL_StreetSkate_LoadUp_1_data:
 
 
-	.byte <- 8,<- 4,$d8,0
-	.byte <-16,<- 4,$d9,0|OAM_FLIP_H
+	.byte <- 8,<- 4,$d5,0
+	.byte <-16,<- 4,$dc,0|OAM_FLIP_H
 	.byte <-16,<-21,$01,2
 	.byte <- 8,<-21,$01,2|OAM_FLIP_H
 
@@ -789,6 +789,9 @@ EWL_StreetSkate_Number_9_data:
 
 	.byte <- 8,<- 8,$2a,0
 	.byte $80
+
+
+
 
 
 
