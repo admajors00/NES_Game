@@ -45,6 +45,8 @@
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
+            lda #$01
+            sta $8000
             ldx #<music_data_untitled
             ldy #>music_data_untitled
             lda #1 ; NTSC
@@ -55,7 +57,7 @@
             jsr Init
             jsr Background::Init
             jsr Chaser::Init
-            jsr Player::init_character
+            jsr Player::Init
 
             lda #Game_States_e::running
             sta game_state
@@ -71,7 +73,7 @@
         
         jsr UpdateButtons
         
-        jsr Player::updatePlayer
+        jsr Player::Update
         jsr Chaser::Update
        
         jsr Update_Score

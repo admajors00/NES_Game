@@ -23,7 +23,18 @@ OAM_TILE = 1
 OAM_ATTR = 2
 OAM_X    = 3
 
+player_external_flags = $19
 
+PLAYER_ANI_DONE_f = 1<<0
+PLAYER_HIT_DETECTED_f = 1<<1
+PLAYER_GRIND_DETECTED_f = 1<<2
+PLAYER_RAMP_DETECTED_f = 1<<3
+PLAYER_GRAB_DETECTED_f = 1<<4
+
+
+ACTION_INTERRUPTABLE_f = 1<<0
+ACTION_STATE_CHANGE_f	= 1<<1
+MOTION_STATE_CHANGE_f = 1<<2
 .scope Player
 
 	.import Load_Animation
@@ -42,6 +53,7 @@ OAM_X    = 3
 	velocity_Y_HI = $18
 
 	player_animation_flag = $19;$10 is interruptable $01 is active 
+	internal_flags = $1A
 	state_change_flag = $1A ;state change this frame if 1, otherwise 0
 
 	player_action_state = $1B
@@ -49,7 +61,9 @@ OAM_X    = 3
 	pointer_1_LO = $1C
 	pointer_1_HI = $1D
 
-	frame_speed = $1E
+	frame_speed = $1E;animation frame speed
+
+	player_state = $1F
 
 	jump_speed_LO = $80
 	jump_speed_HI = $81
@@ -77,20 +91,22 @@ OAM_X    = 3
 
 
 
+	
+	
+	actionStateJumpTable:
+		.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
+
 	.enum PlayerGameStates_e
 		normal = 0
 		crashed = 1
-		rolling = 2
-		starting = 3
+		starting = 2
 
 	.endenum
-	
-actionStateJumpTable:
-	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
 
+	playerGameStateJumpTable:
+		.addr Normal_Update, Crashed_Update, Starting_Update
 
-
-	.proc init_character
+	.proc Init
 		ldx #$00
 		
 		stx velocity_Y_HI
@@ -119,11 +135,14 @@ actionStateJumpTable:
 		ldx #>Idle_Ani_Header
 		ldy #<Idle_Ani_Header
 		jsr Load_Animation
+
+		lda #PlayerGameStates_e::starting
+		sta player_state
 		rts
 	.endproc
 
 
-	updatePlayer:
+	Update:
 		ldx #0
 		stx state_change_flag
 
@@ -134,10 +153,12 @@ actionStateJumpTable:
 			sta player_action_state
 			inc state_change_flag
 		@action_not_done:
-		jsr Handle_movement_state
+		jsr Normal_Update
+	rts	
 		
 
-		
+	Normal_Update:	
+		jsr Handle_movement_state
 		jsr checkButtons
 		jsr handle_action_states
 		
@@ -156,7 +177,19 @@ actionStateJumpTable:
 		asl 
 		rol frame_speed
 	rts
+	Crashed_Update:
+		lda Port_1_Pressed_Buttons
+		beq @done
+			lda #PlayerGameStates_e::starting
+			sta player_state
+		@done:
+	rts
 
+	Starting_Update:
+		lda #PlayerGameStates_e::normal
+		sta player_state
+
+	rts
 	
 	AirborneMoving:
 		

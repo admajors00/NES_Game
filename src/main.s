@@ -214,7 +214,9 @@ vblankwait:
 rts
 
 
-
+BankSwitch:
+	sta $8000
+	rts
 
 ;;;;;;;;;;;;;;  
 
@@ -242,18 +244,25 @@ palette:
 
 
 Start_Screen:
-	.incbin "../graphics/Longer_street_start.bin"
+	.incbin "../graphics/TitleScreen.bin"
 	; .incbin"../graphics/Level_2_1.bin"
-Level_Screen_4:
-	.incbin "../graphics/Level_1_4.bin"
+
 	; .incbin"../graphics/Level_2_2.bin"
 Level_Screen_1:
 	.incbin"../graphics/Level_1_1.bin"
-
 Level_Screen_2:
 	.incbin "../graphics/Level_1_2.bin"
 Level_Screen_3:
 	.incbin "../graphics/Level_1_3.bin"
+Level_Screen_4:
+	.incbin "../graphics/Level_1_4.bin"
+Level_Screen_2_1:
+	.incbin"../graphics/Level_2_1.bin"
+Level_Screen_2_2:
+	.incbin "../graphics/Level_2_2.bin"
+Level_Screen_2_3:
+	.incbin "../graphics/Level_2_3.bin"
+
 End_Screen:
 .incbin"../graphics/Level_1_3.bin"
 	;.incbin "../graphics/Longer_street_end.bin"
@@ -284,20 +293,20 @@ song_game_over:
   
 ;;;;;;;;;;;;;;  
 .segment "CHARS"
-.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
-		.incbin	"../graphics/Level1.chr"
-; .segment "BANK1"
-; 	.proc banked_chr_1
-; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
-; 		.incbin	"../graphics/Level1.chr"
-; 	.endproc
+	; .incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+	; .incbin	"../graphics/StartScreen.chr"
+ .segment "LEVEL1"
+; ;.proc banked_chr_1
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/StartScreen.chr"
+	;.endproc
 	
 
-; .segment "BANK2"	
-; 	.proc banked_chr_2
-; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
-; 		.incbin	"../graphics/Level2.chr"
-; 	.endproc
+.segment "LEVEL2"	
+	;.proc banked_chr_2
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level1.chr"
+	;.endproc
 ; .proc Bank_Table
 ; 	.addr banked_chr_1
 ; 	.byte <.bank (banked_chr_1)
