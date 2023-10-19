@@ -22,31 +22,31 @@ Background_1_Objects:
 Background_1:
     .byte 1
     .addr Cone
-    .addr Longer_street_1
+    .addr Level_Screen_1
 
 Background_2:
     .byte 0
     .addr 0
-    .addr Longer_street_2
+    .addr Level_Screen_2
 
 Background_3:
     .byte 1
     .addr Pothole
-    .addr Longer_street_3
+    .addr Level_Screen_3
 
 Background_4:
     .byte 1
     .addr Pothole
-    .addr Longer_street_4
+    .addr Level_Screen_4
 Background_5:
     .byte 1
     .addr Cone
-    .addr Longer_street_4
+    .addr Level_Screen_4
 
 Background_6:
     .byte 0
     .addr 0
-    .addr Longer_street_4
+    .addr Level_Screen_4
 
 ; .org $430
 Backgrounds_Array:

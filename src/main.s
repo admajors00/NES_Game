@@ -1,8 +1,8 @@
 .segment "HEADER"
   .byte $4E, $45, $53, $1A  ; iNES header identifier
-  .byte 2                   ; 2x 16KB PRG-ROM Banks
-  .byte 1                   ; 1x  8KB CHR-ROM
-  .byte $01                 ; mapper 0 (NROM)
+  .byte 2                  ; 2x 16KB PRG-ROM Banks
+  .byte 2                   ; 1x  8KB CHR-ROM
+  .byte $03                 ; mapper 0 (NROM)
   .byte $00                 ; System: NES
 
 
@@ -222,30 +222,41 @@ rts
 
 palette:
 ;palette_EWL_StreetSkate_b:
-.byte $0f,$10,$12,$00
+.byte $0f,$10,$12,$00 ; level 1 pallet
 .byte $0f,$12,$22,$32
 .byte $0f,$16,$26,$36
 .byte $0f,$14,$24,$38
+; .byte $11,$0f,$10,$20 ;level 2
+; .byte $11,$01,$21,$31
+; .byte $11,$31,$22,$21
+; .byte $11,$10,$19,$29
+
 
 ;palette_EWL_StreetSkate_a:
-.byte $0f,$0f,$30,$27
+.byte $0f,$0f,$30,$27 ;sprite pallet
 .byte $0f,$0f,$37,$31
 .byte $0f,$0f,$10,$20
 .byte $0f,$17,$16,$27
+;palette_Level2_a:
+
+
 
 Start_Screen:
 	.incbin "../graphics/Longer_street_start.bin"
-Longer_street_4:
-	.incbin "../graphics/Longer_street_4.bin"
-Longer_street_1:
-	.incbin"../graphics/Longer_street_1.bin"
+	; .incbin"../graphics/Level_2_1.bin"
+Level_Screen_4:
+	.incbin "../graphics/Level_1_4.bin"
+	; .incbin"../graphics/Level_2_2.bin"
+Level_Screen_1:
+	.incbin"../graphics/Level_1_1.bin"
 
-Longer_street_2:
-	.incbin "../graphics/Longer_street_2.bin"
-Longer_street_3:
-	.incbin "../graphics/Longer_street_3.bin"
+Level_Screen_2:
+	.incbin "../graphics/Level_1_2.bin"
+Level_Screen_3:
+	.incbin "../graphics/Level_1_3.bin"
 End_Screen:
-	.incbin "../graphics/Longer_street_end.bin"
+.incbin"../graphics/Level_1_3.bin"
+	;.incbin "../graphics/Longer_street_end.bin"
 
 
 ; .include "../graphics/Longer_street.s"
@@ -272,9 +283,24 @@ song_game_over:
 	.word	0
   
 ;;;;;;;;;;;;;;  
-  
 .segment "CHARS"
-
-	.incbin	"../graphics/EWL.chr"	; includes 8KB graphics from SMB1
-
+.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level1.chr"
+; .segment "BANK1"
+; 	.proc banked_chr_1
+; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+; 		.incbin	"../graphics/Level1.chr"
+; 	.endproc
 	
+
+; .segment "BANK2"	
+; 	.proc banked_chr_2
+; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+; 		.incbin	"../graphics/Level2.chr"
+; 	.endproc
+; .proc Bank_Table
+; 	.addr banked_chr_1
+; 	.byte <.bank (banked_chr_1)
+; 	.addr banked_chr_2
+; 	.byte <.bank (banked_chr_2)
+; .endproc

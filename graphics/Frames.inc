@@ -71,10 +71,10 @@ EWL_StreetSkate_Push_4_data:
 EWL_StreetSkate_Push_3_data:
 
 
-	.byte <-15,<-23,$05,2
-	.byte <- 7,<-23,$08,2
-	.byte <-15,<-15,$07,2
-	.byte <- 7,<-15,$0a,2
+	.byte <-15,<-23,$04,2
+	.byte <- 7,<-23,$05,2
+	.byte <-15,<-15,$06,2
+	.byte <- 7,<-15,$07,2
 
 	.byte <- 8,<- 8,$e1,0
 	.byte <-16,<- 9,$e8,0
@@ -86,10 +86,10 @@ EWL_StreetSkate_Push_3_data:
 EWL_StreetSkate_Push_2_data:
 
 
-	.byte <-15,<-23,$05,2
-	.byte <- 7,<-23,$08,2
-	.byte <-15,<-15,$07,2
-	.byte <- 7,<-15,$0a,2
+	.byte <-15,<-23,$04,2
+	.byte <- 7,<-23,$05,2
+	.byte <-15,<-15,$06,2
+	.byte <- 7,<-15,$07,2
 
 	.byte <-17,  0,$ea,0
 	.byte <- 8,<- 8,$e1,0
@@ -104,10 +104,10 @@ EWL_StreetSkate_Push_2_data:
 EWL_StreetSkate_Push_1_data:
 
 
-	.byte <-15,<-23,$05,2
-	.byte <- 7,<-23,$08,2
-	.byte <-15,<-15,$07,2
-	.byte <- 7,<-15,$0a,2
+	.byte <-15,<-23,$04,2
+	.byte <- 7,<-23,$05,2
+	.byte <-15,<-15,$06,2
+	.byte <- 7,<-15,$07,2
 
 	.byte <-11,<- 8,$e4,0
 	.byte <-11,  0,$e6,0
@@ -151,15 +151,15 @@ EWL_StreetSkate_Jump_3_data:
 EWL_StreetSkate_Jump_2_data:
 
 
-	.byte <-16,<-26,$01,2
-	.byte <- 8,<-26,$01,2|OAM_FLIP_H
-	.byte <-16,<-18,$03,2
-	.byte <- 8,<-18,$03,2|OAM_FLIP_H
+	.byte <-16,<-28,$01,2
+	.byte <- 8,<-28,$01,2|OAM_FLIP_H
+	.byte <-16,<-20,$03,2
+	.byte <- 8,<-20,$03,2|OAM_FLIP_H
 
+	.byte <-16,<-12,$e9,0
+	.byte <- 7,<-12,$ec,0
 	.byte <- 8,<- 7,$d8,0
 	.byte <-16,<- 7,$d9,0|OAM_FLIP_H
-	.byte <-16,<-10,$e9,0
-	.byte <- 7,<-10,$ec,0
 	.byte $80
 
 
@@ -388,53 +388,46 @@ EWL_StreetSkate_KickFlip_1_data:
 EWL_StreetSkate_GuyRunning_3_data:
 
 
-	.byte <-10,<-30,$1c,1
-	.byte <-26,<-22,$1a,1
-	.byte <-18,<-22,$1b,1
-	.byte <-10,<-22,$1e,1
+	.byte <- 8,<-30,$84,1
+	.byte <-16,<-22,$92,1
+	.byte <-16,<-30,$90,1
+	.byte <- 8,<-22,$93,1
 
-	.byte <- 2,<-22,$1f,1
-	.byte <-26,<-14,$38,1
-	.byte <-18,<-14,$39,1
-	.byte <-10,<-14,$3c,1
-
-	.byte <-12,<- 6,$3e,1
-	.byte <-18,<-30,$19,1
+	.byte <-16,<-14,$b0,1
+	.byte <-24,<-14,$ad,1
+	.byte <- 8,<-13,$b1,1
+	.byte <-10,<- 5,$b3,1
 	.byte $80
 
 
 EWL_StreetSkate_GuyRunning_2_data:
 
 
-	.byte <-17,<-30,$6d,1
-	.byte <- 9,<-30,$1c,1
-	.byte <-25,<-22,$8b,1
-	.byte <-17,<-22,$8e,1
+	.byte <- 8,<-22,$8e,1
+	.byte <-16,<-22,$8b,1
+	.byte <-16,<-30,$89,1
+	.byte <-16,<-14,$a9,1
 
-	.byte <- 9,<-22,$8f,1
-	.byte <-25,<-14,$a9,1
-	.byte <-17,<-14,$ac,1
-	.byte <- 9,<-14,$ad,1
-
-	.byte <-20,<- 6,$ae,1
+	.byte <-24,<-14,$a8,1
+	.byte <-19,<- 6,$ab,1
+	.byte <- 8,<-30,$84,1
 	.byte $80
 
 
 EWL_StreetSkate_GuyRunning_1_data:
 
 
-	.byte <-16,<-30,$84,1
-	.byte <- 8,<-30,$85,1
-	.byte <-24,<-22,$83,1
-	.byte <-16,<-22,$86,1
+	.byte <- 8,<-30,$84,1
+	.byte <-16,<-30,$81,1
+	.byte <- 8,<-22,$86,1
+	.byte <-16,<-22,$83,1
 
-	.byte <- 8,<-22,$87,1
-	.byte <-24,<-14,$a1,1
-	.byte <-16,<-14,$a4,1
-	.byte <- 8,<-14,$a5,1
+	.byte <-24,<-22,$82,1
+	.byte <-24,<-14,$a0,1
+	.byte <-16,<-14,$a1,1
+	.byte <- 8,<-14,$a4,1
 
-	.byte   0,<-22,$8a,1
-	.byte <- 8,<- 6,$a7,1
+	.byte <- 8,<- 6,$a6,1
 	.byte $80
 
 
@@ -525,10 +518,10 @@ EWL_StreetSkate_Crash_4_data:
 EWL_StreetSkate_Crash_3_data:
 
 
-	.byte  25,<-17,$0d,2
-	.byte  33,<-17,$10,2
-	.byte  25,<- 9,$0f,2
-	.byte  33,<- 9,$12,2
+	.byte  25,<-17,$08,2
+	.byte  33,<-17,$09,2
+	.byte  25,<- 9,$0a,2
+	.byte  33,<- 9,$0b,2
 
 	.byte  18,<- 7,$e8,0
 	.byte  18,<-13,$ed,0
@@ -540,10 +533,10 @@ EWL_StreetSkate_Crash_3_data:
 EWL_StreetSkate_Crash_2_data:
 
 
-	.byte  16,<-23,$0d,2
-	.byte  24,<-23,$10,2
-	.byte  16,<-15,$0f,2
-	.byte  24,<-15,$12,2
+	.byte  16,<-23,$08,2
+	.byte  24,<-23,$09,2
+	.byte  16,<-15,$0a,2
+	.byte  24,<-15,$0b,2
 
 	.byte   9,<-13,$e8,0
 	.byte   9,<-19,$ed,0
@@ -555,10 +548,10 @@ EWL_StreetSkate_Crash_2_data:
 EWL_StreetSkate_Crash_1_data:
 
 
-	.byte <- 1,<-24,$05,2
-	.byte   7,<-24,$08,2
-	.byte <- 1,<-16,$07,2
-	.byte   7,<-16,$0a,2
+	.byte <- 1,<-24,$04,2
+	.byte   7,<-24,$05,2
+	.byte <- 1,<-16,$06,2
+	.byte   7,<-16,$07,2
 
 	.byte <- 4,<-10,$e5,0
 	.byte <- 8,<-14,$e8,0

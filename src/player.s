@@ -75,6 +75,15 @@ OAM_X    = 3
 		shuvit=7
 	.endenum
 
+
+
+	.enum PlayerGameStates_e
+		normal = 0
+		crashed = 1
+		rolling = 2
+		starting = 3
+
+	.endenum
 	
 actionStateJumpTable:
 	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
