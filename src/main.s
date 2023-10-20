@@ -1,10 +1,20 @@
 .segment "HEADER"
-  .byte $4E, $45, $53, $1A  ; iNES header identifier
-  .byte 2                  ; 2x 16KB PRG-ROM Banks
-  .byte 2                   ; 1x  8KB CHR-ROM
-  .byte $03                 ; mapper 0 (NROM)
-  .byte $00                 ; System: NES
+;   .byte $4E, $45, $53, $1A  ; iNES header identifier
+;   .byte 2                  ; 2x 16KB PRG-ROM Banks
+;   .byte 4                 ; 1x  8KB CHR-ROM
+; ;   .byte 0
+;   .byte $03                ; mapper 0 (NROM)
+;   .byte $00                 ; System: NES
+INES_MAPPER = 3 ; 0 = NROM
+INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
+INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 
+.byte $4E, $45, $53, $1A ; ID
+.byte $02 ; 16k PRG chunk count
+.byte $02 ; 8k CHR chunk count
+.byte INES_MIRROR | (INES_SRAM << 1) | ((INES_MAPPER & $f) << 4)
+.byte (INES_MAPPER & %11110000)
+.byte $0, $0, $0, $0, $0, $0, $0, $0 ; padding
 
 .segment "ZEROPAGE"
 main_pointer_LO = $f2  ; pointer variables are declared in RAM
@@ -103,67 +113,27 @@ clear_nametables:
 		dex
 		bne	@loop
 
-
-load_palettes:
-		lda	$2002		; read PPU status to reset the high/low latch
-		lda	#$3f
-		sta	$2006
-		lda	#$00
-		sta	$2006
-		ldx	#$00
-	@loop:
-		lda	palette, x	; load palette byte
-		sta	$2007		; write to PPU
-		inx			; set index to next byte
-		cpx	#$20
-		bne	@loop		; if x = $20, 32 bytes copied, all done
-
-; LoadSprites:
-; 	ldx #$80
-; 	stx Player::sprite_pos_x
-; 	LDX #$00 ; start at 0
-; 	LoadSpritesLoop:
-; 		LDA sprites, x ; load data from address (sprites + x)
-; 		STA $0200, x ; store into RAM address ($0200 + x)
-; 		INX ; X = X + 1
-; 		CPX #$20 ; Compare X to hex $10, decimal 16
-; 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-; 		; if compare was equal to 16, continue down  
+lda #>palette_TitleScreen
+sta main_pointer_HI
+lda #<palette_TitleScreen
+sta main_pointer_LO
+jsr load_palettes
 
 
 
 
-; load_background:
-; 	LDA $2002             ; read PPU status to reset the high/low latch
-; 	LDA #$20
-; 	STA $2006             ; write the high byte of $2000 address
-; 	LDA #$00
-; 	STA $2006             ; write the low byte of $2000 address
 
-	LDA #<Start_Screen
-	STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-	LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-	STA bg_data_pt_HI           ; put high byte of address into pointer
-	jsr Background::load_background_nt1
-	; LDX #$00            ; start at pointer + 0
-	; LDY #$00
-	; OutsideLoop:
-		
-	; 	InsideLoop:
-	; 		LDA (main_pointer_LO), y  ; copy one background byte from address in pointer plus Y
-	; 		STA $2007           ; this runs 256 * 4 times		
-	; 		INY                 ; inside loop counter
-	; 		CPY #$00
-	; 		BNE InsideLoop      ; run the inside loop 256 times before continuing down
-		
-	; 	INC main_pointer_HI       ; low byte went 0 to 256, so high byte needs to be changed now
-	; 	INX
-	; 	CPX #$08
-	; 	BNE OutsideLoop     ; run the outside loop 256 times before continuing down
-; inc scroll
-; lda #$01
-; sta scroll_HI
-; jsr Background::Init
+
+    
+
+LDA #<Start_Screen
+STA bg_data_pt_LO           ; put the low byte of address of background into pointer
+LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+STA bg_data_pt_HI           ; put high byte of address into pointer
+jsr Background::load_background_nt1
+
+lda#0
+jsr BankSwitch
 jsr Animation::Init
 
 jsr Obsticles::Init
@@ -178,7 +148,8 @@ STA $2000
 LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 STA $2001         
               
-
+; lda #$01
+; jsr BankSwitch
 
 
 
@@ -215,14 +186,17 @@ rts
 
 
 BankSwitch:
-	sta $8000
-	rts
+	tax
 
+	sta BankValues, x
+	rts
+BankValues:
+	.byte $00, $01, $02, $03
 ;;;;;;;;;;;;;;  
 
 
 
-palette:
+palette_level_1:
 ;palette_EWL_StreetSkate_b:
 .byte $0f,$10,$12,$00 ; level 1 pallet
 .byte $0f,$12,$22,$32
@@ -241,7 +215,16 @@ palette:
 .byte $0f,$17,$16,$27
 ;palette_Level2_a:
 
+palette_TitleScreen:
+.byte $0f,$30,$12,$27
+.byte $0f,$0f,$0f,$0f
+.byte $0f,$20,$0f,$0f
+.byte $0f,$0f,$0f,$0f
 
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
 
 Start_Screen:
 	.incbin "../graphics/TitleScreen.bin"
@@ -264,17 +247,17 @@ Level_Screen_2_3:
 	.incbin "../graphics/Level_2_3.bin"
 
 End_Screen:
-.incbin"../graphics/Level_1_3.bin"
+.incbin"../graphics/GameOver.bin"
 	;.incbin "../graphics/Longer_street_end.bin"
 
 
 ; .include "../graphics/Longer_street.s"
 
-.segment "SONG1"
+;.segment "SONG1"
 song_test:
 .include "../audio/Song2.s"
 
-.segment "SONG2"
+
 song_game_over:
 .include "../audio/gameover_get_fucked.s"
 
@@ -292,7 +275,7 @@ song_game_over:
 	.word	0
   
 ;;;;;;;;;;;;;;  
-.segment "CHARS"
+; .segment "CHARS"
 	; .incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 	; .incbin	"../graphics/StartScreen.chr"
  .segment "LEVEL1"

@@ -152,8 +152,20 @@ MOTION_STATE_CHANGE_f = 1<<2
 			lda #PlayerActionStates::coasting
 			sta player_action_state
 			inc state_change_flag
+
+
+
 		@action_not_done:
-		jsr Normal_Update
+
+		lda player_state
+		asl 
+		tax
+		lda playerGameStateJumpTable, x
+		sta pointer_1_LO
+		lda playerGameStateJumpTable+1, x
+		sta pointer_1_LO+1
+		jmp (pointer_1_LO)
+		
 	rts	
 		
 
@@ -215,6 +227,7 @@ MOTION_STATE_CHANGE_f = 1<<2
 		beq @done
 			sta player_action_state
 			inc state_change_flag
+			
 		@done:
 	rts
 
@@ -477,13 +490,13 @@ MOTION_STATE_CHANGE_f = 1<<2
 		lda state_change_flag
 		beq @done
 		lda player_action_state
-			asl 
-			tax
-			lda actionStateJumpTable, x
-			sta pointer_1_LO
-			lda actionStateJumpTable+1, x
-			sta pointer_1_LO+1
-			jmp (pointer_1_LO)
+		asl 
+		tax
+		lda actionStateJumpTable, x
+		sta pointer_1_LO
+		lda actionStateJumpTable+1, x
+		sta pointer_1_LO+1
+		jmp (pointer_1_LO)
 		
 	@done:	
 	rts	
@@ -607,6 +620,8 @@ MOTION_STATE_CHANGE_f = 1<<2
 		bne @done
 		@crash_:
 		lda #$01
+		lda #PlayerGameStates_e::crashed
+			sta player_state
 		sta player_animation_flag
 		ldx #>Crash_Ani_Header
 		ldy #<Crash_Ani_Header

@@ -41,12 +41,13 @@
 
 
     Start_Screen_Loop:
+        jsr Animation::Update
         jsr UpdateButtons
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
-            lda #$01
-            sta $8000
+            
+            
             ldx #<music_data_untitled
             ldy #>music_data_untitled
             lda #1 ; NTSC

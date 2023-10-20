@@ -64,6 +64,15 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		STA $2000
 		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
 		STA $2001   
+
+		lda #>palette_level_1
+		sta main_pointer_HI
+		lda #<palette_level_1
+		sta main_pointer_LO
+		jsr load_palettes
+		lda #$01
+             jsr BankSwitch
+			;sta $8000
 		jsr Next_Background
 		jsr Background::load_background_nt1
 		inc scroll_HI
@@ -291,9 +300,21 @@ NEW_ATTRIBUTE_FLAG = %00000010
 	rts
 .endscope
 
+load_palettes:
+		lda	$2002		; read PPU status to reset the high/low latch
+		lda	#$3f
+		sta	$2006
+		lda	#$00
+		sta	$2006
+		ldy	#$00
+	@loop:
+		lda	(main_pointer_LO), y	; load palette byte
+		sta	$2007		; write to PPU
+		iny			; set index to next byte
+		cpy	#$20
+		bne	@loop		; if x = $20, 32 bytes copied, all done
 
-
-
+rts
 
 Handle_Scroll:
     
