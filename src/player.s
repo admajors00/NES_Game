@@ -23,7 +23,7 @@ OAM_TILE = 1
 OAM_ATTR = 2
 OAM_X    = 3
 
-player_external_flags = $19
+player_input_flags_g = $EF
 
 PLAYER_ANI_DONE_f = 1<<0
 PLAYER_HIT_DETECTED_f = 1<<1
@@ -153,9 +153,24 @@ MOTION_STATE_CHANGE_f = 1<<2
 			sta player_action_state
 			inc state_change_flag
 
-
-
 		@action_not_done:
+
+
+
+		lda  #PLAYER_HIT_DETECTED_f
+		and player_input_flags_g
+		beq @flag_check_done
+			lda player_input_flags_g
+			eor #PLAYER_HIT_DETECTED_f
+			sta player_input_flags_g
+			
+			lda #PlayerGameStates_e::crashed
+			sta player_state
+			lda #0
+			sta velocity_x_LO
+			sta velocity_x_HI
+			jsr crashed_animation
+		@flag_check_done:
 
 		lda player_state
 		asl 
@@ -222,13 +237,13 @@ MOTION_STATE_CHANGE_f = 1<<2
 	rts
 
 	GroundedNotMoving:
-		lda #PlayerActionStates::crash
-		cmp player_action_state
-		beq @done
-			sta player_action_state
-			inc state_change_flag
+		; lda #PlayerActionStates::crash
+		; cmp player_action_state
+		; beq @done
+		; 	sta player_action_state
+		; 	inc state_change_flag
 			
-		@done:
+		; @done:
 	rts
 
 
@@ -620,8 +635,7 @@ MOTION_STATE_CHANGE_f = 1<<2
 		bne @done
 		@crash_:
 		lda #$01
-		lda #PlayerGameStates_e::crashed
-			sta player_state
+		
 		sta player_animation_flag
 		ldx #>Crash_Ani_Header
 		ldy #<Crash_Ani_Header
