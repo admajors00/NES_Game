@@ -137,16 +137,28 @@
         sbc Obsticles::length
         clc
         cmp Player::pos_x_HI
-        bcc @check_hit
+        bcc @check_obst_hit
 
-
+        lda active_flag
+        beq @done
+        lda Chaser::pos_x_HI
+        clc
+        cmp Player::pos_x_HI
+        bcc @done
+        sec
+        sbc #8
+        clc
+        cmp Player::pos_x_HI
+        bcc @check_chaser_hit
         lda #0
+
+
         sta hit_flag
         jmp @done
 
 
 
-        @check_hit:;the players x value is inside the obstical
+        @check_obst_hit:;the players x value is inside the obstical
             lda Obsticles::pos_y
             sec
             sbc Obsticles::height
@@ -157,19 +169,19 @@
             lda hit_flag
             bne @done ;jump i the player has already hit the obsticle
 
-            adc #1
-            sta hit_flag
-            lda #0
-            sta Player::velocity_x_HI
-            sta Player::velocity_x_LO
-            ldx lives
-            beq @dead
-                ; lda #3
-                ; sta lives
-                ; jmp @done
-            dex
-            stx lives
-            jmp @done
+                adc #1
+                sta hit_flag
+                lda player_input_flags_g
+                ora #PLAYER_HIT_DETECTED_f
+                sta player_input_flags_g
+                ldx lives
+                beq @dead
+                    ; lda #3
+                    ; sta lives
+                    ; jmp @done
+                dex
+                stx lives
+                jmp @done
             @dead:
                 lda #Game_States_e::game_over
                 sta game_state
@@ -184,11 +196,27 @@
                 lda score_HI
                 adc#0
                 sta score_HI
-            
+                jmp @done
 
             ; lda #Player::PlayerActionStates::crash
             ; sta Player::player_action_state
-        
+        @check_chaser_hit:
+            lda hit_flag
+            bne @done ;jump i the player has already hit the obsticle
+
+                adc #1
+                sta hit_flag
+                lda player_input_flags_g
+                ora #PLAYER_HIT_DETECTED_f
+                sta player_input_flags_g
+                ldx lives
+                beq @dead
+                    ; lda #3
+                    ; sta lives
+                    ; jmp @done
+                dex
+                stx lives
+                jmp @done
         @done:
     rts
 

@@ -9,12 +9,8 @@ _BACKGROUNDS_INC  =1
 .endstruct
 
 
-.struct Level_t
-    num_screens .byte 
-     background_pt .addr
-.endstruct
-NUM_BACKGROUNDS = 7
 
+NUM_BACKGROUNDS = 7
 
 
 
