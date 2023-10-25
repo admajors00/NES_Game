@@ -22,6 +22,7 @@ _GAME_INC = 1
     running = 1
     paused = 2
     game_over = 3
+    level_restart = 4
 .endenum
 
 

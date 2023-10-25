@@ -91,13 +91,15 @@
 		sta pos_x_LO
 		lda pos_x_HI
 		adc relative_velocity
+		sta main_temp
 
-		;lda pos_x_HI
-		cmp Player::pos_x_HI
-		bcs @done
+		ldx Player::pos_x_HI ;check if the chaser has caught up to the player
+		inx
+		cpx main_temp
+		bcc @done
+		lda main_temp
 		sta pos_x_HI
-
-		lda pos_x_HI
+		lda pos_x_HI;check if chaser has gone off screen behing player
 
 		cmp #$0f
 		bcc @hide_chaser
@@ -111,7 +113,7 @@
 		@done:
 
 
-		ldy #Sprite_Positions_e::chaser_x
+		ldy #Sprite_Positions_e::chaser_x ;updae the players positon in the animation sprite pos table
 		lda pos_x_HI
 		sta Sprite_positions_table, y
 		iny 

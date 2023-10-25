@@ -188,7 +188,7 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			
 
 			lda #1
-			sta active_flag
+			sta obsticles_active_flag
 
 			ldy #Background_t::obsticle_list
 			lda (bg_header_pt_LO), y ;get first item from obsticle list
@@ -217,7 +217,7 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 			@remove_obsticles:
 				lda #0
-				sta active_flag
+				sta obsticles_active_flag
 				ldx #>Empty_Ani_Header
 				ldy #<Empty_Ani_Header
 				jsr Animation::Load_Animation

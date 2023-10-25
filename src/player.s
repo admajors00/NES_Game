@@ -113,7 +113,8 @@ MOTION_STATE_CHANGE_f = 1<<2
 		
 		stx pos_x_LO
 		stx pos_y_LO
-
+		stx internal_flags
+		stx player_input_flags_g
 		ldx #$ff
 		stx velocity_x_LO
 		ldx #$02
@@ -125,7 +126,8 @@ MOTION_STATE_CHANGE_f = 1<<2
 		stx pos_y_HI
 
 
-	
+		lda #PlayerActionStates::coasting
+			sta player_action_state
 
 		ldx #PlayerMovementStates::idle
 		stx player_movement_state
@@ -170,6 +172,7 @@ MOTION_STATE_CHANGE_f = 1<<2
 			sta velocity_x_LO
 			sta velocity_x_HI
 			jsr crashed_animation
+			RTS
 		@flag_check_done:
 
 		lda player_state

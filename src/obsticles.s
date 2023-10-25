@@ -7,7 +7,7 @@
 
 .segment "CODE"
 
-active_flag = $57
+obsticles_active_flag = $57
 .scope Obsticles
 
 

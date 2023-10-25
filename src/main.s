@@ -23,6 +23,7 @@ main_pointer_HI = $f3  ; low byte first, high byte immediately after
 
 
 amount_to_scroll = $f4; .res 1
+main_temp = $f5
 
 .segment "RAM"
 
