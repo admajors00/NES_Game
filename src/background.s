@@ -154,6 +154,7 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		scroll_done:
 
 	rts
+	
 
 	Next_Background: ;update bg header and bg data pointers
 		
@@ -225,6 +226,61 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		@done:
 		
 		
+	rts
+	Draw_Box:
+            
+		LDA #$21           
+		sta main_pointer_HI
+		LDA #$AC
+		sta main_pointer_LO
+		; lda main_pointer_LO
+		; clc
+		; adc scroll
+		; sta main_pointer_LO
+		; lda main_pointer_HI
+		; adc #0
+		; sta main_pointer_HI  
+
+
+		LDA $2002             ; read PPU status to reset the high/low latch
+		LDA main_pointer_HI
+		STA $2006             ; write the high byte of $2000 address
+		
+		LDA main_pointer_LO
+		STA $2006             ; write the low byte of $2000 address
+		
+
+
+
+		LDX #$00            ; start at pointer + 0
+		LDY #$00
+		@OutsideLoop:
+			
+			@InsideLoop:
+				LDA #0  ; copy one background byte from address in pointer plus Y
+				STA $2007           ; this runs 256 * 4 times		
+				INY                 ; inside loop counter
+				CPY #$08
+				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
+			
+			lda main_pointer_LO
+			clc
+			adc #32
+			sta main_pointer_LO
+			lda main_pointer_HI
+			adc #0
+			sta main_pointer_HI    
+
+			LDA $2002             ; read PPU status to reset the high/low latch
+			LDA main_pointer_HI
+			STA $2006             ; write the high byte of $2000 address
+			LDA main_pointer_LO
+			STA $2006             ; write the low byte of $2000 address
+			
+			LDY #0
+			inx
+			CPX #$04
+			BNE @OutsideLoop     ; run the outside loop 256 times before continuing down
 	rts
 	load_background_nt1: ;rendering should be stopped before calling this function
 		LDA $2002             ; read PPU status to reset the high/low latch

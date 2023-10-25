@@ -12,7 +12,7 @@
 
 
     Init:
-        lda #3
+        lda #0
         sta lives
         lda #Game_States_e::start_screen
         sta game_state
@@ -47,7 +47,9 @@
         and Port_1_Pressed_Buttons
         beq @done
             
-            
+            lda#0 
+            sta nametable
+            sta scroll
             ldx #<music_data_untitled
             ldy #>music_data_untitled
             lda #1 ; NTSC
@@ -92,7 +94,7 @@
         LDA #%00000000   ; disable rendering
         STA $2001    
 
-
+         jsr Background::Draw_Box
         lda #Game_States_e::start_screen
         sta game_state   
 
@@ -103,15 +105,15 @@
 
         lda #0
         jsr famistudio_music_play
-        lda#0 
-        sta nametable
-        sta scroll
+
+
+        
         LDA #<End_Screen
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>End_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
-        jsr Background::load_background_nt1
-
+        ;jsr Background::load_background_nt1
+       
 
 
 
