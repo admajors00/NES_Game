@@ -14,6 +14,11 @@ HIT_CHASER_f = 1<<1
     lives = $73
     game_state = $74
 
+    timer = $75
+
+    level_pt_LO= $76
+    level_pt_HI = $77
+    level = $78
 
     Init:
         lda #3
@@ -24,12 +29,35 @@ HIT_CHASER_f = 1<<1
         lda #0
         sta score_HI
         sta score_LO
+        sta level
         
 
     rts
 
+    Update_level:
+
+        lda level
+        cmp #NUM_LEVELS
+        bcc @cont
+            lda #0
+            sta level
+        @cont:
+        asl 
+        tay
+        lda Levels_table,Y
+        sta level_pt_LO
+        iny 
+        lda Levels_table,Y
+        sta level_pt_HI
+        ldx level_pt_LO
+        ldy level_pt_HI
+        jsr Background::Load_Level_Background_Data
+
+        
+    rts
+
     game_state_jump_table:
-        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop
+        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop
 
     Update:
         lda game_state
@@ -51,7 +79,12 @@ HIT_CHASER_f = 1<<1
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
-            
+           
+       
+            LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+            STA $2000
+            LDA #%00000000   ; enable sprites, enable background, no clipping on left side
+            STA $2001   
            
             ldx #<music_data_untitled
             ldy #>music_data_untitled
@@ -61,17 +94,40 @@ HIT_CHASER_f = 1<<1
             jsr famistudio_music_play
 
             jsr Init
+            jsr Update_level
             jsr Background::Init
             jsr Chaser::Init
             jsr Player::Init
 
             lda #Game_States_e::running
             sta game_state
+
+            lda #$3f
+            sta $2006
+            lda #$00
+            sta $2006
+            
+
+            ldy #Level_t::bg_color
+            lda (level_pt_LO), y
+            sta $2007
+
+            LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+            STA $2000
+            LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+            STA $2001
         @done:
     rts
 
     Game_Loop:
        
+        lda scroll_HI
+        cmp #NUM_BACKGROUNDS-1
+        bcc @cont
+            inc level
+            lda #Game_States_e::next_level
+            sta game_state
+        @cont:
         jsr Background::Update 
         jsr Obsticles::Update
         jsr Check_For_Hit
@@ -83,6 +139,9 @@ HIT_CHASER_f = 1<<1
         jsr Chaser::Update
        
         jsr Update_Score
+
+        
+        @done:
     rts
 
 
@@ -112,8 +171,11 @@ HIT_CHASER_f = 1<<1
         lda #0
         jsr famistudio_music_play
 
-
-        
+        ldx #<palette_TitleScreen
+        ldy #>palette_TitleScreen
+        jsr load_palettes
+        lda #0
+        jsr BankSwitch
         LDA #<End_Screen
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>End_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
@@ -134,22 +196,102 @@ HIT_CHASER_f = 1<<1
 
     Level_Restart_Loop:
         jsr Animation::Update
+        jsr Player::Update
         jsr UpdateButtons
         jsr Update_Score
         lda Port_1_Pressed_Buttons
          
         beq @done
+            LDA #%00000000   ;disable nmi
+            STA $2000
+            LDA #%00000000   ; disable rendering
+            STA $2001  
             lda #0
-            sta score_HI
-            sta score_LO
+            ; sta score_HI
+            ; sta score_LO
             sta scroll
             sta scroll_HI
             lda #Game_States_e::running
             sta game_state 
             jsr Background::Init
-            jsr Chaser::Init
-            jsr Player::Init  
+            jsr Chaser::Reset
+            jsr Player::Init 
+            LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+        STA $2000
+        LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+        STA $2001  
         @done:
+    rts
+
+    Next_Level_Loop:
+        ;load level number screen wait for a minute 
+        
+		LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+		STA $2000
+		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
+		STA $2001   
+
+         lda #Game_States_e::level_restart
+            sta game_state 
+	
+        jsr Update_level
+
+        lda Chaser::velocity_x_LO
+        clc
+        adc #$30
+        sta  Chaser::velocity_x_LO
+        lda  Chaser::velocity_x_HI
+        adc #0
+        sta Chaser::velocity_x_HI
+
+	
+		
+
+		lda #2
+		sta scroll_HI_prev
+		ldy #0 
+		sty scroll_HI
+		sty scroll
+		sty nametable
+			
+		; jsr Background::Next_Background
+		; jsr Background::load_background_nt1
+		; inc scroll_HI
+		; jsr Background::Next_Background
+		; jsr Background::load_background_nt2
+		
+		; jsr  Background::Reset_Buffers
+
+		; ldy #0
+		; sty scroll_HI
+		; sty amount_to_scroll
+		; sty column_number
+		; jsr  Background::Next_Background
+		;inc scroll
+		
+        lda #Game_States_e::running
+        sta game_state 
+        jsr Background::Init
+        jsr Chaser::Reset
+        jsr Player::Init 
+
+         lda #$3f
+            sta $2006
+            lda #$00
+            sta $2006
+            
+
+            ldy #Level_t::bg_color
+            lda (level_pt_LO), y
+            sta $2007
+
+		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+		STA $2000
+		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+		STA $2001
+       
+
+
     rts
     Check_For_Hit:
         lda obsticles_active_flag

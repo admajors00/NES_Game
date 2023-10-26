@@ -11,7 +11,7 @@ INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 
 .byte $4E, $45, $53, $1A ; ID
 .byte $02 ; 16k PRG chunk count
-.byte $02 ; 8k CHR chunk count
+.byte $04 ; 8k CHR chunk count
 .byte INES_MIRROR | (INES_SRAM << 1) | ((INES_MAPPER & $f) << 4)
 .byte (INES_MAPPER & %11110000)
 .byte $0, $0, $0, $0, $0, $0, $0, $0 ; padding
@@ -76,6 +76,7 @@ reset:
 	stx	$2000		; disable NMI
 	stx	$2001		; disable rendering
 	stx	$4010		; disable DMC I	RQs
+ 
 
 	;; first wait for vblank to make sure PPU is ready
 jsr vblankwait
@@ -114,15 +115,17 @@ clear_nametables:
 		dex
 		bne	@loop
 
-lda #>palette_TitleScreen
-sta main_pointer_HI
-lda #<palette_TitleScreen
-sta main_pointer_LO
+ldx #<palette_TitleScreen
+ldy #>palette_TitleScreen
+
 jsr load_palettes
 
 
 
-
+; lda #<Level_1_bg_Array
+; sta level_bg_header_pt_LO
+; lda #>Level_1_bg_Array
+; sta level_bg_header_pt_HI
 
 
     
@@ -195,7 +198,16 @@ BankValues:
 	.byte $00, $01, $02, $03
 ;;;;;;;;;;;;;;  
 
+palette_level_2:
+.byte $11,$0f,$10,$20
+.byte $11,$01,$21,$31
+.byte $11,$31,$22,$21
+.byte $11,$10,$19,$29
 
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
 
 palette_level_1:
 ;palette_EWL_StreetSkate_b:
@@ -203,17 +215,12 @@ palette_level_1:
 .byte $0f,$12,$22,$32
 .byte $0f,$16,$26,$36
 .byte $0f,$14,$24,$38
-; .byte $11,$0f,$10,$20 ;level 2
-; .byte $11,$01,$21,$31
-; .byte $11,$31,$22,$21
-; .byte $11,$10,$19,$29
 
-
-;palette_EWL_StreetSkate_a:
 .byte $0f,$0f,$30,$27 ;sprite pallet
 .byte $0f,$0f,$37,$31
 .byte $0f,$0f,$10,$20
 .byte $0f,$17,$16,$27
+
 ;palette_Level2_a:
 
 palette_TitleScreen:
@@ -248,7 +255,7 @@ Level_Screen_2_3:
 	.incbin "../graphics/Level_2_3.bin"
 
 End_Screen:
-.incbin"../graphics/GameOver.bin"
+.incbin"../graphics/EndScreen.bin"
 	;.incbin "../graphics/Longer_street_end.bin"
 
 
@@ -279,17 +286,21 @@ song_game_over:
 ; .segment "CHARS"
 	; .incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 	; .incbin	"../graphics/StartScreen.chr"
- .segment "LEVEL1"
+ .segment "TITLEBANK"
 ; ;.proc banked_chr_1
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/StartScreen.chr"
 	;.endproc
 	
 
-.segment "LEVEL2"	
+.segment "LEVEL1"	
 	;.proc banked_chr_2
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level1.chr"
+.segment "LEVEL2"	
+	;.proc banked_chr_2
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level2.chr"
 	;.endproc
 ; .proc Bank_Table
 ; 	.addr banked_chr_1

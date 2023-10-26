@@ -1,15 +1,15 @@
  .include "/inc/animations.inc"
 .include "/inc/obsticles.inc"
 .include "/inc/backgrounds.inc"
- 
+.include "/inc/Levels.inc"
 .segment "CODE"
 scroll_HI_prev = $30
 bg_data_pt_LO = $31
 bg_data_pt_HI = $32
 
 
-obst_header_pt_LO = $33
-obst_header_pt_HI = $34
+level_bg_header_pt_LO = $33
+level_bg_header_pt_HI = $34
 
 
 
@@ -47,32 +47,8 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		sty scroll_HI
 		sty scroll
 		sty nametable
-		; lda Backgrounds_Array,y
-		; sta bg_header_pt_LO
-		; iny
-		; lda Backgrounds_Array,y
-		; sta bg_header_pt_HI
 
-		; ldy #Background_t::background_data ;get the background data
-		; lda (bg_header_pt_LO), Y
-		; sta bg_data_pt_LO
-		; iny
-		; lda (bg_header_pt_LO), Y
-		; sta bg_data_pt_HI   
-
-		LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA $2000
-		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
-		STA $2001   
-
-		lda #>palette_level_1
-		sta main_pointer_HI
-		lda #<palette_level_1
-		sta main_pointer_LO
-		jsr load_palettes
-		lda #$01
-             jsr BankSwitch
-			;sta $8000
+			
 		jsr Next_Background
 		jsr Background::load_background_nt1
 		inc scroll_HI
@@ -87,12 +63,6 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		sty column_number
 		jsr Next_Background
 		;inc scroll
-
-		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA $2000
-		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-		STA $2001
-
 		
 	rts
 
@@ -154,7 +124,36 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		scroll_done:
 
 	rts
-	
+
+	;inputs  x level header pt lo, y level header pt hi
+	;drawing should be stopped before calling
+	Load_Level_Background_Data:
+		stx main_pointer_LO
+		sty main_pointer_HI
+
+		ldy #Level_t::bank_num
+		lda (main_pointer_LO), y
+		jsr BankSwitch
+
+		
+
+		ldy #Level_t::backgrounds_pt
+		lda (main_pointer_LO), y
+		sta level_bg_header_pt_LO
+		iny
+		lda (main_pointer_LO), y
+		sta level_bg_header_pt_HI
+
+		ldy #Level_t::pallet_table_pt
+		lda (main_pointer_LO), y
+		tax
+		iny
+		lda (main_pointer_LO), y
+		tay 
+		jsr load_palettes
+
+		
+	rts
 
 	Next_Background: ;update bg header and bg data pointers
 		
@@ -163,15 +162,15 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		beq @done
 			sta scroll_HI_prev
 		;  jsr Update_Background_Obsticles
-
+	
 			lda scroll_HI
 			asl A
 			tay
 
-			lda Backgrounds_Array,y ;get bg header at the index of scroll hi
+			lda (level_bg_header_pt_LO),y ;get bg header at the index of scroll hi
 			sta bg_header_pt_LO
 			iny
-			lda Backgrounds_Array, y
+			lda (level_bg_header_pt_LO),y
 			sta bg_header_pt_HI
 
 
@@ -192,23 +191,23 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 			ldy #Background_t::obsticle_list
 			lda (bg_header_pt_LO), y ;get first item from obsticle list
-			sta obst_header_pt_LO
+			sta main_pointer_LO
 			iny
 			lda (bg_header_pt_LO ), y 
-			sta obst_header_pt_HI
+			sta main_pointer_HI
 
-			ldx obst_header_pt_HI
-			ldy obst_header_pt_LO
+			ldx main_pointer_HI
+			ldy main_pointer_LO
 
 			jsr Obsticles::Load 
 
 
 			ldy #Obstical_t::animation_header_addr ; load the animation 
 			iny 
-			lda (obst_header_pt_LO), Y
+			lda (main_pointer_LO), Y
 			tax
 			dey
-			lda (obst_header_pt_LO ), Y
+			lda (main_pointer_LO ), Y
 			tay
 
 
@@ -335,10 +334,10 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		lda scroll_HI
 		asl A
 		tay
-		lda Backgrounds_Array,y
+		lda (level_bg_header_pt_LO),y
 		sta bg_header_pt_LO
 		iny
-		lda Backgrounds_Array,y
+		lda (level_bg_header_pt_LO),y
 		sta bg_header_pt_HI
 	rts
 
@@ -355,8 +354,10 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 	rts
 .endscope
-
+;inputs x lo pt, y hi pt
 load_palettes:
+		stx main_pointer_LO
+		sty main_pointer_HI
 		lda	$2002		; read PPU status to reset the high/low latch
 		lda	#$3f
 		sta	$2006

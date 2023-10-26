@@ -169,6 +169,8 @@ MOTION_STATE_CHANGE_f = 1<<2
 			lda #PlayerGameStates_e::crashed
 			sta player_state
 			lda #0
+			sta velocity_Y_HI
+			sta velocity_Y_LO
 			sta velocity_x_LO
 			sta velocity_x_HI
 			jsr crashed_animation
@@ -208,6 +210,13 @@ MOTION_STATE_CHANGE_f = 1<<2
 		rol frame_speed
 	rts
 	Crashed_Update:
+		jsr Handle_movement_state
+		ldy #Sprite_Positions_e::player_x
+		lda pos_x_HI
+		sta Sprite_positions_table, y
+		iny 
+		lda pos_y_HI
+		sta Sprite_positions_table, y
 		lda Port_1_Pressed_Buttons
 		beq @done
 			lda #PlayerGameStates_e::starting
@@ -429,8 +438,11 @@ MOTION_STATE_CHANGE_f = 1<<2
 		cmp #PlayerActionStates::pushing
 		beq @done
 		cmp #PlayerActionStates::loadup
-		beq @done
-
+		beq @cont
+			lda#0
+			sta jump_speed_LO
+			sta jump_speed_HI
+		@cont:
 		lda velocity_x_HI
 		cmp #Game_Const::max_speed 
 		bcs @done
@@ -491,7 +503,7 @@ MOTION_STATE_CHANGE_f = 1<<2
 		@add_speed:
 		lda jump_speed_LO
 		clc
-		adc #$0F
+		adc #$18
 		sta jump_speed_LO
 		lda jump_speed_HI
 		adc#0

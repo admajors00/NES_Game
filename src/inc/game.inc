@@ -3,7 +3,7 @@ _GAME_INC = 1
 
 .scope Game_Const
     gravity = $10
-    ground = $A8
+    ground = $B0
     friction = $02
     jump_speed_max_low = $80
     jump_speed_max_high = $01
@@ -23,6 +23,7 @@ _GAME_INC = 1
     paused = 2
     game_over = 3
     level_restart = 4
+    next_level = 5
 .endenum
 
 

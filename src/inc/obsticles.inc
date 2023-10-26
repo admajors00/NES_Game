@@ -25,7 +25,7 @@ _OBSTICLE_INC  =1
 
 Cone:
     .byte $B0
-    .byte $B0
+    .byte $B6
     .byte $0F
     .byte $0F
     .byte $00
@@ -34,7 +34,7 @@ Cone:
 
 Pothole:
     .byte $10
-    .byte $B0
+    .byte $B6
     .byte $0F
     .byte $0A
     .byte $00
@@ -43,7 +43,7 @@ Pothole:
 
 Grate:
     .byte $10
-    .byte $B0
+    .byte $B8
     .byte $0F
     .byte $0A
     .byte $00

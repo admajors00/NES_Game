@@ -60,13 +60,32 @@
 		ldy #<chaser_Ani_Header
 		jsr Load_Animation
 
-		lda #2
+		lda #3;2
 	 	sta velocity_x_HI
-		lda #$B0
+		lda #$60;b0
 		sta velocity_x_LO
 	
         rts
     .endproc
+	Reset:
+		lda #0
+        sta pos_x_LO
+        sta pos_y_LO
+
+        lda #$10
+        sta pos_x_HI
+
+        lda #Game_Const::ground
+     
+        sta pos_y_HI
+
+        
+		ldx #>chaser_Ani_Header
+		ldy #<chaser_Ani_Header
+		jsr Load_Animation
+
+
+	rts
 
 	 Update:
 		; lda Player::character_velocity_x_HIGH

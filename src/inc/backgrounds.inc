@@ -17,46 +17,85 @@ NUM_BACKGROUNDS = 7
 Background_1_Objects:
     .addr   Cone, Cone
 
-Background_1:
+Lv1_bg_1:
     .byte 1
     .addr Cone
     .addr Level_Screen_1
 
-Background_2:
+Lv1_bg_2:
     .byte 0
     .addr 0
     .addr Level_Screen_2
 
-Background_3:
+Lv1_bg_3:
     .byte 1
     .addr Pothole
     .addr Level_Screen_3
 
-Background_4:
+Lv1_bg_4:
     .byte 1
     .addr Pothole
     .addr Level_Screen_4
-Background_5:
+Lv1_bg_5:
     .byte 1
     .addr Cone
     .addr Level_Screen_4
 
-Background_6:
+Lv1_bg_6:
     .byte 0
     .addr 0
     .addr Level_Screen_4
 
+
+Lv2_bg_1:
+    .byte 1
+    .addr Cone
+    .addr Level_Screen_2_1
+Lv2_bg_2:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_2_2
+
+Lv2_bg_3:
+    .byte 1
+    .addr Pothole
+    .addr Level_Screen_2_3
+
+Lv2_bg_4:
+    .byte 1
+    .addr Pothole
+    .addr Level_Screen_2_2
+Lv2_bg_5:
+    .byte 1
+    .addr Cone
+    .addr Level_Screen_2_3
+
+Lv2_bg_6:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_2_3
+
 ; .org $430
-Backgrounds_Array:
-    .addr Background_6
-    .addr Background_5
-    .addr Background_1
-    .addr Background_2
-    .addr Background_3
-    .addr Background_4
-    .addr Background_6
-    .addr Background_5
-    
+Level_2_bg_Array:
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5
+    .addr Lv2_bg_1
+    .addr Lv2_bg_2
+    .addr Lv2_bg_3
+    .addr Lv2_bg_4
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5  
+Level_1_bg_Array:
+    .addr Lv1_bg_6
+    .addr Lv1_bg_5
+    .addr Lv1_bg_1
+    .addr Lv1_bg_2
+    .addr Lv1_bg_3
+    .addr Lv1_bg_4
+    .addr Lv1_bg_6
+    .addr Lv1_bg_5
+
+ 
 
 .org $460
 Scroll_Buffer: .res 32
