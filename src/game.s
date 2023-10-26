@@ -368,6 +368,15 @@ HIT_CHASER_f = 1<<1
             lda score_HI
             adc#0
             sta score_HI
+
+            lda score_LO
+            clc
+            adc Player::velocity_x_HI
+            ;adc Player::velocity_x_HI
+            sta score_LO
+            lda score_HI
+            adc#0
+            sta score_HI
             jmp @done
         @done:
     rts
