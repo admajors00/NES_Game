@@ -75,7 +75,10 @@ HIT_CHASER_f = 1<<1
     Start_Screen_Loop:
         jsr Animation::Update
         jsr UpdateButtons
-        ;jsr Update_Score
+        lda score_LO 
+        beq @cont
+            jsr Update_Score
+        @cont:
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
