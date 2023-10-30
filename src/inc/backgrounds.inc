@@ -49,7 +49,10 @@ Lv1_bg_7:
     .byte 1
     .addr Pothole
     .addr Level_Screen_4
-
+Lv1_bg_8:
+    .byte 1
+    .addr Grate
+    .addr Level_Screen_4
 
 Lv2_bg_1:
     .byte 1
@@ -91,7 +94,7 @@ Level_2_bg_Array:
     .addr Lv2_bg_5  
 Level_1_bg_Array:
     .addr Lv1_bg_6
-    .addr Lv1_bg_5
+    .addr Lv1_bg_8
     .addr Lv1_bg_1
     .addr Lv1_bg_2
     .addr Lv1_bg_3
