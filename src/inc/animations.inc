@@ -21,7 +21,7 @@ ANI_FLAGS_MASK = %11110000
     flags               .byte ;lower 4 bits determine what object its associated with, upper 4 are flags
 .endstruct
 
-.enum objects
+.enum objects_e
     player = $00
     guy_chasing = $01
     obstical_1 = $02
@@ -167,6 +167,16 @@ Cone_Ani_Header:
       .addr cone_frame_timers
       .byte $FF
       .byte %01110010
+    
+
+Ramp_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_ramp
+      .addr EWL_StreetSkate_Ramp_data
+      .addr cone_frame_timers
+      .byte $FF
+      .byte %01110010
 
 
 pothole_frame_timers:
@@ -178,6 +188,18 @@ Pothole_Ani_Header:
     .addr EWL_StreetSkate_pointers_pothole
     .addr EWL_StreetSkate_Pothole_1_data
     .addr pothole_frame_timers
+    .byte $FF
+    .byte %01110010
+
+grate_frame_timers:
+    .byte $FF
+
+Grate_Ani_Header:
+    .byte 2
+    .byte 2
+    .addr EWL_StreetSkate_pointers_grate
+    .addr EWL_StreetSkate_Grate_data
+    .addr grate_frame_timers
     .byte $FF
     .byte %01110010
 

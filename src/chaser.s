@@ -56,8 +56,8 @@
         sta pos_y_HI
 
         
-		ldx #>chaser_Ani_Header
-		ldy #<chaser_Ani_Header
+		ldy #>chaser_Ani_Header
+		ldx #<chaser_Ani_Header
 		jsr Load_Animation
 
 		lda #3;2
@@ -80,8 +80,8 @@
         sta pos_y_HI
 
         
-		ldx #>chaser_Ani_Header
-		ldy #<chaser_Ani_Header
+		ldy #>chaser_Ani_Header
+		ldx #<chaser_Ani_Header
 		jsr Load_Animation
 
 

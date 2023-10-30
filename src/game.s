@@ -124,9 +124,12 @@ HIT_CHASER_f = 1<<1
 
     Game_Loop:
        
-        lda scroll_HI
-        cmp #NUM_BACKGROUNDS-1
-        bcc @cont
+        
+
+        ldy #Level_t::num_screens
+        lda (level_pt_LO),y
+        cmp scroll_HI
+        bne @cont
             inc level
             lda #Game_States_e::next_level
             sta game_state
@@ -297,115 +300,147 @@ HIT_CHASER_f = 1<<1
 
     rts
     Check_For_Hit:
-        lda obsticles_active_flag
-        beq @done
-        lda Obsticles::pos_x
-        clc
-        cmp Player::pos_x_HI
-        bcc @check_Chaser
-        sec
-        sbc Obsticles::length
-        clc
-        cmp Player::pos_x_HI
-        bcc check_obst_hit
-        
-        @check_Chaser:
-        lda #<~HIT_OBST_f
-        and hit_flag
-        sta hit_flag
-        lda Chaser::pos_x_HI
-        clc
-        cmp Player::pos_x_HI
-        bcc @done
-        sec
-        sbc #8
-        clc
-        cmp Player::pos_x_HI
-        bcc check_chaser_hit
-        
-        jmp @done
+        jsr check_obst_hit
+        jsr check_chaser_hit
 
-        @done: 
-        lda #<~HIT_CHASER_f
-        and hit_flag
-        sta hit_flag
+       
 
         
     rts
 
     check_obst_hit:;the players x value is inside the obstical
-        lda Obsticles::pos_y
-        sec
-        sbc Obsticles::height
-        clc
-        cmp Player::pos_y_HI
-        bcs @above_obst ;jump if the player is above the obstical
-
-        lda #HIT_OBST_f
-        and hit_flag
-        bne @done ;jump if the player has already hit the obsticle
-            lda #HIT_OBST_f
-            ora hit_flag
+        lda obsticles_active_flag ;check if there are any obsticals on the scrren
+        beq @not_over_obst
+            lda Obsticles::pos_x
+            clc
+            cmp Player::pos_x_HI    ;check if player is inside of ostical
+            bcc @not_over_obst
+                sec
+                sbc Obsticles::length
+                clc
+                cmp Player::pos_x_HI
+                bcc @over_obst
+        @not_over_obst:
+            lda #<~HIT_OBST_f
+            and hit_flag
             sta hit_flag
-            lda player_input_flags_g
-            ora #PLAYER_HIT_DETECTED_f
-            sta player_input_flags_g
-            ldx lives
-            beq dead
-                ; lda #3
-                ; sta lives
-                ; jmp @done
-            dex
-            stx lives
-            lda #Game_States_e::level_restart
-            sta game_state  
             jmp @done
-        
-        @above_obst:
-            
-            lda score_LO
+        @over_obst:
+            ;check if player is hitting or above obsticle
+            lda Obsticles::pos_y
+            sec
+            sbc Obsticles::height
             clc
-            adc Player::player_action_state
-            ;adc Player::velocity_x_HI
-            sta score_LO
-            lda score_HI
-            adc#0
-            sta score_HI
+            cmp Player::pos_y_HI
+            bcs @above_obst ;jump if the player is above the obstical
 
-            lda score_LO
-            clc
-            adc Player::velocity_x_HI
-            ;adc Player::velocity_x_HI
-            sta score_LO
-            lda score_HI
-            adc#0
-            sta score_HI
-            jmp @done
+            lda #HIT_OBST_f
+            and hit_flag
+            bne @done ;jump if the player has already hit the obsticle
+                lda #HIT_OBST_f
+                ora hit_flag
+                sta hit_flag
+
+                lda Obsticles::type
+                cmp #Obstical_Types_e::trip
+                beq @trip
+
+                lda Obsticles::type
+                cmp #Obstical_Types_e::rough
+                beq @rough
+
+                lda Obsticles::type
+                cmp #Obstical_Types_e::ramp
+                beq @ramp
+                @trip:
+                    lda player_input_flags_g
+                    ora #PLAYER_HIT_DETECTED_f
+                    sta player_input_flags_g
+                    ldx lives
+                    beq dead
+                        ; lda #3
+                        ; sta lives
+                        ; jmp @done
+                    dex
+                    stx lives
+                    lda #Game_States_e::level_restart
+                    sta game_state  
+                    jmp @done
+                @rough:
+                    lda player_input_flags_g
+                    ora #PLAYER_ROUGH_DETECTED_f
+                    sta player_input_flags_g
+                    lda #<~HIT_OBST_f
+                    and hit_flag
+                    sta hit_flag
+                    jmp @done
+                @ramp:
+                    lda player_input_flags_g
+                    ora #PLAYER_RAMP_DETECTED_f
+                    sta player_input_flags_g
+                    jmp @done
+            @above_obst:
+                
+                lda score_LO
+                clc
+                adc Player::player_action_state
+                ;adc Player::velocity_x_HI
+                sta score_LO
+                lda score_HI
+                adc#0
+                sta score_HI
+
+                lda score_LO
+                clc
+                adc Player::velocity_x_HI
+                ;adc Player::velocity_x_HI
+                sta score_LO
+                lda score_HI
+                adc#0
+                sta score_HI
+                jmp @done
         @done:
     rts
             ; lda #Player::PlayerActionStates::crash
             ; sta Player::player_action_state
     check_chaser_hit:
-        lda #HIT_CHASER_f
-        and hit_flag
-        bne @done ;jump i the player has already hit the obsticle
-            lda #HIT_CHASER_f
-            ora hit_flag
+        lda Chaser::pos_x_HI
+        clc
+        cmp Player::pos_x_HI
+        bcc @not_grabed
+        sec
+        sbc #8
+        clc
+        cmp Player::pos_x_HI
+        bcc @check_hit
+        @not_grabed:
+            lda #<~HIT_CHASER_f
+            and hit_flag
             sta hit_flag
-            lda player_input_flags_g
-            ora #PLAYER_HIT_DETECTED_f
-            sta player_input_flags_g
-            ldx lives
-            beq dead
-                ; lda #3
-                ; sta lives
-                ; jmp @done
-            dex
-            lda #Game_States_e::level_restart
-            sta game_state
-            stx lives
             jmp @done
-    @done:
+
+        @check_hit:
+
+            ; lda #HIT_CHASER_f
+            ; and hit_flag
+            ; bne @done ;jump i the player has already hit the obsticle
+                lda #HIT_CHASER_f
+                ora hit_flag
+                sta hit_flag
+                lda player_input_flags_g
+                ora #PLAYER_GRAB_DETECTED_f
+                sta player_input_flags_g
+                ldx lives
+                beq dead
+                    ; lda #3
+                    ; sta lives
+                    ; jmp @done
+                dex
+                lda #Game_States_e::level_restart
+                sta game_state
+                stx lives
+                jmp @done
+        @done:
     rts
 
     dead:

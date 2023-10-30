@@ -19,7 +19,7 @@ Background_1_Objects:
 
 Lv1_bg_1:
     .byte 1
-    .addr Cone
+    .addr Pothole
     .addr Level_Screen_1
 
 Lv1_bg_2:
@@ -29,12 +29,12 @@ Lv1_bg_2:
 
 Lv1_bg_3:
     .byte 1
-    .addr Pothole
+    .addr Grate
     .addr Level_Screen_3
 
 Lv1_bg_4:
     .byte 1
-    .addr Pothole
+    .addr Ramp
     .addr Level_Screen_4
 Lv1_bg_5:
     .byte 1
@@ -44,6 +44,10 @@ Lv1_bg_5:
 Lv1_bg_6:
     .byte 0
     .addr 0
+    .addr Level_Screen_4
+Lv1_bg_7:
+    .byte 1
+    .addr Pothole
     .addr Level_Screen_4
 
 
@@ -93,10 +97,32 @@ Level_1_bg_Array:
     .addr Lv1_bg_3
     .addr Lv1_bg_4
     .addr Lv1_bg_6
+    .addr Lv1_bg_7
+    .addr Lv1_bg_6
+    .addr Lv1_bg_7
+    .addr Lv1_bg_6
+Level_3_bg_Array:
+    .addr Lv1_bg_6
     .addr Lv1_bg_5
-
+    .addr Lv1_bg_1
+    .addr Lv1_bg_2
+    .addr Lv1_bg_3
+    .addr Lv1_bg_4
+    .addr Lv1_bg_6
+    .addr Lv1_bg_5
+    .addr Lv1_bg_5
+    .addr Lv1_bg_5
+    .addr Lv1_bg_5
  
-
+Level_4_bg_Array:
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1
+    .addr Lv2_bg_1 
 .org $460
 Scroll_Buffer: .res 32
 Attribute_Buffer: .res 32

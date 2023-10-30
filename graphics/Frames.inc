@@ -696,15 +696,28 @@ EWL_StreetSkate_ShuvIt_7_data:
 
 EWL_StreetSkate_Grate_data:
 
-
 	.byte <-24,<- 8,$7e,2
 	.byte <-16,<- 8,$7f,2
 	.byte <- 8,<- 8,$9d,2
 	.byte   8,<- 8,$7e,2|OAM_FLIP_H|OAM_FLIP_V
 
-	.byte  24,<- 8,$7f,2
 	.byte   0,<- 8,$9d,2
+
 	.byte $80
+
+
+EWL_StreetSkate_Ramp_data:
+
+
+	.byte<-16,<-16,$6d,3
+	.byte<- 8,<-16,$70,3
+	.byte<-16,<- 8,$6f,3
+	.byte<- 8,<- 8,$72,3
+
+	.byte $80
+
+
+
 
 
 EWL_StreetSkate_Egg_life_data:
@@ -826,8 +839,8 @@ EWL_StreetSkate_pointers_cone:
 EWL_StreetSkate_pointers_pothole:
 	.word EWL_StreetSkate_Pothole_1_data
 	.word EWL_StreetSkate_Pothole_1_data
-
-
+EWL_StreetSkate_pointers_ramp:
+.word EWL_StreetSkate_Ramp_data
 
 
 EWL_StreetSkate_pointers_chaser:

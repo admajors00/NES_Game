@@ -2,6 +2,9 @@
 UPPER_4 = %11110000
 LOWER_4 = %00001111
 
+
+SCORE_CHANGE = 1 << 0
+
 ten_thousands_place = $60
 thousands_place = $61
 hundreds_place = $62
@@ -15,7 +18,9 @@ temp_score_LO = $66
 
 status_oam_size = $67
 score_pos_x_ = $68
-temp = $69
+status_bar_flags = $69
+
+
 TEN_THOUSANDS_HI = $27
 TEN_THOUSANDS_LO = $10
 
@@ -31,6 +36,7 @@ SCORE_POS_X = $58
 SCORE_POS_Y = $18
 
 Update_Score:
+    
     lda #0 
     sta ones_place
     sta tens_place
@@ -174,7 +180,7 @@ convert_to_decimal:
         lda EWL_StreetSkate_pointers_score, y
         sta main_pointer_HI
 
-        stx temp
+        stx main_temp
         ldx Animation::oam_size
         
         ldy #0
@@ -205,7 +211,7 @@ convert_to_decimal:
         clc
         adc #4
         sta Animation::oam_size
-        ldx temp
+        ldx main_temp
         INX
             
         cpx #5
@@ -224,13 +230,13 @@ convert_to_decimal:
 
         ; sta main_pointer_HI
         ldx Game::lives
-        stx temp
+        stx main_temp
         ldx #0
         
         stx score_pos_x_
        
         @loop:
-            lda temp
+            lda main_temp
             beq @done    
             ldx Animation::oam_size
           
@@ -262,7 +268,7 @@ convert_to_decimal:
             clc
             adc #4
             sta Animation::oam_size
-            dec temp
+            dec main_temp
             jmp @loop
         
         @done:

@@ -80,10 +80,10 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			lda scroll_HI
 			adc #0
 			sta scroll_HI
-			cmp #NUM_BACKGROUNDS	
-			bcc @continue
-				lda #0
-				sta scroll_HI
+			; cmp #NUM_BACKGROUNDS	
+			; bcc @continue
+			; 	lda #0
+			; 	sta scroll_HI
 				
 			@continue:
 			jsr Next_Background
@@ -196,17 +196,16 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			lda (bg_header_pt_LO ), y 
 			sta main_pointer_HI
 
-			ldx main_pointer_HI
-			ldy main_pointer_LO
+			ldy main_pointer_HI
+			ldx main_pointer_LO
 
 			jsr Obsticles::Load 
 
 
 			ldy #Obstical_t::animation_header_addr ; load the animation 
-			iny 
 			lda (main_pointer_LO), Y
 			tax
-			dey
+			iny
 			lda (main_pointer_LO ), Y
 			tay
 
@@ -217,8 +216,8 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			@remove_obsticles:
 				lda #0
 				sta obsticles_active_flag
-				ldx #>Empty_Ani_Header
-				ldy #<Empty_Ani_Header
+				ldx #<Empty_Ani_Header
+				ldy #>Empty_Ani_Header
 				jsr Animation::Load_Animation
 				jmp @done
 

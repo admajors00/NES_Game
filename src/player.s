@@ -23,18 +23,20 @@ OAM_TILE = 1
 OAM_ATTR = 2
 OAM_X    = 3
 
-player_input_flags_g = $EF
+player_input_flags_g = $1A
 
 PLAYER_ANI_DONE_f = 1<<0
 PLAYER_HIT_DETECTED_f = 1<<1
+
 PLAYER_GRIND_DETECTED_f = 1<<2
 PLAYER_RAMP_DETECTED_f = 1<<3
 PLAYER_GRAB_DETECTED_f = 1<<4
+PLAYER_ROUGH_DETECTED_f 	= 1<<5
 
-
-ACTION_INTERRUPTABLE_f = 1<<0
+ACTION_INTERRUPTABLE_f 	= 1<<0
 ACTION_STATE_CHANGE_f	= 1<<1
-MOTION_STATE_CHANGE_f = 1<<2
+MOTION_STATE_CHANGE_f 	= 1<<2
+UPDATE_ANIMATION_f 		= 1<<3
 .scope Player
 
 	.import Load_Animation
@@ -52,9 +54,8 @@ MOTION_STATE_CHANGE_f = 1<<2
 	velocity_Y_LO = $17
 	velocity_Y_HI = $18
 
-	player_animation_flag = $19;$10 is interruptable $01 is active 
-	internal_flags = $1A
-	state_change_flag = $1A ;state change this frame if 1, otherwise 0
+
+	internal_flags = $19
 
 	player_action_state = $1B
 
@@ -93,9 +94,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 
 	
 	
-	actionStateJumpTable:
-		.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
-
+	; actionStateJumpTable:
+	; 	.addr idle_ani, coasting, pushing_animation, jumping_animation, kickflip_animation,loadUp_animation, crashed_animation, shuv_it_animation
+	actionStateAniTable:
+		.addr Idle_Ani_Header, Coast_Ani_Header, Push_Ani_Header, Jump_Ani_Header, KickFlip_Ani_Header, LoadUp_Ani_Header, Crash_Ani_Header, ShuvIt_Ani_Header
 	.enum PlayerGameStates_e
 		normal = 0
 		crashed = 1
@@ -125,18 +127,16 @@ MOTION_STATE_CHANGE_f = 1<<2
 		ldx #Game_Const::ground
 		stx pos_y_HI
 
+		ldy #>Idle_Ani_Header
+		ldx #<Idle_Ani_Header
+		jsr Load_Animation
+
 
 		lda #PlayerActionStates::coasting
-			sta player_action_state
+		sta player_action_state
 
 		ldx #PlayerMovementStates::idle
 		stx player_movement_state
-		lda #$10
-		sta player_animation_flag
-
-		ldx #>Idle_Ani_Header
-		ldy #<Idle_Ani_Header
-		jsr Load_Animation
 
 		lda #PlayerGameStates_e::starting
 		sta player_state
@@ -145,37 +145,9 @@ MOTION_STATE_CHANGE_f = 1<<2
 
 
 	Update:
-		ldx #0
-		stx state_change_flag
-
-		lda player_animation_flag;if 0 then an animation has finished, return to default state
-		bne @action_not_done
-
-			lda #PlayerActionStates::coasting
-			sta player_action_state
-			inc state_change_flag
-
-		@action_not_done:
-
-
-
-		lda  #PLAYER_HIT_DETECTED_f
-		and player_input_flags_g
-		beq @flag_check_done
-			lda player_input_flags_g
-			eor #PLAYER_HIT_DETECTED_f
-			sta player_input_flags_g
-			
-			lda #PlayerGameStates_e::crashed
-			sta player_state
-			lda #0
-			sta velocity_Y_HI
-			sta velocity_Y_LO
-			sta velocity_x_LO
-			sta velocity_x_HI
-			jsr crashed_animation
-			RTS
-		@flag_check_done:
+	
+		jsr Handle_input_flags
+		
 
 		lda player_state
 		asl 
@@ -188,11 +160,137 @@ MOTION_STATE_CHANGE_f = 1<<2
 		
 	rts	
 		
+	Handle_input_flags:
+		lda #PLAYER_ANI_DONE_f;if 0 then an animation has finished, return to default state
+		and player_input_flags_g
+		beq @action_not_done
 
+			lda #PlayerActionStates::coasting
+			sta player_action_state
+
+			lda internal_flags
+			ora #ACTION_STATE_CHANGE_f
+			sta internal_flags
+
+			lda player_input_flags_g;if 0 then an animation has finished, return to default state
+			and #<~PLAYER_ANI_DONE_f
+			sta player_input_flags_g
+			
+		@action_not_done:
+
+
+		lda  #PLAYER_RAMP_DETECTED_f
+		and player_input_flags_g
+		bne @ramp
+
+		lda #PLAYER_HIT_DETECTED_f
+		and player_input_flags_g
+		bne @trip
+
+		lda  #PLAYER_GRAB_DETECTED_f
+		and player_input_flags_g
+		bne @grabbed
+
+		lda  #PLAYER_ROUGH_DETECTED_f
+		and player_input_flags_g
+		bne @rough
+
+		
+		
+
+		jmp @flag_check_done
+
+		@ramp:
+			lda player_input_flags_g
+			and #<~PLAYER_RAMP_DETECTED_f
+			sta player_input_flags_g
+
+			 ;lsr velocity_x_HI
+			; ror velocity_x_LO
+
+			lda velocity_Y_LO
+			clc
+			adc velocity_x_LO
+			sta velocity_Y_LO
+			lda velocity_Y_HI
+			adc velocity_x_HI
+			sta velocity_Y_HI
+			dec pos_y_HI
+			rts
+
+		@trip:
+			lda player_input_flags_g
+			and #<~PLAYER_HIT_DETECTED_f
+			sta player_input_flags_g
+			
+			lda #PlayerGameStates_e::crashed
+			sta player_state
+			lda #0
+			sta velocity_Y_HI
+			sta velocity_Y_LO
+			sta velocity_x_LO
+			sta velocity_x_HI
+			ldx #<Crash_Ani_Header
+			ldy #>Crash_Ani_Header
+			
+			jsr Load_Animation
+			
+			RTS
+
+		@grabbed:
+			lda player_input_flags_g
+			and #<~PLAYER_GRAB_DETECTED_f
+			sta player_input_flags_g
+			
+			lda #PlayerGameStates_e::crashed
+			sta player_state
+			lda #0
+			sta velocity_Y_HI
+			sta velocity_Y_LO
+			sta velocity_x_LO
+			sta velocity_x_HI
+			ldx #<Crash_Ani_Header
+			ldy #>Crash_Ani_Header
+			
+			jsr Load_Animation
+			rts
+		@rough:
+			lda #<~PLAYER_ROUGH_DETECTED_f
+			and player_input_flags_g
+			sta player_input_flags_g
+
+			
+			lda velocity_x_HI
+			bne @continue
+			;IF VxHI is zero check if VxLO is greater than friction
+				LDA velocity_x_LO
+				cmp #$F0
+				bcs @continue
+				; lda #0 ;if VxLO is less than friction, set to 0
+				; sta velocity_x_LO
+				jmp @done
+			@continue:
+				; else, subtract from both
+				lda velocity_x_LO
+				sec
+				sbc #$30
+				
+				sta velocity_x_LO
+				lda velocity_x_HI
+				sbc #$00
+				;bvs @done
+				sta velocity_x_HI
+			@done:
+
+			
+		@flag_check_done:
+
+	rts
 	Normal_Update:	
 		jsr Handle_movement_state
-		jsr checkButtons
-		jsr handle_action_states
+		jsr Handle_action_state
+		jsr load_action_state_ani
+
 		
 		ldy #Sprite_Positions_e::player_x
 		lda pos_x_HI
@@ -314,20 +412,23 @@ MOTION_STATE_CHANGE_f = 1<<2
 	Apply_Friction_X:
 		lda velocity_x_HI
 		bne @continue
+			;IF VxHI is zero check if VxLO is greater than friction
 			LDA velocity_x_LO
 			cmp #Game_Const::friction
 			bcs @continue
-			lda #0
+			lda #0 ;if VxLO is less than friction, set to 0
 			sta velocity_x_LO
 			jmp @done
 		@continue:
+			; else, subtract from both
 			lda velocity_x_LO
 			sec
 			sbc #Game_Const::friction
-
+			
 			sta velocity_x_LO
 			lda velocity_x_HI
 			sbc #$00
+			;bvs @done
 			sta velocity_x_HI
 		@done:
 	rts
@@ -350,7 +451,7 @@ MOTION_STATE_CHANGE_f = 1<<2
 			adc velocity_x_LO
 			sta pos_x_LO
 			lda amount_to_scroll
-			;clc
+		
 			adc velocity_x_HI
 			sta amount_to_scroll
 
@@ -397,13 +498,15 @@ MOTION_STATE_CHANGE_f = 1<<2
 
 	
 
-	checkButtons:
+	Handle_action_state:
 
 		lda player_movement_state			
 		cmp #PlayerMovementStates::inAirNotMoving
 		beq @done
 		cmp #PlayerMovementStates::inAirMoving
 		beq @done
+
+
 
 		lda #BUTTON_A
 		and Port_1_Pressed_Buttons
@@ -450,7 +553,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 		jsr Apply_Push_X        
 		ldx #PlayerActionStates::pushing
 		stx player_action_state
-		inc state_change_flag
+
+		lda #ACTION_STATE_CHANGE_f
+		ora internal_flags
+		sta internal_flags
 		@done:
 		rts
 	
@@ -458,7 +564,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 		jsr Apply_Jump_Y		
 		ldx #PlayerActionStates::ollie
 		stx player_action_state
-		inc state_change_flag
+
+		lda #ACTION_STATE_CHANGE_f
+		ora internal_flags
+		sta internal_flags
 	rts
 
 	kickflip:
@@ -468,7 +577,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 		sta jump_speed_LO
 		ldx #PlayerActionStates::kickflip
 		stx player_action_state
-		inc state_change_flag
+
+		lda #ACTION_STATE_CHANGE_f
+		ora internal_flags
+		sta internal_flags
 	rts
 	shuv_it:
 		jsr Apply_Jump_Y
@@ -477,7 +589,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 		sta jump_speed_LO
 		ldx #PlayerActionStates::shuvit
 		stx player_action_state
-		inc state_change_flag
+
+		lda #ACTION_STATE_CHANGE_f
+		ora internal_flags
+		sta internal_flags
 	rts
 
 	
@@ -487,7 +602,10 @@ MOTION_STATE_CHANGE_f = 1<<2
 		sta jump_speed_LO
 		ldx #PlayerActionStates::loadup
 		stx player_action_state
-		inc state_change_flag
+
+		lda #ACTION_STATE_CHANGE_f
+		ora internal_flags
+		sta internal_flags
 	rts
 
 
@@ -506,157 +624,171 @@ MOTION_STATE_CHANGE_f = 1<<2
 		adc #$18
 		sta jump_speed_LO
 		lda jump_speed_HI
-		adc#0
+		adc #0
 		sta jump_speed_HI
 		jmp @done
 	@done:
 
 	rts
 	
-	handle_action_states:
+
+
+
+
+	load_action_state_ani:
 		; lda flags
 		; and #ACTIVE
 		; bne @done
-		lda state_change_flag
+		lda #ACTION_STATE_CHANGE_f 
+		and internal_flags
 		beq @done
-		lda player_action_state
-		asl 
-		tax
-		lda actionStateJumpTable, x
-		sta pointer_1_LO
-		lda actionStateJumpTable+1, x
-		sta pointer_1_LO+1
-		jmp (pointer_1_LO)
+			lda #<~ACTION_STATE_CHANGE_f 
+			and internal_flags
+			sta internal_flags
+			
+			lda player_action_state
+			asl 
+			tax
+			lda actionStateAniTable, x
+			sta pointer_1_LO
+			lda actionStateAniTable+1, x
+			sta pointer_1_HI
+
+			ldx pointer_1_LO
+			ldy pointer_1_HI 
+			jsr Load_Animation
+			;jmp (pointer_1_LO)
 		
-	@done:	
+		@done:	
 	rts	
 
-	idle_ani:
-		lda #$11
-		sta player_animation_flag
-		ldx #>Idle_Ani_Header
-		ldy #<Idle_Ani_Header
-		jsr Load_Animation
+	; idle_ani:
+	; 	lda #$11
+	; 	sta player_animation_flag
+	; 	ldx #<Idle_Ani_Header
+	; 	ldy #>Idle_Ani_Header
+		
+	; 	jsr Load_Animation
 		
 
-	rts
+	; rts
 
-	pushing_animation:
-		lda player_animation_flag
-		beq @load_push
-		lda #$10
-		and player_animation_flag
-		bne @load_push
-		bne @done
-		@load_push:
-			lda #11
-			sta player_animation_flag
+	; pushing_animation:
+	; 	lda player_animation_flag
+	; 	beq @load_push
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @load_push
+	; 	bne @done
+	; 	@load_push:
+	; 		lda #11
+	; 		sta player_animation_flag
 
-			ldx #>Push_Ani_Header
-			ldy #<Push_Ani_Header
-			jsr Load_Animation
-			jmp @done
-		@done:
-	rts
+	; 		ldy #>Push_Ani_Header
+	; 		ldx #<Push_Ani_Header
+	; 		jsr Load_Animation
+	; 		jmp @done
+	; 	@done:
+	; rts
 
 
-	jumping_animation:
+	; jumping_animation:
 		
-		lda player_animation_flag
-		beq @load_jump
-		lda #$10
-		and player_animation_flag
-		bne @load_jump
-		bne @done
-		@load_jump:
-			lda #01
-			sta player_animation_flag
-			ldx #>Jump_Ani_Header
-			ldy #<Jump_Ani_Header
-			jsr Load_Animation
-		@done:
-		rts
+	; 	lda player_animation_flag
+	; 	beq @load_jump
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @load_jump
+	; 	bne @done
+	; 	@load_jump:
+	; 		lda #01
+	; 		sta player_animation_flag
+	; 		ldy #>Jump_Ani_Header
+	; 		ldx #<Jump_Ani_Header
+	; 		jsr Load_Animation
+	; 	@done:
+	; 	rts
 
-	coasting:
-		lda player_animation_flag
-		bne @done
-		lda #$11
-		sta player_animation_flag
-		ldx #>Coast_Ani_Header
-		ldy #<Coast_Ani_Header
-		jsr Load_Animation
-		@done:
-		rts
-	loadUp_animation:
-		lda player_animation_flag
-		beq @loadup
-		lda #$10
-		and player_animation_flag
-		bne @loadup
+	; coasting:
+	; 	lda player_animation_flag
+	; 	bne @done
+	; 	lda #$11
+	; 	sta player_animation_flag
+	; 	ldy #>Coast_Ani_Header
+	; 	ldx #<Coast_Ani_Header
+	; 	jsr Load_Animation
+	; 	@done:
+	; 	rts
+	; loadUp_animation:
+	; 	lda player_animation_flag
+	; 	beq @loadup
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @loadup
 		
-		bne @done
-		@loadup:
-			; lda player_animation_flag
-			; bne @done
-			lda #$01
-			sta player_animation_flag
-			ldx #>LoadUp_Ani_Header
-			ldy #<LoadUp_Ani_Header
-			jsr Load_Animation
-		@done:
-		rts
+	; 	bne @done
+	; 	@loadup:
+	; 		; lda player_animation_flag
+	; 		; bne @done
+	; 		lda #$01
+	; 		sta player_animation_flag
+	; 		ldy #>LoadUp_Ani_Header
+	; 		ldx #<LoadUp_Ani_Header
+	; 		jsr Load_Animation
+	; 	@done:
+	; 	rts
 
-	kickflip_animation:
-		lda player_animation_flag
-		beq @load_kf
-		lda #$10
-		and player_animation_flag
-		bne @load_kf
+	; kickflip_animation:
+	; 	lda player_animation_flag
+	; 	beq @load_kf
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @load_kf
 		
-		bne @done
-		@load_kf:
-			lda #$01
-			sta player_animation_flag
-			ldx #>KickFlip_Ani_Header
-			ldy #<KickFlip_Ani_Header
-			jsr Load_Animation
-			jmp @done
-	@done:
-	rts
-	shuv_it_animation:
-		lda player_animation_flag
-		beq @load_si
-		lda #$10
-		and player_animation_flag
-		bne @load_si
+	; 	bne @done
+	; 	@load_kf:
+	; 		lda #$01
+	; 		sta player_animation_flag
+	; 		ldy #>KickFlip_Ani_Header
+	; 		ldx #<KickFlip_Ani_Header
+	; 		jsr Load_Animation
+	; 		jmp @done
+	; @done:
+	; rts
+	; shuv_it_animation:
+	; 	lda player_animation_flag
+	; 	beq @load_si
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @load_si
 		
-		bne @done
-		@load_si:
-			lda #$01
-			sta player_animation_flag
-			ldx #>ShuvIt_Ani_Header
-			ldy #<ShuvIt_Ani_Header
-			jsr Load_Animation
-			jmp @done
-	@done:
-	rts
-	crashed_animation:
-		lda player_animation_flag
-		beq @crash_
-		lda #$10
-		and player_animation_flag
-		bne @crash_
+	; 	bne @done
+	; 	@load_si:
+	; 		lda #$01
+	; 		sta player_animation_flag
+	; 		ldy #>ShuvIt_Ani_Header
+	; 		ldx #<ShuvIt_Ani_Header
+	; 		jsr Load_Animation
+	; 		jmp @done
+	; @done:
+	; rts
+	; crashed_animation:
+	; 	lda player_animation_flag
+	; 	beq @crash_
+	; 	lda #$10
+	; 	and player_animation_flag
+	; 	bne @crash_
 		
-		bne @done
-		@crash_:
-		lda #$01
+	; 	bne @done
+	; 	@crash_:
+	; 	lda #$01
 		
-		sta player_animation_flag
-		ldx #>Crash_Ani_Header
-		ldy #<Crash_Ani_Header
-		jsr Load_Animation
-		@done:
-	rts	
+	; 	sta player_animation_flag
+	; 	ldy #>Crash_Ani_Header
+	; 	ldx #<Crash_Ani_Header
+	; 	jsr Load_Animation
+	; 	@done:
+	; rts	
 	
 .endscope
 

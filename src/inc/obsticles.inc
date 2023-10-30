@@ -2,9 +2,10 @@
 _OBSTICLE_INC  =1
 
 .enum Obstical_Types_e
-    cone = 0
+    trip = 0
     rail = 1
     ramp = 2
+    rough = 3
 .endenum
 
 .enum Obstical_States_e
@@ -28,8 +29,8 @@ Cone:
     .byte $B6
     .byte $0F
     .byte $0F
-    .byte $00
-    .byte $00
+    .byte Obstical_Types_e::trip
+    .byte Obstical_States_e::idle
     .addr Cone_Ani_Header
 
 Pothole:
@@ -37,17 +38,25 @@ Pothole:
     .byte $B6
     .byte $0F
     .byte $0A
-    .byte $00
-    .byte $00
+    .byte Obstical_Types_e::trip
+    .byte Obstical_States_e::idle
     .addr Pothole_Ani_Header
 
 Grate:
     .byte $10
-    .byte $B8
-    .byte $0F
+    .byte $B4
+    .byte $18
     .byte $0A
-    .byte $00
-    .byte $00
-    .addr Pothole_Ani_Header
+    .byte Obstical_Types_e::rough
+    .byte Obstical_States_e::idle
+    .addr Grate_Ani_Header
+Ramp:
+    .byte $B0
+    .byte $B6
+    .byte $0F
+    .byte $0F
+    .byte Obstical_Types_e::ramp
+    .byte Obstical_States_e::idle
+    .addr Ramp_Ani_Header
 
 .endif

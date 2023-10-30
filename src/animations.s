@@ -64,8 +64,7 @@ OAM_DMA_X    = $203
     flags = $25
 
     header_table_index = $26
-    temp1 = $27
-    temp2 = $28
+  
 
     pointer_3_LO = $29
     pointer_3_HI = $2A
@@ -123,8 +122,8 @@ OAM_DMA_X    = $203
     
     Load_Animation: ;add animation header to the list of headers
 
-        sty pointer_1_LO
-        stx pointer_1_HI ;load new header addr
+        stx pointer_1_LO
+        sty pointer_1_HI ;load new header addr
         ldy #Animation_Header_t::flags
         lda #ANI_OBJECTS_MASK
        
@@ -197,16 +196,15 @@ OAM_DMA_X    = $203
         ;for animation in list
         ;if started 
      
-        ; lda #0
-        ; sta temp1
+       
         jsr Clear_OAM_DMA
         lda #HEADER_TABLE_MAX_SIZE
         asl 
         sta header_table_index
         tay
         @loop:
-            inc temp1
-            ldy  header_table_index
+    
+            ldy header_table_index
             beq @done       
              ; if index is 0 stop
 
@@ -305,8 +303,12 @@ OAM_DMA_X    = $203
 
                 ;else 
                 @not_a_loop:  
-                    lda #0
-                    sta Player::player_animation_flag
+                    lda header_table_index
+                    bne @done ;if headertable index is 0 then set PLAYER_ANI_DONE_f 
+                        lda #PLAYER_ANI_DONE_f
+                        ora player_input_flags_g
+                        sta player_input_flags_g
+                    
                     jmp @done
                     ;set the animation done flag
                 
