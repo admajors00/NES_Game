@@ -53,10 +53,14 @@ Obstical_headers:
         sta pos_y
 
 
-        ldy #>Empty_Ani_Header
-		ldx #<Empty_Ani_Header
+        ldy #>Obs_0_Empty_Ani_Header
+		ldx #<Obs_0_Empty_Ani_Header
 		jsr Load_Animation
 
+
+         ldy #>Obs_1_Empty_Ani_Header
+		ldx #<Obs_1_Empty_Ani_Header
+		jsr Load_Animation
         ldx #>Cone
 		ldy #<Cone
 		jsr Load
@@ -72,6 +76,13 @@ Obstical_headers:
         sta pos_x
         
         ldy #Sprite_Positions_e::obst_1_x
+		lda pos_x
+		sta Sprite_positions_table, y
+		iny 
+		lda pos_y
+		sta Sprite_positions_table, y
+
+        ldy #Sprite_Positions_e::obst_0_x
 		lda pos_x
 		sta Sprite_positions_table, y
 		iny 

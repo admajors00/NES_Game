@@ -16,6 +16,8 @@
 animation_headers_table:
     .addr 0,0,0,0
 
+obs0_header_table:
+    .tag Animation_Header_t
 player_header_table:
     .tag Animation_Header_t
 
@@ -26,7 +28,7 @@ obs1_header_table:
     .tag Animation_Header_t
 
 Sprite_positions_table:
-    .byte 0,0,0,0,0,0
+    .byte 0,0,0,0,0,0,0,0
 
 Alt_frametimer_table:
     .byte 0, 0, 0 ,0
@@ -34,7 +36,7 @@ Alt_frametimer_table:
 
 
 SPRITE_0_X = $FA
-SPRITE_0_Y = $1D
+SPRITE_0_Y = $2D
 
 
 .segment "CODE"
@@ -89,6 +91,13 @@ OAM_DMA_X    = $203
         sta pointer_1_LO
 
         ldy #0
+        lda #<obs0_header_table
+        sta (pointer_1_LO),Y
+        iny 
+        lda #>obs0_header_table
+        sta (pointer_1_LO),Y
+
+        iny
         lda #<player_header_table
         sta (pointer_1_LO),Y
         iny 
@@ -304,6 +313,8 @@ OAM_DMA_X    = $203
                 ;else 
                 @not_a_loop:  
                     lda header_table_index
+                    lsr
+                    cmp #objects_e::player
                     bne @done ;if headertable index is 0 then set PLAYER_ANI_DONE_f 
                         lda #PLAYER_ANI_DONE_f
                         ora player_input_flags_g
@@ -447,13 +458,17 @@ OAM_DMA_X    = $203
     .endproc
 
     Clear_OAM_DMA:
+        
+     
         lda #$FE
         ldx oam_size
+    
         @loop:
             sta $200, X
             dex
-            bne @loop
-            ldx #4
+            cpx status_oam_size
+            bcs @loop
+            ldx status_oam_size
             stx oam_size
             lda #SPRITE_0_X
             sta OAM_DMA_X

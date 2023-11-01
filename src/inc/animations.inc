@@ -22,25 +22,23 @@ ANI_FLAGS_MASK = %11110000
 .endstruct
 
 .enum objects_e
-    player = $00
-    guy_chasing = $01
-    obstical_1 = $02
-    obstical_2 = $03
+    obstical_0 = $00
+    player = $01
+    guy_chasing = $02
+    obstical_1 = $03
 .endenum
 
 .enum Sprite_Positions_e
-    player_x = 0
-    player_y = 1
-    chaser_x = 2
-    chaser_y = 3
-    obst_1_x = 4
-    obst_1_y = 5
+    obst_0_x = 0
+    obst_0_y = 1
+    player_x = 2
+    player_y = 3
+    chaser_x = 4
+    chaser_y = 5
+    obst_1_x = 6
+    obst_1_y = 7
 .endenum
-.struct Linked_List
-    data_pt     .addr
-    prev        .addr
-    next        .addr
-.endstruct
+
 
 
 
@@ -54,7 +52,7 @@ Push_Ani_Header:
       .addr EWL_StreetSkate_Push_1_data
       .addr push_frame_timers
       .byte 8
-      .byte %00010000
+      .byte %00010000 | objects_e::player
 
 
 
@@ -68,7 +66,7 @@ Jump_Ani_Header:
       .addr EWL_StreetSkate_Jump_1_data
       .addr jump_frame_timers
       .byte 2
-      .byte %00010000
+      .byte %00010000 | objects_e::player
 
 
 
@@ -82,7 +80,7 @@ Coast_Ani_Header:
       .addr EWL_StreetSkate_Coasting_1_data
       .addr coast_frame_timers
       .byte 8
-      .byte %11010000
+      .byte %11010000 | objects_e::player
 loadUp_frame_timers:
     .byte 4,8,8,8
 LoadUp_Ani_Header:
@@ -92,7 +90,7 @@ LoadUp_Ani_Header:
     .addr EWL_StreetSkate_LoadUp_1_data
     .addr loadUp_frame_timers
     .byte 8
-    .byte %11010000
+    .byte %11010000 | objects_e::player
 
 
 crash_frame_timers:
@@ -105,7 +103,7 @@ Crash_Ani_Header:
       .addr EWL_StreetSkate_Crash_1_data
       .addr crash_frame_timers
       .byte 4
-      .byte %00010000
+      .byte %00010000 | objects_e::player
 
 idle_frame_timers:
     .byte 2
@@ -117,7 +115,7 @@ Idle_Ani_Header:
       .addr EWL_StreetSkate_Coasting_1_data
       .addr idle_frame_timers
       .byte 2
-      .byte %01010000
+      .byte %01010000 | objects_e::player
 
 kickFlip_frame_timers:
     .byte 4,4,4,4,4,4,4,8,4
@@ -129,7 +127,7 @@ KickFlip_Ani_Header:
       .addr EWL_StreetSkate_KickFlip_1_data
       .addr kickFlip_frame_timers
       .byte 2
-      .byte %00010000
+      .byte %00010000 | objects_e::player
 
 shuvIt_frame_timers:
     .byte 4,4,4,4,4,4,8,4
@@ -141,7 +139,7 @@ ShuvIt_Ani_Header:
       .addr EWL_StreetSkate_ShuvIt_0_data
       .addr shuvIt_frame_timers
       .byte 2
-      .byte %00010000
+      .byte %00010000 | objects_e::player
 
 chaser_frame_timers:
     .byte 8,8,8,8
@@ -153,7 +151,7 @@ chaser_Ani_Header:
       .addr EWL_StreetSkate_GuyRunning_1_data
       .addr chaser_frame_timers
       .byte 8
-      .byte %11010001
+      .byte %11010000 | objects_e::guy_chasing
 
 
 cone_frame_timers:
@@ -166,7 +164,7 @@ Cone_Ani_Header:
       .addr EWL_StreetSkate_Cone_1_data
       .addr cone_frame_timers
       .byte $FF
-      .byte %01110010
+      .byte %01110000 | objects_e::obstical_1
     
 
 Ramp_Ani_Header:
@@ -176,7 +174,7 @@ Ramp_Ani_Header:
       .addr EWL_StreetSkate_Ramp_data
       .addr cone_frame_timers
       .byte $FF
-      .byte %01110010
+      .byte %01110000 | objects_e::obstical_0
 
 
 pothole_frame_timers:
@@ -189,7 +187,7 @@ Pothole_Ani_Header:
     .addr EWL_StreetSkate_Pothole_1_data
     .addr pothole_frame_timers
     .byte $FF
-    .byte %01110010
+    .byte %01110000 | objects_e::obstical_0
 
 grate_frame_timers:
     .byte $FF
@@ -201,15 +199,40 @@ Grate_Ani_Header:
     .addr EWL_StreetSkate_Grate_data
     .addr grate_frame_timers
     .byte $FF
-    .byte %01110010
+    .byte %01110000 | objects_e::obstical_0
 
-Empty_Ani_Header: 
+Obs_0_Empty_Ani_Header: 
     .byte 0
     .byte 0
     .addr 0
     .addr 0
     .addr 0
     .byte 0
-    .byte %00000010
-      
+    .byte %00000000 | objects_e::obstical_0
+Chaser_Empty_Ani_Header: 
+    .byte 0
+    .byte 0
+    .addr 0
+    .addr 0
+    .addr 0
+    .byte 0
+    .byte %00000000 | objects_e::guy_chasing 
+
+Player_Empty_Ani_Header: 
+    .byte 0
+    .byte 0
+    .addr 0
+    .addr 0
+    .addr 0
+    .byte 0
+    .byte %00000000 | objects_e::player  
+
+Obs_1_Empty_Ani_Header: 
+    .byte 0
+    .byte 0
+    .addr 0
+    .addr 0
+    .addr 0
+    .byte 0
+    .byte %00000000 | objects_e::obstical_1
 .endif

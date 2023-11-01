@@ -73,12 +73,12 @@ HIT_CHASER_f = 1<<1
 
 
     Start_Screen_Loop:
-        jsr Animation::Update
+        ;jsr Animation::Update
         jsr UpdateButtons
         lda score_LO 
-        beq @cont
-            jsr Update_Score
-        @cont:
+        ; beq @cont
+        ;     jsr Update_Score
+        ; @cont:
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
@@ -97,6 +97,7 @@ HIT_CHASER_f = 1<<1
             jsr famistudio_music_play
 
             jsr Init
+            jsr Status_Bar_Init
             jsr Update_level
             jsr Background::Init
             jsr Chaser::Init
@@ -134,9 +135,11 @@ HIT_CHASER_f = 1<<1
             lda #Game_States_e::next_level
             sta game_state
         @cont:
+        jsr Update_Score
         jsr Background::Update 
         jsr Obsticles::Update
         jsr Check_For_Hit
+       
         jsr Animation::Update
         
         jsr UpdateButtons
@@ -144,7 +147,7 @@ HIT_CHASER_f = 1<<1
         jsr Player::Update
         jsr Chaser::Update
        
-        jsr Update_Score
+        
 
         
         @done:
@@ -176,6 +179,8 @@ HIT_CHASER_f = 1<<1
 
         lda #0
         jsr famistudio_music_play
+
+        jsr store_high_score
 
         ldx #<palette_TitleScreen
         ldy #>palette_TitleScreen
@@ -356,6 +361,10 @@ HIT_CHASER_f = 1<<1
                     lda player_input_flags_g
                     ora #PLAYER_HIT_DETECTED_f
                     sta player_input_flags_g
+
+                    ; lda #LIVES_CHANGE
+                    ; ora status_bar_flags
+                    ; sta status_bar_flags
                     ldx lives
                     beq dead
                         ; lda #3
@@ -363,6 +372,7 @@ HIT_CHASER_f = 1<<1
                         ; jmp @done
                     dex
                     stx lives
+                    
                     lda #Game_States_e::level_restart
                     sta game_state  
                     jmp @done
@@ -398,6 +408,10 @@ HIT_CHASER_f = 1<<1
                 lda score_HI
                 adc#0
                 sta score_HI
+
+                lda #SCORE_CHANGE
+                ora status_bar_flags
+                sta status_bar_flags
                 jmp @done
         @done:
     rts

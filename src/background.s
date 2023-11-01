@@ -216,8 +216,12 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			@remove_obsticles:
 				lda #0
 				sta obsticles_active_flag
-				ldx #<Empty_Ani_Header
-				ldy #>Empty_Ani_Header
+				ldx #<Obs_0_Empty_Ani_Header
+				ldy #>Obs_0_Empty_Ani_Header
+				jsr Animation::Load_Animation
+
+				ldy #>Obs_1_Empty_Ani_Header
+				ldx #<Obs_1_Empty_Ani_Header
 				jsr Animation::Load_Animation
 				jmp @done
 
@@ -422,7 +426,7 @@ Handle_Scroll:
         and #%01000000
         beq WaitSprite0      ; wait until sprite 0 is hit
 
-    ldx #$10
+    ldx #$20
     WaitScanline:
         dex
         bne WaitScanline
@@ -521,7 +525,7 @@ Draw_New_Attributes_From_Buffer:
 	LSR A
 	LSR A
 	CLC
-	ADC #$C8
+	ADC #$c8	;attribute table start adress offset
 	STA column_LO    ; attribute base + scroll / 32
 
 
@@ -551,16 +555,8 @@ Draw_New_Attributes_From_Buffer:
 		@done:
 
 rts
-; lda scroll_HI
-; 	asl 
-; 	asl	
-; 	sta new_background_HI
 
-; 	lda column_number
-; 	and #%00011111
-; 	lsr A
-; 	lsr A
-; 	sta new_background_LO
+
 Draw_New_Collumn_To_Buffer:
 	
 	lda #0 
@@ -577,8 +573,8 @@ Draw_New_Collumn_To_Buffer:
 	sta new_background_HI
 
 
-	ldx #$1A
-	ldy #$80
+	ldx #$18 ;buffer start addr offset for status bar
+	ldy #$C0	;acreen new bg start addr offset for status bar
 
 	@loop:
 		lda (new_background_LO),Y
@@ -616,7 +612,7 @@ Draw_New_Collumn_From_Buffer:
 
 	LDA column_LO
 	CLC
-	ADC #$80
+	ADC #$C0 ;nametable start addr offset for status bar
 	STA column_LO
 	LDA column_HI
 	ADC #$00
@@ -630,8 +626,8 @@ Draw_New_Collumn_From_Buffer:
 	lda column_LO
 	sta $2006
 
-	ldx #$1A
-	ldy #$80
+	ldx #$18 ;buffer start addr offset for status bar
+
 
 	@loop:
 		lda Scroll_Buffer,x
