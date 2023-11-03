@@ -83,15 +83,7 @@ Lv2_bg_6:
     .addr Level_Screen_2_3
 
 ; .org $430
-Level_2_bg_Array:
-    .addr Lv2_bg_6
-    .addr Lv2_bg_5
-    .addr Lv2_bg_1
-    .addr Lv2_bg_2
-    .addr Lv2_bg_3
-    .addr Lv2_bg_4
-    .addr Lv2_bg_6
-    .addr Lv2_bg_5  
+
 Level_1_bg_Array:
     .addr Lv1_bg_6
     .addr Lv1_bg_8
@@ -104,6 +96,16 @@ Level_1_bg_Array:
     .addr Lv1_bg_6
     .addr Lv1_bg_7
     .addr Lv1_bg_6
+
+Level_2_bg_Array:
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5
+    .addr Lv2_bg_1
+    .addr Lv2_bg_2
+    .addr Lv2_bg_3
+    .addr Lv2_bg_4
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5  
 Level_3_bg_Array:
     .addr Lv1_bg_6
     .addr Lv1_bg_5

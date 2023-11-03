@@ -100,6 +100,7 @@ HIT_CHASER_f = 1<<1
             jsr Status_Bar_Init
             jsr Update_level
             jsr Background::Init
+            jsr Obsticles::Init
             jsr Chaser::Init
             jsr Player::Init
 
@@ -136,8 +137,9 @@ HIT_CHASER_f = 1<<1
             sta game_state
         @cont:
         jsr Update_Score
-        jsr Background::Update 
         jsr Obsticles::Update
+        jsr Background::Update 
+        
         jsr Check_For_Hit
        
         jsr Animation::Update
@@ -225,6 +227,7 @@ HIT_CHASER_f = 1<<1
             lda #Game_States_e::running
             sta game_state 
             jsr Background::Init
+            jsr Obsticles::Init
             jsr Chaser::Reset
             jsr Player::Init 
             LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -283,6 +286,7 @@ HIT_CHASER_f = 1<<1
         lda #Game_States_e::running
         sta game_state 
         jsr Background::Init
+        jsr Obsticles::Init
         jsr Chaser::Reset
         jsr Player::Init 
 
@@ -315,6 +319,7 @@ HIT_CHASER_f = 1<<1
 
     check_obst_hit:;the players x value is inside the obstical
         lda obsticles_active_flag ;check if there are any obsticals on the scrren
+       
         beq @not_over_obst
             lda Obsticles::pos_x
             clc

@@ -47,7 +47,7 @@ SCORE_POS_X = $58
 SCORE_POS_Y = $28
 
 LEVEL_POS_X = $C8
-LEVEL_POS_Y = $20
+LEVEL_POS_Y = $1F
 
 LIVES_POS_X = $C0
 LIVES_POS_Y = $28
@@ -76,7 +76,11 @@ Status_Bar_Init:
     lda #SCORE_POS_Y
     sta score_pos_y_
     jsr Send_Score_To_OAM_Buff
+    lda #44;skip first 4 for aprite 0 
+    sta status_oam_index
     jsr Send_Level_To_OAM_Buff
+    lda #48;skip first 4 for aprite 0 
+    sta status_oam_index
     jsr Send_Lives_To_OAM_Buff
 
 
@@ -354,8 +358,9 @@ Send_Level_To_OAM_Buff:
   
         
     
-    ldy Game::level
-    tya
+    lda Game::level
+    clc
+    adc #1
     asl
     tay
 
@@ -372,7 +377,7 @@ Send_Level_To_OAM_Buff:
     ldy #0
 
     lda #LEVEL_POS_X
-    adc (main_pointer_LO),Y
+   adc (main_pointer_LO),Y
     sta OAM_DMA_X, X
 
     iny
@@ -431,7 +436,7 @@ Send_Level_To_OAM_Buff:
             sta OAM_DMA_X, X
    
             iny
-            lda #SCORE_POS_Y   
+            lda #LIVES_POS_Y   
             clc   
             adc EWL_StreetSkate_Egg_life_data,Y
             sta OAM_DMA_Y ,X

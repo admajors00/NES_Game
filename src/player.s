@@ -204,9 +204,17 @@ UPDATE_ANIMATION_f 		= 1<<3
 			lda player_input_flags_g
 			and #<~PLAYER_RAMP_DETECTED_f
 			sta player_input_flags_g
+			lda player_movement_state
+			cmp #PlayerMovementStates::inAirMoving
+			beq @trip
 
-			 ;lsr velocity_x_HI
-			; ror velocity_x_LO
+			lda #PlayerActionStates::ollie
+			sta player_action_state
+			lda #ACTION_STATE_CHANGE_f
+			ora internal_flags
+			sta internal_flags
+			;  lsr velocity_x_HI
+			;  ror velocity_x_LO
 
 			lda velocity_Y_LO
 			clc

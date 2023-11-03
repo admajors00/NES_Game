@@ -8,10 +8,10 @@ _OBSTICLE_INC  =1
     rough = 3
 .endenum
 
-.enum Obstical_States_e
-    idle = 0
-    knocked_over = 1
-.endenum
+; .enum Obstical_States_e
+;     idle = 0
+;     knocked_over = 1
+; .endenum
 
 .struct Obstical_t
     pos_x               .byte
@@ -19,18 +19,18 @@ _OBSTICLE_INC  =1
     length              .byte
     height              .byte
     type                .byte
-    state               .byte
+ ;   state               .byte
     animation_header_addr.addr
 .endstruct
 
 
 Cone:
-    .byte $B0
+    .byte $10
     .byte $B6
     .byte $0F
     .byte $0F
     .byte Obstical_Types_e::trip
-    .byte Obstical_States_e::idle
+    ;.byte Obstical_States_e::idle
     .addr Cone_Ani_Header
 
 Pothole:
@@ -39,7 +39,7 @@ Pothole:
     .byte $0F
     .byte $0A
     .byte Obstical_Types_e::trip
-    .byte Obstical_States_e::idle
+   ; .byte Obstical_States_e::idle
     .addr Pothole_Ani_Header
 
 Grate:
@@ -48,15 +48,15 @@ Grate:
     .byte $18
     .byte $0A
     .byte Obstical_Types_e::rough
-    .byte Obstical_States_e::idle
+  ;  .byte Obstical_States_e::idle
     .addr Grate_Ani_Header
 Ramp:
-    .byte $B0
+    .byte $10
     .byte $B6
     .byte $0F
     .byte $0F
     .byte Obstical_Types_e::ramp
-    .byte Obstical_States_e::idle
+  ;  .byte Obstical_States_e::idle
     .addr Ramp_Ani_Header
 
 .endif

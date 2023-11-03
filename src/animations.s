@@ -36,7 +36,7 @@ Alt_frametimer_table:
 
 
 SPRITE_0_X = $FA
-SPRITE_0_Y = $2D
+SPRITE_0_Y = $2C
 
 
 .segment "CODE"
@@ -235,7 +235,7 @@ OAM_DMA_X    = $203
             sty header_table_index
 
             ldy #Animation_Header_t::flags
-            lda #ANI_FLAGS_MASK 
+            lda #ACTIVE 
             and (pointer_1_LO), y ; if flags are 0 do not update
             beq @loop
             ldy #Animation_Header_t::flags

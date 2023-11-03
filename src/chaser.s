@@ -122,12 +122,20 @@
 
 		cmp #$0f
 		bcc @hide_chaser
-			lda #Game_Const::ground
-       		sta pos_y_HI
+			ldy #Animation_Header_t::flags
+			lda chaser_header_table, Y
+			ora #ACTIVE
+			sta chaser_header_table, Y
+			; lda #Game_Const::ground
+       		; sta pos_y_HI
 			jmp @done
 		@hide_chaser:
-			lda #$FF
-			sta pos_y_HI
+			ldy #Animation_Header_t::flags
+			lda chaser_header_table, Y
+			and #<~ACTIVE
+			sta chaser_header_table, Y
+			;lda #$FF
+			;sta pos_y_HI
 			;sta pos_x_HI
 		@done:
 

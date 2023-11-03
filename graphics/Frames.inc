@@ -193,8 +193,6 @@ EWL_StreetSkate_Coasting_4_data:
 	.byte <-16,<- 4,$d5,0|OAM_FLIP_H
 	.byte <-16,<- 8,$e0,0
 	.byte <- 8,<- 8,$e1,0
-
-	.byte <-16,<- 4,$cd,0
 	.byte $80
 
 
@@ -210,8 +208,6 @@ EWL_StreetSkate_Coasting_3_data:
 	.byte <-16,<- 4,$d8,0|OAM_FLIP_H
 	.byte <-16,<- 8,$e0,0
 	.byte <- 8,<- 8,$e1,0
-
-	.byte <-16,<- 4,$cd,0
 	.byte $80
 
 
@@ -696,28 +692,14 @@ EWL_StreetSkate_ShuvIt_7_data:
 
 EWL_StreetSkate_Grate_data:
 
+
 	.byte <-24,<- 8,$7e,2
 	.byte <-16,<- 8,$7f,2
 	.byte <- 8,<- 8,$9d,2
 	.byte   8,<- 8,$7e,2|OAM_FLIP_H|OAM_FLIP_V
 
 	.byte   0,<- 8,$9d,2
-
 	.byte $80
-
-
-EWL_StreetSkate_Ramp_data:
-
-
-	.byte<-16,<-16,$6d,3
-	.byte<- 8,<-16,$70,3
-	.byte<-16,<- 8,$6f,3
-	.byte<- 8,<- 8,$72,3
-
-	.byte $80
-
-
-
 
 
 EWL_StreetSkate_Egg_life_data:
@@ -795,6 +777,18 @@ EWL_StreetSkate_Number_9_data:
 
 	.byte <- 8,<- 8,$2a,0
 	.byte $80
+
+
+EWL_StreetSkate_Ramp_data:
+
+
+	.byte <-16,<-16,$6d,3
+	.byte <- 8,<-16,$70,3
+	.byte <-16,<- 8,$6f,3
+	.byte <- 8,<- 8,$72,3
+	.byte $80
+
+
 
 
 

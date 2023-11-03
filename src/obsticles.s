@@ -40,12 +40,15 @@ Obstical_headers:
     obsticle_index = $5e
 
     internal_flags = $5f
-    
+    obsticles_inFrame_flag = $59
 
     Init:
         lda #$00
-        sta pos_x 
         sta screen_pos_x
+        sta obsticles_active_flag
+        sta obsticles_inFrame_flag
+        lda #$F8
+        sta pos_x 
 
         lda #Game_Const::ground
         clc
@@ -61,20 +64,88 @@ Obstical_headers:
          ldy #>Obs_1_Empty_Ani_Header
 		ldx #<Obs_1_Empty_Ani_Header
 		jsr Load_Animation
-        ldx #>Cone
-		ldy #<Cone
-		jsr Load
+        ; ldx #>Cone
+		; ldy #<Cone
+		; jsr Load
         
 
     rts
 
 
     Update:
-        lda screen_pos_x
-        sec
-        sbc scroll
+        lda obsticles_active_flag
+        beq @done
+
+        lda scroll
+        cmp screen_pos_x
+        bcc @done
+
+        lda obsticles_inFrame_flag
+        bne @cont
+            lda #1
+            sta obsticles_inFrame_flag
+            ldy #Obstical_t::animation_header_addr
+            lda (header_pt_LO), Y
+            tax
+
+            iny
+            lda (header_pt_LO), Y
+            tay
+            jsr Load_Animation
+
+        @cont:
+
+        lda pos_x
+        sec 
+        sbc amount_to_scroll
         sta pos_x
-        
+     
+
+
+
+        ; lda pos_x
+        ; sec
+        ; sbc scroll
+        ; sta pos_x
+        clc
+        lda pos_x
+        cmp #$10
+        bcs @dont_hide_obs
+
+            lda #$F8
+            sta pos_x 
+            lda #0
+            sta obsticles_active_flag
+           ; lda #0
+            sta obsticles_inFrame_flag
+            ldy #Animation_Header_t::flags
+            lda obs1_header_table, Y
+            and #<~ACTIVE
+            sta obs1_header_table, Y
+
+            ldy #Animation_Header_t::flags
+            lda obs0_header_table, Y
+            and #<~ACTIVE
+            sta obs0_header_table, Y
+
+
+                ldy #Sprite_Positions_e::obst_1_x
+            lda pos_x
+            sta Sprite_positions_table, y
+            iny 
+            lda pos_y
+            sta Sprite_positions_table, y
+
+            ldy #Sprite_Positions_e::obst_0_x
+            lda pos_x
+            sta Sprite_positions_table, y
+            iny 
+            lda pos_y
+            sta Sprite_positions_table, y
+
+            jmp @done
+        @dont_hide_obs:
+           
         ldy #Sprite_Positions_e::obst_1_x
 		lda pos_x
 		sta Sprite_positions_table, y
@@ -88,6 +159,8 @@ Obstical_headers:
 		iny 
 		lda pos_y
 		sta Sprite_positions_table, y
+
+        @done: 
     rts
 
 
@@ -116,9 +189,12 @@ Obstical_headers:
         stx header_pt_LO
         sty header_pt_HI
 
+        lda #1
+        sta obsticles_active_flag
+
         ldy #Obstical_t::pos_x
         lda (header_pt_LO), Y
-        sta pos_x
+        sta screen_pos_x
 
         iny
         lda (header_pt_LO), Y
@@ -135,9 +211,31 @@ Obstical_headers:
         iny
         lda (header_pt_LO), Y
         sta  type
+
+        ; iny
+        ; lda (header_pt_LO), Y
+        ; tax
+
+        ; iny
+        ; lda (header_pt_LO), Y
+        ; tay
+        ; jsr Load_Animation
+
+       
         @done:
     rts
+    Remove:
+        ldy #Animation_Header_t::flags
+        lda obs1_header_table, Y
+        and #<~ACTIVE
+        sta obs1_header_table, Y
 
+        ldy #Animation_Header_t::flags
+        lda obs0_header_table, Y
+        and #<~ACTIVE
+        sta obs0_header_table, Y
+
+    rts 
 .endscope
 
 

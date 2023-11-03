@@ -186,8 +186,8 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			beq @remove_obsticles
 			
 
-			lda #1
-			sta obsticles_active_flag
+			; lda #1
+			; sta obsticles_active_flag
 
 			ldy #Background_t::obsticle_list
 			lda (bg_header_pt_LO), y ;get first item from obsticle list
@@ -196,33 +196,42 @@ NEW_ATTRIBUTE_FLAG = %00000010
 			lda (bg_header_pt_LO ), y 
 			sta main_pointer_HI
 
-			ldy main_pointer_HI
 			ldx main_pointer_LO
+			ldy main_pointer_HI		
 
 			jsr Obsticles::Load 
 
 
-			ldy #Obstical_t::animation_header_addr ; load the animation 
-			lda (main_pointer_LO), Y
-			tax
-			iny
-			lda (main_pointer_LO ), Y
-			tay
+			; ldy #Obstical_t::animation_header_addr ; load the animation 
+			; lda (main_pointer_LO), Y
+			; tax
+			; iny
+			; lda (main_pointer_LO ), Y
+			; tay
 
 
-			jsr Animation::Load_Animation
+			; jsr Animation::Load_Animation
 			jmp @done
 
 			@remove_obsticles:
-				lda #0
-				sta obsticles_active_flag
-				ldx #<Obs_0_Empty_Ani_Header
-				ldy #>Obs_0_Empty_Ani_Header
-				jsr Animation::Load_Animation
+				; ldy #Animation_Header_t::flags
+				; lda obs1_header_table, Y
+				; and #<~ACTIVE
+				; sta obs1_header_table, Y
 
-				ldy #>Obs_1_Empty_Ani_Header
-				ldx #<Obs_1_Empty_Ani_Header
-				jsr Animation::Load_Animation
+				; ldy #Animation_Header_t::flags
+				; lda obs0_header_table, Y
+				; and #<~ACTIVE
+				; sta obs0_header_table, Y
+				; lda #0
+				; sta obsticles_active_flag
+				; ldx #<Obs_0_Empty_Ani_Header
+				; ldy #>Obs_0_Empty_Ani_Header
+				; jsr Animation::Load_Animation
+
+				; ldy #>Obs_1_Empty_Ani_Header
+				; ldx #<Obs_1_Empty_Ani_Header
+				; jsr Animation::Load_Animation
 				jmp @done
 
 		@done:
