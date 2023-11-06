@@ -252,7 +252,7 @@ HIT_CHASER_f = 1<<1
 
         lda Chaser::velocity_x_LO
         clc
-        adc #$30
+        adc #$80
         sta  Chaser::velocity_x_LO
         lda  Chaser::velocity_x_HI
         adc #0

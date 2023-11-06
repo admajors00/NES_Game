@@ -165,7 +165,25 @@ Cone_Ani_Header:
       .addr cone_frame_timers
       .byte $FF
       .byte %01110000 | objects_e::obstical_1
-    
+
+ CautionSign_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_cautionSign
+
+      .addr EWL_StreetSkate_CautionSign_data
+      .addr cone_frame_timers
+      .byte $FF
+      .byte %01110000 | objects_e::obstical_1
+ Crack_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_crack
+
+      .addr EWL_StreetSkate_Crack_data
+      .addr cone_frame_timers
+      .byte $FF
+      .byte %01110000 | objects_e::obstical_0      
 
 Ramp_Ani_Header:
       .byte 2

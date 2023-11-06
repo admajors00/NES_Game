@@ -54,6 +54,8 @@ Lv1_bg_8:
     .addr Grate
     .addr Level_Screen_4
 
+
+
 Lv2_bg_1:
     .byte 1
     .addr Cone
@@ -76,12 +78,53 @@ Lv2_bg_5:
     .byte 1
     .addr Cone
     .addr Level_Screen_2_3
-
 Lv2_bg_6:
     .byte 0
     .addr 0
     .addr Level_Screen_2_3
+Lv2_bg_7:
+    .byte 1
+    .addr Crack
+    .addr Level_Screen_2_3
 
+
+
+Lv3_bg_1:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_3_1
+Lv3_bg_2:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_3_2
+
+Lv3_bg_3:
+    .byte 1
+    .addr CautionSign
+    .addr Level_Screen_3_1
+
+Lv3_bg_4:
+    .byte 1
+    .addr CautionSign
+    .addr Level_Screen_3_2
+
+Lv3_bg_5:
+    .byte 1
+    .addr Pothole
+    .addr Level_Screen_3_1
+
+Lv3_bg_6:
+    .byte 1
+    .addr Crack
+    .addr Level_Screen_3_2
+Lv3_bg_7:
+    .byte 1
+    .addr Crack
+    .addr Level_Screen_3_3
+Lv3_bg_8:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_3_4
 ; .org $430
 
 Level_1_bg_Array:
@@ -103,25 +146,25 @@ Level_2_bg_Array:
     .addr Lv2_bg_1
     .addr Lv2_bg_2
     .addr Lv2_bg_3
-    .addr Lv2_bg_4
+    .addr Lv2_bg_7
     .addr Lv2_bg_6
     .addr Lv2_bg_5  
 Level_3_bg_Array:
-    .addr Lv1_bg_6
-    .addr Lv1_bg_5
-    .addr Lv1_bg_1
-    .addr Lv1_bg_2
-    .addr Lv1_bg_3
-    .addr Lv1_bg_4
-    .addr Lv1_bg_6
-    .addr Lv1_bg_5
-    .addr Lv1_bg_5
-    .addr Lv1_bg_5
-    .addr Lv1_bg_5
+    .addr Lv3_bg_1
+    .addr Lv3_bg_2
+    .addr Lv3_bg_6
+    .addr Lv3_bg_2
+    .addr Lv3_bg_7
+    .addr Lv3_bg_4
+    .addr Lv3_bg_5
+    .addr Lv3_bg_4
+    .addr Lv3_bg_5
+    .addr Lv3_bg_7
+    .addr Lv3_bg_8
  
 Level_4_bg_Array:
     .addr Lv2_bg_1
-    .addr Lv2_bg_1
+    .addr Lv2_bg_2
     .addr Lv2_bg_1
     .addr Lv2_bg_1
     .addr Lv2_bg_1

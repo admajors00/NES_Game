@@ -26,9 +26,9 @@ Level_2_h:
 Level_3_h:
     .byte 11
     .addr Level_3_bg_Array
-    .addr palette_level_1
-    .byte 1
-    .byte $0F
+    .addr palette_level_3
+    .byte 2
+    .byte $30
 
 Level_4_h:
     .byte 8
@@ -38,6 +38,6 @@ Level_4_h:
     .byte $11    
 
 Levels_table:
-    .addr Level_1_h, Level_2_h,Level_3_h,Level_4_h
+    .addr Level_3_h,Level_1_h, Level_2_h,Level_4_h
 
 .endif

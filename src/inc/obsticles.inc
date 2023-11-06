@@ -24,6 +24,23 @@ _OBSTICLE_INC  =1
 .endstruct
 
 
+Crack:
+    .byte $10
+    .byte $BA
+    .byte $0F
+    .byte $0F
+    .byte Obstical_Types_e::rough
+    ;.byte Obstical_States_e::idle
+    .addr Crack_Ani_Header
+
+CautionSign:
+    .byte $10
+    .byte $Ba
+    .byte $0F
+    .byte $0F
+    .byte Obstical_Types_e::trip
+    .addr CautionSign_Ani_Header
+
 Cone:
     .byte $10
     .byte $B6

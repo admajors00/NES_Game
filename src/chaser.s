@@ -60,7 +60,7 @@
 		ldx #<chaser_Ani_Header
 		jsr Load_Animation
 
-		lda #3;2
+		lda #2;2
 	 	sta velocity_x_HI
 		lda #$60;b0
 		sta velocity_x_LO

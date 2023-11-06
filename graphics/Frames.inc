@@ -174,10 +174,9 @@ EWL_StreetSkate_Jump_1_data:
 	.byte <- 8,<-15,$ec,0
 	.byte <-16,<-14,$e5,0
 	.byte <-17,<- 6,$e7,0
-	.byte <-16,<- 6,$fe,0
+	.byte <-16,<- 6,$fa,0
 
-	.byte <- 8,<- 6,$ff,0
-	.byte <- 8,<-14,$fd,0
+	.byte <- 8,<-12,$f9,0
 	.byte $80
 
 
@@ -249,11 +248,9 @@ EWL_StreetSkate_KickFlip_9_data:
 	.byte <-16,<-15,$03,2
 	.byte <- 8,<-15,$03,2|OAM_FLIP_H
 
-	.byte <- 8,<- 7,$f1,0
 	.byte <- 8,<- 4,$d8,0
 	.byte <-16,<- 4,$d9,0|OAM_FLIP_H
 	.byte <- 7,<- 7,$ec,0
-
 	.byte <-15,<- 8,$ed,0
 	.byte $80
 
@@ -374,10 +371,9 @@ EWL_StreetSkate_KickFlip_1_data:
 	.byte <- 8,<-14,$ec,0
 	.byte <-16,<-13,$e5,0
 	.byte <-17,<- 5,$e7,0
-	.byte <-16,<- 5,$fe,0
+	.byte <-14,<- 4,$fe,0
 
-	.byte <- 8,<- 5,$ff,0
-	.byte <- 8,<-13,$fd,0
+	.byte <- 8,<-12,$fd,0
 	.byte $80
 
 
@@ -499,8 +495,8 @@ EWL_StreetSkate_LoadUp_1_data:
 EWL_StreetSkate_Crash_4_data:
 
 
-	.byte <- 8,<- 4,$d4,0
-	.byte <-16,<- 4,$d4,0|OAM_FLIP_H
+	.byte <- 8,<- 8,$d4,0
+	.byte <-16,<- 8,$d4,0|OAM_FLIP_H
 	.byte  17,  0,$4b,0
 	.byte  25,  0,$4e,0
 
@@ -521,8 +517,8 @@ EWL_StreetSkate_Crash_3_data:
 
 	.byte  18,<- 7,$e8,0
 	.byte  18,<-13,$ed,0
-	.byte <- 8,<- 4,$d4,0
-	.byte <-16,<- 4,$d4,0|OAM_FLIP_H
+	.byte <- 8,<- 7,$d4,0
+	.byte <-16,<- 7,$d4,0|OAM_FLIP_H
 	.byte $80
 
 
@@ -536,8 +532,8 @@ EWL_StreetSkate_Crash_2_data:
 
 	.byte   9,<-13,$e8,0
 	.byte   9,<-19,$ed,0
-	.byte <- 8,<- 4,$d4,0
-	.byte <-16,<- 4,$d4,0|OAM_FLIP_H
+	.byte <- 8,<- 6,$d4,0
+	.byte <-16,<- 6,$d4,0|OAM_FLIP_H
 	.byte $80
 
 
@@ -552,10 +548,8 @@ EWL_StreetSkate_Crash_1_data:
 	.byte <- 4,<-10,$e5,0
 	.byte <- 8,<-14,$e8,0
 	.byte <- 4,<- 2,$e7,0
-	.byte <-17,<-10,$f9,0|OAM_FLIP_H
+	.byte <-16,<-10,$f9,0|OAM_FLIP_H
 
-	.byte <-17,<- 2,$fb,0|OAM_FLIP_H
-	.byte <-10,<-10,$f8,0|OAM_FLIP_H
 	.byte <- 9,<- 2,$fa,0|OAM_FLIP_H
 	.byte $80
 
@@ -789,8 +783,31 @@ EWL_StreetSkate_Ramp_data:
 	.byte $80
 
 
+EWL_StreetSkate_CautionSign_data:
 
 
+	.byte <-16,<-16,$5c,0
+	.byte <- 8,<-16,$5d,0
+	.byte <-16,<- 8,$5e,0
+	.byte <- 8,<- 8,$5f,0
+	.byte $80
+
+
+EWL_StreetSkate_Crack_data:
+
+
+	.byte <-16,<-13,$64,0
+	.byte <- 8,<-13,$65,0
+	.byte <-16,<- 5,$66,0
+	.byte <- 8,<- 5,$67,0
+	.byte $80
+
+EWL_StreetSkate_pointers_crack:
+	.word EWL_StreetSkate_Crack_data
+
+
+EWL_StreetSkate_pointers_cautionSign:
+	.word EWL_StreetSkate_CautionSign_data
 
 
 

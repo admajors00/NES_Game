@@ -197,6 +197,16 @@ BankSwitch:
 BankValues:
 	.byte $00, $01, $02, $03
 ;;;;;;;;;;;;;;  
+palette_level_3:
+.byte $30,$10,$00,$26
+.byte $30,$10,$00,$12
+.byte $30,$10,$00,$37
+.byte $30,$0f,$00,$16
+
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
 
 palette_level_2:
 .byte $11,$0f,$10,$20
@@ -254,6 +264,14 @@ Level_Screen_2_2:
 Level_Screen_2_3:
 	.incbin "../graphics/Level_2_3.bin"
 
+Level_Screen_3_1:
+	.incbin"../graphics/Level_3_1.bin"
+Level_Screen_3_2:
+	.incbin "../graphics/Level_3_2.bin"
+Level_Screen_3_3:
+	.incbin "../graphics/Level_3_3.bin"
+Level_Screen_3_4:
+	.incbin "../graphics/Level_3_4.bin"
 End_Screen:
 .incbin"../graphics/EndScreen.bin"
 	;.incbin "../graphics/Longer_street_end.bin"
