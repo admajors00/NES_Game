@@ -24,7 +24,7 @@ Level_2_h:
     .byte 2
     .byte $11
 Level_3_h:
-    .byte 11
+    .byte 12
     .addr Level_3_bg_Array
     .addr palette_level_3
     .byte 2
@@ -33,7 +33,7 @@ Level_3_h:
 Level_4_h:
     .byte 8
     .addr Level_4_bg_Array
-    .addr palette_level_2
+    .addr palette_level_3
     .byte 2
     .byte $11    
 

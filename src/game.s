@@ -310,12 +310,9 @@ HIT_CHASER_f = 1<<1
     rts
     Check_For_Hit:
         jsr check_obst_hit
-        jsr check_chaser_hit
-
-       
-
-        
+        jsr check_chaser_hit  
     rts
+
 
     check_obst_hit:;the players x value is inside the obstical
         lda obsticles_active_flag ;check if there are any obsticals on the scrren
@@ -469,7 +466,6 @@ HIT_CHASER_f = 1<<1
         @done:
     rts
 
-    crashed: 
 .endscope
 
 ; .ENDIF

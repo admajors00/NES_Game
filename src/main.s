@@ -198,10 +198,11 @@ BankValues:
 	.byte $00, $01, $02, $03
 ;;;;;;;;;;;;;;  
 palette_level_3:
-.byte $30,$10,$00,$26
-.byte $30,$10,$00,$12
-.byte $30,$10,$00,$37
-.byte $30,$0f,$00,$16
+
+.byte $30,$2c,$0c,$26
+.byte $30,$2c,$0c,$12
+.byte $30,$2c,$0c,$37
+.byte $30,$0f,$2d,$16
 
 .byte $0f,$0f,$30,$27 ;sprite pallet
 .byte $0f,$0f,$37,$31
@@ -246,9 +247,6 @@ palette_TitleScreen:
 
 Start_Screen:
 	.incbin "../graphics/TitleScreen.bin"
-	; .incbin"../graphics/Level_2_1.bin"
-
-	; .incbin"../graphics/Level_2_2.bin"
 Level_Screen_1:
 	.incbin"../graphics/Level_1_1.bin"
 Level_Screen_2:
@@ -272,12 +270,11 @@ Level_Screen_3_3:
 	.incbin "../graphics/Level_3_3.bin"
 Level_Screen_3_4:
 	.incbin "../graphics/Level_3_4.bin"
+Level_Screen_3_5:
+	.incbin "../graphics/Level_3_5.bin"
 End_Screen:
-.incbin"../graphics/EndScreen.bin"
-	;.incbin "../graphics/Longer_street_end.bin"
+	.incbin"../graphics/EndScreen.bin"
 
-
-; .include "../graphics/Longer_street.s"
 
 ;.segment "SONG1"
 song_test:

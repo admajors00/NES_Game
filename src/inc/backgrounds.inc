@@ -125,6 +125,10 @@ Lv3_bg_8:
     .byte 0
     .addr 0
     .addr Level_Screen_3_4
+Lv3_bg_9:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_3_5
 ; .org $430
 
 Level_1_bg_Array:
@@ -161,6 +165,7 @@ Level_3_bg_Array:
     .addr Lv3_bg_5
     .addr Lv3_bg_7
     .addr Lv3_bg_8
+    .addr Lv3_bg_9
  
 Level_4_bg_Array:
     .addr Lv2_bg_1
