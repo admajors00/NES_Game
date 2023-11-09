@@ -307,6 +307,17 @@ UPDATE_ANIMATION_f 		= 1<<3
 		lda pos_y_HI
 		sta Sprite_positions_table, y
 
+		ldy #Sprite_Positions_e::ind_x
+		lda pos_x_HI
+
+
+		sta Sprite_positions_table, y ;update indicator pos
+		iny 
+		lda pos_y_HI
+		sec
+		sbc #24
+		sta Sprite_positions_table, y
+
 		lda velocity_x_HI
 		sta frame_speed
 		lda velocity_x_LO

@@ -14,7 +14,7 @@
 .segment "RAM"
 .org $400
 animation_headers_table:
-    .addr 0,0,0,0
+    .addr 0,0,0,0,0
 
 obs0_header_table:
     .tag Animation_Header_t
@@ -26,12 +26,14 @@ chaser_header_table:
 
 obs1_header_table:
     .tag Animation_Header_t
+indicator_header_table:
+    .tag Animation_Header_t
 
 Sprite_positions_table:
-    .byte 0,0,0,0,0,0,0,0
+    .byte 0,0,0,0,0,0,0,0,0,0
 
 Alt_frametimer_table:
-    .byte 0, 0, 0 ,0
+    .byte 0, 0, 0 ,0, 0
 .reloc
 
 
@@ -41,7 +43,7 @@ SPRITE_0_Y = $2C
 
 .segment "CODE"
 
-HEADER_TABLE_MAX_SIZE = 4
+HEADER_TABLE_MAX_SIZE = 5
 
 OAM_DMA_ADDR = $200
 OAM_DMA_Y    = $200
@@ -111,13 +113,19 @@ OAM_DMA_X    = $203
         lda #>chaser_header_table
         sta (pointer_1_LO),Y
 
-         iny
+        iny
         lda #<obs1_header_table
         sta (pointer_1_LO),Y
         iny 
         lda #>obs1_header_table
         sta (pointer_1_LO),Y
 
+        iny
+        lda #<indicator_header_table
+        sta (pointer_1_LO),Y
+        iny 
+        lda #>indicator_header_table
+        sta (pointer_1_LO),Y
         
         lda #SPRITE_0_X
             sta OAM_DMA_X
@@ -193,7 +201,7 @@ OAM_DMA_X    = $203
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
 
-       ldy #Animation_Header_t::flags
+            ldy #Animation_Header_t::flags
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
 

@@ -25,7 +25,7 @@ _OBSTICLE_INC  =1
 
 
 Crack:
-    .byte $10
+    .byte $80
     .byte $BA
     .byte $0F
     .byte $0F
@@ -34,7 +34,7 @@ Crack:
     .addr Crack_Ani_Header
 
 CautionSign:
-    .byte $10
+    .byte $80
     .byte $Ba
     .byte $0F
     .byte $0F
@@ -42,7 +42,7 @@ CautionSign:
     .addr CautionSign_Ani_Header
 
 Cone:
-    .byte $10
+    .byte $80
     .byte $B6
     .byte $0F
     .byte $0F
@@ -51,7 +51,7 @@ Cone:
     .addr Cone_Ani_Header
 
 Pothole:
-    .byte $10
+    .byte $80
     .byte $B6
     .byte $0F
     .byte $0A
@@ -60,7 +60,7 @@ Pothole:
     .addr Pothole_Ani_Header
 
 Grate:
-    .byte $10
+    .byte $80
     .byte $B4
     .byte $18
     .byte $0A
@@ -68,7 +68,7 @@ Grate:
   ;  .byte Obstical_States_e::idle
     .addr Grate_Ani_Header
 Ramp:
-    .byte $10
+    .byte $80
     .byte $B6
     .byte $0F
     .byte $0F

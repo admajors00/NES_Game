@@ -802,6 +802,18 @@ EWL_StreetSkate_Crack_data:
 	.byte <- 8,<- 5,$67,0
 	.byte $80
 
+
+EWL_StreetSkate_Indicator_data:
+
+
+	.byte <- 8,<-16,$10,0
+	.byte <- 8,<- 8,$12,0
+	.byte $80
+
+EWL_StreetSkate_pointers_indicator:
+	.word EWL_StreetSkate_Indicator_data
+
+
 EWL_StreetSkate_pointers_crack:
 	.word EWL_StreetSkate_Crack_data
 

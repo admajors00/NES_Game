@@ -26,6 +26,7 @@ ANI_FLAGS_MASK = %11110000
     player = $01
     guy_chasing = $02
     obstical_1 = $03
+    indicator = $04
 .endenum
 
 .enum Sprite_Positions_e
@@ -37,6 +38,8 @@ ANI_FLAGS_MASK = %11110000
     chaser_y = 5
     obst_1_x = 6
     obst_1_y = 7
+    ind_x    = 8
+    ind_y    = 9
 .endenum
 
 
@@ -219,7 +222,19 @@ Grate_Ani_Header:
     .byte $FF
     .byte %01110000 | objects_e::obstical_0
 
-Obs_0_Empty_Ani_Header: 
+Indicator_Ani_Header:
+      .byte 2
+      .byte 2
+      .addr EWL_StreetSkate_pointers_indicator
+      .addr EWL_StreetSkate_Indicator_data
+      .addr cone_frame_timers
+      .byte $FF
+      .byte %01100000 | objects_e::indicator ; initially not active
+
+
+
+
+      Obs_0_Empty_Ani_Header: 
     .byte 0
     .byte 0
     .addr 0
@@ -227,25 +242,9 @@ Obs_0_Empty_Ani_Header:
     .addr 0
     .byte 0
     .byte %00000000 | objects_e::obstical_0
-Chaser_Empty_Ani_Header: 
-    .byte 0
-    .byte 0
-    .addr 0
-    .addr 0
-    .addr 0
-    .byte 0
-    .byte %00000000 | objects_e::guy_chasing 
 
-Player_Empty_Ani_Header: 
-    .byte 0
-    .byte 0
-    .addr 0
-    .addr 0
-    .addr 0
-    .byte 0
-    .byte %00000000 | objects_e::player  
 
-Obs_1_Empty_Ani_Header: 
+    Obs_1_Empty_Ani_Header: 
     .byte 0
     .byte 0
     .addr 0
@@ -254,3 +253,6 @@ Obs_1_Empty_Ani_Header:
     .byte 0
     .byte %00000000 | objects_e::obstical_1
 .endif
+
+
+

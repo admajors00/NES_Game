@@ -9,7 +9,7 @@ INES_MAPPER = 3 ; 0 = NROM
 INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
 INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 
-.byte $4E, $45, $53, $1A ; ID
+.byte $4E, $45, $53, $1A ; ID "NES", $1a;
 .byte $02 ; 16k PRG chunk count
 .byte $04 ; 8k CHR chunk count
 .byte INES_MIRROR | (INES_SRAM << 1) | ((INES_MAPPER & $f) << 4)
@@ -114,6 +114,7 @@ clear_nametables:
 		bne	@loop
 		dex
 		bne	@loop
+jsr vblankwait
 
 ldx #<palette_TitleScreen
 ldy #>palette_TitleScreen
@@ -313,6 +314,10 @@ song_game_over:
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level1.chr"
 .segment "LEVEL2"	
+	;.proc banked_chr_2
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level2.chr"
+.segment "LEVEL3"	
 	;.proc banked_chr_2
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level2.chr"

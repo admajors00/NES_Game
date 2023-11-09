@@ -24,6 +24,7 @@ _GAME_INC = 1
     game_over = 3
     level_restart = 4
     next_level = 5
+    intro = 6
 .endenum
 
 
