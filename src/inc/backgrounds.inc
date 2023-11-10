@@ -182,6 +182,32 @@ Level_4_bg_Array:
     .addr Lv2_bg_1
     .addr Lv2_bg_1
     .addr Lv2_bg_1 
+
+
+
+Intro_bg_1:
+    .byte 0
+    .addr 0
+    .addr Intro_Screen_1
+Intro_bg_2:
+    .byte 0
+    .addr 0
+    .addr Intro_Screen_2
+Intro_bg_3:
+    .byte 0
+    .addr 0
+    .addr Intro_Screen_3
+Intro_bg_4:
+    .byte 0
+    .addr 0
+    .addr Intro_Screen_4
+Intro_bg_Array:
+    .addr Intro_bg_1
+    .addr Intro_bg_2
+    .addr Intro_bg_3
+    .addr Intro_bg_4
+
+
 .org $460
 Scroll_Buffer: .res 32
 Attribute_Buffer: .res 32

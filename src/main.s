@@ -24,6 +24,7 @@ main_pointer_HI = $f3  ; low byte first, high byte immediately after
 
 amount_to_scroll = $f4; .res 1
 main_temp = $f5
+bg_chr_rom_start_addr = $f6
 
 .segment "RAM"
 
@@ -149,6 +150,7 @@ jsr Obsticles::Init
 
 LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 STA $2000
+sta bg_chr_rom_start_addr
 
 LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 STA $2001         
@@ -197,7 +199,20 @@ BankSwitch:
 	rts
 BankValues:
 	.byte $00, $01, $02, $03
-;;;;;;;;;;;;;;  
+;;;;;;;;;;;;;; 
+
+
+palette_level_2_night:
+
+.byte $0c,$0f,$2d,$10
+.byte $0c,$04,$38,$14
+.byte $0c,$0c,$38,$04
+.byte $0c,$0b,$0a,$19
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
 palette_level_3:
 
 .byte $30,$2c,$0c,$26
@@ -246,37 +261,58 @@ palette_TitleScreen:
 .byte $0f,$0f,$10,$20
 .byte $0f,$17,$16,$27
 
+palette_Instructions:
+.byte $0f,$0f,$30,$27
+.byte $0f,$0f,$0f,$30
+.byte $0f,$2d,$10,$20
+.byte $0f,$18,$28,$38
+
+palette_Intro:
+.byte $30,$0f,$36,$11
+.byte $30,$0f,$0f,$30
+.byte $30,$0f,$10,$27
+.byte $30,$0f,$36,$16
+
+
 Start_Screen:
-	.incbin "../graphics/TitleScreen.bin"
+	.incbin "../graphics/Backgrounds/TitleScreen.bin"
 Level_Screen_1:
-	.incbin"../graphics/Level_1_1.bin"
+	.incbin"../graphics/Backgrounds/Level_1_1.bin"
 Level_Screen_2:
-	.incbin "../graphics/Level_1_2.bin"
+	.incbin "../graphics/Backgrounds/Level_1_2.bin"
 Level_Screen_3:
-	.incbin "../graphics/Level_1_3.bin"
+	.incbin "../graphics/Backgrounds/Level_1_3.bin"
 Level_Screen_4:
-	.incbin "../graphics/Level_1_4.bin"
+	.incbin "../graphics/Backgrounds/Level_1_4.bin"
 Level_Screen_2_1:
-	.incbin"../graphics/Level_2_1.bin"
+	.incbin"../graphics/Backgrounds/Level_2_1.bin"
 Level_Screen_2_2:
-	.incbin "../graphics/Level_2_2.bin"
+	.incbin "../graphics/Backgrounds/Level_2_2.bin"
 Level_Screen_2_3:
-	.incbin "../graphics/Level_2_3.bin"
+	.incbin "../graphics/Backgrounds/Level_2_3.bin"
 
 Level_Screen_3_1:
-	.incbin"../graphics/Level_3_1.bin"
+	.incbin"../graphics/Backgrounds/Level_3_1.bin"
 Level_Screen_3_2:
-	.incbin "../graphics/Level_3_2.bin"
+	.incbin "../graphics/Backgrounds/Level_3_2.bin"
 Level_Screen_3_3:
-	.incbin "../graphics/Level_3_3.bin"
+	.incbin "../graphics/Backgrounds/Level_3_3.bin"
 Level_Screen_3_4:
-	.incbin "../graphics/Level_3_4.bin"
+	.incbin "../graphics/Backgrounds/Level_3_4.bin"
 Level_Screen_3_5:
-	.incbin "../graphics/Level_3_5.bin"
+	.incbin "../graphics/Backgrounds/Level_3_5.bin"
 End_Screen:
-	.incbin"../graphics/EndScreen.bin"
-
-
+	.incbin"../graphics/Backgrounds/EndScreen.bin"
+Instructions_Screen:
+	.incbin"../graphics/Backgrounds/Instructions.bin"
+Intro_Screen_1:
+	.incbin"../graphics/Backgrounds/Intro_1.bin"
+Intro_Screen_2:
+	.incbin"../graphics/Backgrounds/Intro_2.bin"	
+Intro_Screen_3:
+	.incbin"../graphics/Backgrounds/Intro_3.bin"
+Intro_Screen_4:
+	.incbin"../graphics/Backgrounds/Intro_4.bin"
 ;.segment "SONG1"
 song_test:
 .include "../audio/Song2.s"
@@ -304,7 +340,7 @@ song_game_over:
 	; .incbin	"../graphics/StartScreen.chr"
  .segment "TITLEBANK"
 ; ;.proc banked_chr_1
-		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Intro.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/StartScreen.chr"
 	;.endproc
 	

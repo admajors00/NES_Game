@@ -57,7 +57,7 @@ HIT_CHASER_f = 1<<1
     rts
 
     game_state_jump_table:
-        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop
+        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop, Intro_Loop
 
     Update:
         lda game_state
@@ -79,16 +79,28 @@ HIT_CHASER_f = 1<<1
         ; beq @cont
         ;     jsr Update_Score
         ; @cont:
+        lda #BUTTON_SELECT
+        and Port_1_Pressed_Buttons
+        beq @cont
+            JMP Intro_Init
+        @cont:
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
-           
-       
-            LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+           jmp Start_Game
+        @done:
+    rts
+
+    Start_Game:
+         LDA #%00000000   ; disable NMI
             STA $2000
-            LDA #%00000000   ; enable sprites, enable background, no clipping on left side
+            LDA #%00000000   ; disable sprites, enable background, no clipping on left side
             STA $2001   
-           
+
+            lda scroll_flags
+            ora #STATUS_BAR_FLAG
+            sta scroll_flags
+       
             ldx #<music_data_untitled
             ldy #>music_data_untitled
             lda #1 ; NTSC
@@ -107,27 +119,23 @@ HIT_CHASER_f = 1<<1
             lda #Game_States_e::running
             sta game_state
 
-            lda #$3f
-            sta $2006
-            lda #$00
-            sta $2006
+            ; lda #$3f
+            ; sta $2006
+            ; lda #$00
+            ; sta $2006
             
 
-            ldy #Level_t::bg_color
-            lda (level_pt_LO), y
-            sta $2007
+            ; ldy #Level_t::bg_color
+            ; lda (level_pt_LO), y
+            ; sta $2007
 
             LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
             STA $2000
+            sta bg_chr_rom_start_addr
             LDA #%00011110   ; enable sprites, enable background, no clipping on left side
             STA $2001
-        @done:
     rts
-
     Game_Loop:
-       
-        
-
         ldy #Level_t::num_screens
         lda (level_pt_LO),y
         cmp scroll_HI
@@ -154,8 +162,54 @@ HIT_CHASER_f = 1<<1
         
         @done:
     rts
+    Intro_Init:
+        LDA #%00000000   ; disable NMI
+        STA $2000
+        LDA #%00000000   ; disable sprites, enable background, no clipping on left side
+        STA $2001 
+        lda scroll_flags
+        AND #<~STATUS_BAR_FLAG
+        sta scroll_flags
 
+        
 
+        ldx #<Intro_h
+        ldy #>Intro_h
+        jsr Background::Load_Level_Background_Data
+        jsr Background::Init
+        lda #Game_States_e::intro
+        sta game_state
+
+        ; ldy #Level_t::bg_color
+        ; lda Intro_h, y
+        ; sta $2007
+
+        LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
+        STA $2000
+        sta bg_chr_rom_start_addr
+        LDA #%0001110   ; disable sprites, enable background, no clipping on left side
+        STA $2001
+    rts
+
+    Intro_Loop:
+        jsr UpdateButtons
+        lda #BUTTON_A
+        and Port_1_Down_Buttons
+        beq @cont
+
+            jmp Start_Game
+        @cont:
+        ldy #Level_t::num_screens
+        lda scroll_HI
+
+        cmp Intro_h, Y
+        beq @done
+        lda #1
+        sta amount_to_scroll
+        jsr Background::Update
+
+        @done:
+    rts
     Paused_Loop:
 
     rts
@@ -168,6 +222,11 @@ HIT_CHASER_f = 1<<1
         STA $2001    
 
         ;jsr Background::Draw_Box
+
+        lda scroll_flags
+        AND #<~STATUS_BAR_FLAG
+        sta scroll_flags
+
         lda#0
         sta nametable
         sta scroll
@@ -197,9 +256,10 @@ HIT_CHASER_f = 1<<1
        
 
 
-
+        
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA $2000
+        sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
         STA $2001  
         
@@ -230,8 +290,9 @@ HIT_CHASER_f = 1<<1
             jsr Obsticles::Init
             jsr Chaser::Reset
             jsr Player::Init 
-            LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+        LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA $2000
+        sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
         STA $2001  
         @done:
@@ -290,18 +351,19 @@ HIT_CHASER_f = 1<<1
         jsr Chaser::Reset
         jsr Player::Init 
 
-         lda #$3f
-            sta $2006
-            lda #$00
-            sta $2006
+        ;  lda #$3f
+        ;     sta $2006
+        ;     lda #$00
+        ;     sta $2006
             
 
-            ldy #Level_t::bg_color
-            lda (level_pt_LO), y
-            sta $2007
+        ;     ldy #Level_t::bg_color
+        ;     lda (level_pt_LO), y
+        ;     sta $2007
 
 		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 		STA $2000
+        sta bg_chr_rom_start_addr
 		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 		STA $2001
        

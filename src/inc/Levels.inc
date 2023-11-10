@@ -33,9 +33,16 @@ Level_3_h:
 Level_4_h:
     .byte 8
     .addr Level_4_bg_Array
-    .addr palette_level_3
+    .addr palette_level_2_night
     .byte 2
-    .byte $11    
+    .byte $0c   
+
+Intro_h:
+    .byte 4
+    .addr Intro_bg_Array 
+    .addr palette_Intro
+    .byte 0
+    .byte $30
 
 Levels_table:
     .addr Level_3_h,Level_1_h, Level_2_h,Level_4_h

@@ -16,6 +16,7 @@ Port_1_Pressed_Buttons = $F0 ;pressed this frame
 Port_1_Down_Buttons = $F1;     = $31 ;held down
 Port_1_Released_Buttons = $F2
 Port_1_prev_Down_Buttons = $F3
+
 UpdateButtons:
     lda Port_1_Down_Buttons
     sta Port_1_prev_Down_Buttons

@@ -23,7 +23,7 @@ new_background_HI = $39
 
 column_number = $3A
 
- scroll_flags = $3B
+scroll_flags = $3B
 bg_header_pt_LO = $3C
 bg_header_pt_HI = $3D
 
@@ -31,9 +31,9 @@ scroll =$3e
 scroll_HI = $3f
 
 
-NEW_COLUMN_FLAG = %00000001
-NEW_ATTRIBUTE_FLAG = %00000010
-
+NEW_COLUMN_FLAG = 1<<0
+NEW_ATTRIBUTE_FLAG = 1<<1
+STATUS_BAR_FLAG = 1<<2
 
 
 
@@ -47,21 +47,31 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		sty scroll_HI
 		sty scroll
 		sty nametable
-
+		sty amount_to_scroll
+		sty column_number
 			
 		jsr Next_Background
 		jsr Background::load_background_nt1
-		inc scroll_HI
-		jsr Next_Background
-		jsr Background::load_background_nt2
+		; inc scroll_HI
+		; jsr Next_Background
+		; jsr Background::load_background_nt2
 		
 		jsr Reset_Buffers
-
-		ldy #0
+		lda #2
+		sta scroll_HI_prev
+		ldy #1
 		sty scroll_HI
-		sty amount_to_scroll
-		sty column_number
+	
+	
 		jsr Next_Background
+		jsr Draw_New_Collumn_To_Buffer
+		jsr Draw_New_Attributes_To_Buffer
+		lda #NEW_COLUMN_FLAG
+		ora scroll_flags
+		sta scroll_flags
+		lda #NEW_ATTRIBUTE_FLAG
+						ora scroll_flags
+						sta scroll_flags
 		;inc scroll
 		
 	rts
@@ -131,6 +141,10 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		stx main_pointer_LO
 		sty main_pointer_HI
 
+		ldy #Level_t::bg_color
+		lda (main_pointer_LO), y
+		sta main_temp
+
 		ldy #Level_t::bank_num
 		lda (main_pointer_LO), y
 		jsr BankSwitch
@@ -152,6 +166,14 @@ NEW_ATTRIBUTE_FLAG = %00000010
 		tay 
 		jsr load_palettes
 
+		lda #$3f
+		sta $2006
+		lda #$00
+		sta $2006
+		lda main_temp
+		sta $2007
+
+		
 		
 	rts
 
@@ -183,7 +205,7 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 			ldy #Background_t::num_obsticles
 			lda (bg_header_pt_LO), Y ;if num obsticles == 0 jump to done
-			beq @remove_obsticles
+			beq @done
 			
 
 			; lda #1
@@ -198,41 +220,11 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 			ldx main_pointer_LO
 			ldy main_pointer_HI		
-
 			jsr Obsticles::Load 
 
 
-			; ldy #Obstical_t::animation_header_addr ; load the animation 
-			; lda (main_pointer_LO), Y
-			; tax
-			; iny
-			; lda (main_pointer_LO ), Y
-			; tay
-
-
-			; jsr Animation::Load_Animation
-			jmp @done
-
-			@remove_obsticles:
-				; ldy #Animation_Header_t::flags
-				; lda obs1_header_table, Y
-				; and #<~ACTIVE
-				; sta obs1_header_table, Y
-
-				; ldy #Animation_Header_t::flags
-				; lda obs0_header_table, Y
-				; and #<~ACTIVE
-				; sta obs0_header_table, Y
-				; lda #0
-				; sta obsticles_active_flag
-				; ldx #<Obs_0_Empty_Ani_Header
-				; ldy #>Obs_0_Empty_Ani_Header
-				; jsr Animation::Load_Animation
-
-				; ldy #>Obs_1_Empty_Ani_Header
-				; ldx #<Obs_1_Empty_Ani_Header
-				; jsr Animation::Load_Animation
-				jmp @done
+		
+			
 
 		@done:
 		
@@ -365,6 +357,8 @@ NEW_ATTRIBUTE_FLAG = %00000010
 
 
 	rts
+
+
 .endscope
 ;inputs x lo pt, y hi pt
 load_palettes:
@@ -401,8 +395,9 @@ Handle_Scroll:
         jsr Draw_New_Attributes_From_Buffer
 
     @New_Column_Check_done:
-        lda #0
-        sta scroll_flags
+        lda scroll_flags
+        and #<~NEW_ATTRIBUTE_FLAG
+		and #<~NEW_COLUMN_FLAG
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	$2003
@@ -417,14 +412,17 @@ Handle_Scroll:
 	STA $2005
 
 	;;This is the PPU clean up section, so rendering the next frame starts properly.
-	LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+	LDA bg_chr_rom_start_addr  ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+	
     ;	ORA nametable    ; select correct nametable for bit 0
 	STA $2000
 
 	LDA #%00011110   ; enable sprites, enable background, no clipping on left side
 	STA $2001	  
 
-
+	LDA #STATUS_BAR_FLAG
+	and	scroll_flags
+	beq skip_statusbar
     WaitNotSprite0:
         lda $2002
         and #%01000000
@@ -439,7 +437,7 @@ Handle_Scroll:
     WaitScanline:
         dex
         bne WaitScanline
-  
+	skip_statusbar:
     ; now set the scroll and nametable to use for the rest of the screen down
   
     LDA scroll
@@ -448,7 +446,7 @@ Handle_Scroll:
     LDA #$00         ; no vertical scrolling
     STA $2005
         
-    LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+    LDA bg_chr_rom_start_addr  ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
     ORA nametable    ; select correct nametable for bit 0
     STA $2000
 
@@ -474,8 +472,6 @@ rts
 
 Draw_New_Attributes_To_Buffer:
 	
-
-
     lda #0 
 	sta new_background_HI
 
@@ -498,9 +494,20 @@ Draw_New_Attributes_To_Buffer:
 	lda new_background_HI
 	adc #$03
 	sta new_background_HI
+	
 
 
-	LDY #$08
+	lda #STATUS_BAR_FLAG
+	and scroll_flags
+	bne @add_status_bar_offset
+		LDY #$00
+		jmp @add_status_bar_offset_done
+	@add_status_bar_offset:
+	
+		LDY #$08
+	@add_status_bar_offset_done:
+
+
 	LDA $2002             ; read PPU status to reset the high/low latch
 	@loop:
 		LDA (new_background_LO), y    ; copy new attribute byte
@@ -527,19 +534,36 @@ Draw_New_Attributes_From_Buffer:
 	ADC #$23          ; add high byte of attribute base address ($23C0)
 	STA column_HI    ; now address = $23 or $27 for nametable 0 or 1
 	
-	LDA scroll
-	LSR A
-	LSR A
-	LSR A
-	LSR A
-	LSR A
-	CLC
-	ADC #$c8	;attribute table start adress offset
-	STA column_LO    ; attribute base + scroll / 32
+	
 
+	lda #STATUS_BAR_FLAG
+	and scroll_flags
+	bne @add_status_bar_offset
+		LDA scroll
+		LSR A
+		LSR A
+		LSR A
+		LSR A
+		LSR A
+		CLC
+		ADC #$c0	;attribute table start adress offset
+		STA column_LO    ; attribute base + scroll / 32
 
+		LDY #$00
+		jmp @add_status_bar_offset_done
+	@add_status_bar_offset:
+		LDA scroll
+		LSR A
+		LSR A
+		LSR A
+		LSR A
+		LSR A
+		CLC
+		ADC #$c8	;attribute table start adress offset
+		STA column_LO    ; attribute base + scroll / 32
 
-	LDY #$08
+		LDY #$08
+	@add_status_bar_offset_done:
 	LDA $2002             ; read PPU status to reset the high/low latch
 	@loop:
 		LDA column_HI
@@ -581,9 +605,17 @@ Draw_New_Collumn_To_Buffer:
 	adc #0
 	sta new_background_HI
 
-
-	ldx #$18 ;buffer start addr offset for status bar
-	ldy #$C0	;acreen new bg start addr offset for status bar
+	lda #STATUS_BAR_FLAG
+	and scroll_flags
+	bne @add_status_bar_offset
+		ldx #$1e ;buffer start addr offset for status bar
+		ldy #$00	;acreen new bg start addr offset for status bar
+		jmp @add_status_bar_offset_done
+	@add_status_bar_offset:
+		ldx #$18
+		ldy #$C0	;acreen new bg start addr offset for status bar
+	@add_status_bar_offset_done:
+	
 
 	@loop:
 		lda (new_background_LO),Y
@@ -609,7 +641,6 @@ Draw_New_Collumn_From_Buffer:
 	lsr A
 	lsr A
 	sta column_LO
-
 	lda nametable
 	eor #$01
 	asl A
@@ -619,13 +650,26 @@ Draw_New_Collumn_From_Buffer:
 	sta column_HI
 	
 
-	LDA column_LO
-	CLC
-	ADC #$C0 ;nametable start addr offset for status bar
-	STA column_LO
-	LDA column_HI
-	ADC #$00
-	STA column_HI 
+	
+
+	lda #STATUS_BAR_FLAG
+	and scroll_flags
+	bne @add_status_bar_offset
+		ldx #$1E ;buffer start addr offset for status bar
+		jmp @add_status_bar_offset_done
+	@add_status_bar_offset:
+		
+	
+		LDA column_LO
+		CLC
+		ADC #$C0 ;nametable start addr offset for status bar
+		STA column_LO
+		LDA column_HI
+		ADC #$00
+		STA column_HI 
+		ldx #$18;buffer start addr offset for status bar
+	@add_status_bar_offset_done:
+	
 
 	lda #%00000100
 	sta $2000
@@ -634,10 +678,6 @@ Draw_New_Collumn_From_Buffer:
 	sta $2006
 	lda column_LO
 	sta $2006
-
-	ldx #$18 ;buffer start addr offset for status bar
-
-
 	@loop:
 		lda Scroll_Buffer,x
 		sta $2007

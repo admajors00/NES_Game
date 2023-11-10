@@ -429,13 +429,13 @@ OAM_DMA_X    = $203
             clc
             adc (pointer_2_LO),Y
             sta OAM_DMA_X, X
-   
+         
             iny
             lda sprite_pos_y   
             clc   
             adc (pointer_2_LO),Y
             sta OAM_DMA_Y ,X
-   
+
             iny
             lda (pointer_2_LO),Y
             sta OAM_DMA_TILE,X
@@ -450,7 +450,7 @@ OAM_DMA_X    = $203
             sta oam_size
             cmp #$F0
             bcs @done
-           
+
             
             iny
             lda (pointer_2_LO),Y
@@ -459,7 +459,7 @@ OAM_DMA_X    = $203
             bne @loop
             jmp @done
 
-            
+      
      
         @done:
     rts
