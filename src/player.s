@@ -204,9 +204,9 @@ UPDATE_ANIMATION_f 		= 1<<3
 			lda player_input_flags_g
 			and #<~PLAYER_RAMP_DETECTED_f
 			sta player_input_flags_g
-			lda player_movement_state
-			cmp #PlayerMovementStates::inAirMoving
-			beq @trip
+			; lda player_movement_state
+			; cmp #PlayerMovementStates::inAirMoving
+			; beq @trip
 
 			lda #PlayerActionStates::ollie
 			sta player_action_state
@@ -348,7 +348,7 @@ UPDATE_ANIMATION_f 		= 1<<3
 	rts
 	
 	AirborneMoving:
-		
+	
 		jsr Apply_Gravity_Y
 		jsr Update_Pos_X
 		jsr Update_Pos_Y
@@ -496,6 +496,15 @@ UPDATE_ANIMATION_f 		= 1<<3
 	rts
 
 	Apply_Push_X:
+		lda velocity_x_HI
+		cmp #Game_Const::max_speed_HI  
+
+		bcc @cont
+			bne @done	
+			lda velocity_x_LO
+			cmp #Game_Const::max_speed_LO 
+			BCS @done
+		@cont:
 		lda velocity_x_LO
 		clc
 		adc #Game_Const::push_speed_low
@@ -503,6 +512,7 @@ UPDATE_ANIMATION_f 		= 1<<3
 		lda velocity_x_HI
 		adc #Game_Const::push_speed_high
 		sta velocity_x_HI
+		@done:
 	rts
 
 	Update_Pos_Y:
@@ -565,9 +575,7 @@ UPDATE_ANIMATION_f 		= 1<<3
 			sta jump_speed_LO
 			sta jump_speed_HI
 		@cont:
-		lda velocity_x_HI
-		cmp #Game_Const::max_speed 
-		bcs @done
+		
 		
 		jsr Apply_Push_X        
 		ldx #PlayerActionStates::pushing

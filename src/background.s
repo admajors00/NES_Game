@@ -417,7 +417,7 @@ Handle_Scroll:
     ;	ORA nametable    ; select correct nametable for bit 0
 	STA $2000
 
-	LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+	lda bg_sprite_on_off   ; enable sprites, enable background, no clipping on left side
 	STA $2001	  
 
 	LDA #STATUS_BAR_FLAG

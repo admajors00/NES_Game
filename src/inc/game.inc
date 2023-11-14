@@ -12,7 +12,15 @@ _GAME_INC = 1
     push_speed_high = $00
 
     scroll_wall = $60
-    max_speed = $04
+    max_speed_HI = $02
+    max_speed_LO = $F0
+
+    chaser_initial_speed_LO = $58
+    chaser_initial_speed_HI = $02
+    chaser_max_speed_LO = $D0
+    chaser_max_speed_HI = $02
+
+    chaser_speed_increase= $14
 .endscope
 
    
@@ -25,6 +33,7 @@ _GAME_INC = 1
     level_restart = 4
     next_level = 5
     intro = 6
+    instructions = 7
 .endenum
 
 

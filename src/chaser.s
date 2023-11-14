@@ -15,7 +15,7 @@
 	velocity_y_LO = $47
 	velocity_y_HI = $48
 
-	relative_velocity = $4E
+	
 
 	animation_flag = $49
 	state_change_flag = $4A ;state change this frame if 1, otherwise 0
@@ -24,6 +24,9 @@
 
 	pointer_1_LO = $4C
 	pointer_1_HI = $4D
+	relative_velocity_HI = $4E
+	relative_velocity_LO = $4F
+
 
     .enum MovementStates		
 		idle = 0
@@ -60,9 +63,9 @@
 		ldx #<chaser_Ani_Header
 		jsr Load_Animation
 
-		lda #2;2
+		lda #Game_Const::chaser_initial_speed_HI
 	 	sta velocity_x_HI
-		lda #$60;b0
+		lda #Game_Const::chaser_initial_speed_LO
 		sta velocity_x_LO
 	
         rts
@@ -97,19 +100,21 @@
 		; sbc #8
 		; @skip
 		; sta velocity_x_LO
-		
-		
+		lda velocity_x_LO
+		sec
+		sbc Player::velocity_x_LO
+		sta relative_velocity_LO
 		lda velocity_x_HI
-		sbc amount_to_scroll
-		sta relative_velocity
+		sbc Player::velocity_x_HI
+		sta relative_velocity_HI
 
 
 		lda pos_x_LO
 		clc 
-		adc velocity_x_LO
+		adc relative_velocity_LO
 		sta pos_x_LO
 		lda pos_x_HI
-		adc relative_velocity
+		adc relative_velocity_HI
 		sta main_temp
 
 		ldx Player::pos_x_HI ;check if the chaser has caught up to the player

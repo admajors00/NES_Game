@@ -25,7 +25,11 @@ main_pointer_HI = $f3  ; low byte first, high byte immediately after
 amount_to_scroll = $f4; .res 1
 main_temp = $f5
 bg_chr_rom_start_addr = $f6
+bg_sprite_on_off = $f7
+frame_counter = $f8	
 
+rng_seed_LO = $f9
+rng_seed_HI = $fA
 .segment "RAM"
 
 
@@ -117,50 +121,13 @@ clear_nametables:
 		bne	@loop
 jsr vblankwait
 
-ldx #<palette_TitleScreen
-ldy #>palette_TitleScreen
-
-jsr load_palettes
-
-
-
-; lda #<Level_1_bg_Array
-; sta level_bg_header_pt_LO
-; lda #>Level_1_bg_Array
-; sta level_bg_header_pt_HI
+lda #$69
+sta rng_seed_LO
+lda #$42
+sta rng_seed_HI
 
 
-    
-
-LDA #<Start_Screen
-STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-STA bg_data_pt_HI           ; put high byte of address into pointer
-jsr Background::load_background_nt1
-
-lda#0
-jsr BankSwitch
-jsr Animation::Init
-
-jsr Obsticles::Init
-;jsr Game::Init
-
-
-
-
-LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-STA $2000
-sta bg_chr_rom_start_addr
-
-LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-STA $2001         
-              
-; lda #$01
-; jsr BankSwitch
-
-
-
-
+jsr Game::Start_Screen_Init
 
 	
 forever:
@@ -170,7 +137,7 @@ forever:
 
 
 nmi:
-	
+	inc frame_counter
 	jsr Handle_Scroll
 
 	jsr famistudio_update
@@ -201,6 +168,20 @@ BankValues:
 	.byte $00, $01, $02, $03
 ;;;;;;;;;;;;;; 
 
+prng:
+	ldy #8     ; iteration count (generates 8 bits)
+	lda seed+0
+:
+	asl        ; shift the register
+	rol seed+1
+	bcc :+
+	eor #$39   ; apply XOR feedback whenever a 1 bit is shifted out
+:
+	dey
+	bne :--
+	sta seed+0
+	cmp #0     ; reload flags
+	rts
 
 palette_level_2_night:
 
