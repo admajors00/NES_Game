@@ -34,6 +34,7 @@ _GAME_INC = 1
     next_level = 5
     intro = 6
     instructions = 7
+
 .endenum
 
 

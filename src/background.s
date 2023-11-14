@@ -34,7 +34,7 @@ scroll_HI = $3f
 NEW_COLUMN_FLAG = 1<<0
 NEW_ATTRIBUTE_FLAG = 1<<1
 STATUS_BAR_FLAG = 1<<2
-
+USE_RANDOM_BACKGROUND = 1<<3
 
 
 
@@ -70,26 +70,35 @@ STATUS_BAR_FLAG = 1<<2
 		ora scroll_flags
 		sta scroll_flags
 		lda #NEW_ATTRIBUTE_FLAG
-						ora scroll_flags
-						sta scroll_flags
+		ora scroll_flags
+		sta scroll_flags
 		;inc scroll
 		
 	rts
 
 	Update:
-		
-	
 		ldx amount_to_scroll
 		beq scroll_done
-
 		loop_1:
 			lda scroll
 			clc
 			adc#$01
 			sta scroll
-			lda scroll_HI
-			adc #0
-			sta scroll_HI
+			bcc @skip
+				;sta scroll
+				lda scroll_HI
+				adc #0
+
+				sta scroll_HI
+			
+				lda scroll_flags
+				and #USE_RANDOM_BACKGROUND
+				beq @continue
+					jsr prng
+					and #%00000111
+					sta scroll_HI
+			@skip:
+			
 			; cmp #NUM_BACKGROUNDS	
 			; bcc @continue
 			; 	lda #0
@@ -184,11 +193,20 @@ STATUS_BAR_FLAG = 1<<2
 		beq @done
 			sta scroll_HI_prev
 		;  jsr Update_Background_Obsticles
-	
-			lda scroll_HI
-			asl A
-			tay
+			; lda scroll_flags
+			; and #USE_RANDOM_BACKGROUND
+			; beq @dont_use_random
+			; 	jsr prng
+			; 	and #%00000111
+			; 	asl
+			; 	tay
+			; 	jmp @check_random_done
+			; @dont_use_random:
+				lda scroll_HI
+				asl A
+				tay
 
+			@check_random_done:
 			lda (level_bg_header_pt_LO),y ;get bg header at the index of scroll hi
 			sta bg_header_pt_LO
 			iny

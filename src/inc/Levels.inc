@@ -36,7 +36,12 @@ Level_4_h:
     .addr palette_level_2_night
     .byte 2
     .byte $0c   
-
+Level_Random_h:
+    .byte 9
+    .addr Level_Random_bg_Array
+    .addr palette_level_2
+    .byte 2
+    .byte $11
 Intro_h:
     .byte 4
     .addr Intro_bg_Array 

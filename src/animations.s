@@ -128,9 +128,12 @@ OAM_DMA_X    = $203
         sta (pointer_1_LO),Y
         
         lda #SPRITE_0_X
-            sta OAM_DMA_X
-            lda #SPRITE_0_Y
-            sta OAM_DMA_Y 
+        sta OAM_DMA_X
+        lda #SPRITE_0_Y
+        sta OAM_DMA_Y 
+        lda #0
+        sta OAM_DMA_TILE
+        sta OAM_DMA_ATTR
 
         
 

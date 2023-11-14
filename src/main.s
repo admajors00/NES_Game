@@ -30,6 +30,9 @@ frame_counter = $f8
 
 rng_seed_LO = $f9
 rng_seed_HI = $fA
+.org $f9
+seed: .res 2
+.reloc
 .segment "RAM"
 
 
