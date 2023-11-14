@@ -133,6 +133,7 @@ OAM_DMA_X    = $203
         sta OAM_DMA_Y 
         lda #0
         sta OAM_DMA_TILE
+        lda #%00100000
         sta OAM_DMA_ATTR
 
         
@@ -479,15 +480,19 @@ OAM_DMA_X    = $203
             dex
             cpx status_oam_size
             bcs @loop
+
             ldx status_oam_size
             stx oam_size
+            
             lda #SPRITE_0_X
             sta OAM_DMA_X
             lda #SPRITE_0_Y
             sta OAM_DMA_Y 
             lda #0
             sta OAM_DMA_TILE
+            lda #%00100000
             sta OAM_DMA_ATTR
+           
 
     rts
 

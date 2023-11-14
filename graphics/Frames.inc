@@ -124,11 +124,9 @@ EWL_StreetSkate_Jump_4_data:
 	.byte <-16,<-17,$03,2
 	.byte <- 8,<-17,$03,2|OAM_FLIP_H
 
-	.byte <- 8,<- 9,$f1,0
 	.byte <- 8,<- 6,$d8,0
 	.byte <-16,<- 6,$d9,0|OAM_FLIP_H
 	.byte <- 7,<- 9,$ec,0
-
 	.byte <-15,<-10,$ed,0
 	.byte $80
 
@@ -548,7 +546,7 @@ EWL_StreetSkate_Crash_1_data:
 	.byte <- 4,<-10,$e5,0
 	.byte <- 8,<-14,$e8,0
 	.byte <- 4,<- 2,$e7,0
-	.byte <-16,<-10,$f9,0|OAM_FLIP_H
+	.byte <-16,<- 8,$f9,0|OAM_FLIP_H
 
 	.byte <- 9,<- 2,$fa,0|OAM_FLIP_H
 	.byte $80
@@ -575,9 +573,8 @@ EWL_StreetSkate_ShuvIt_0_data:
 	.byte <- 8,<-15,$ec,0
 	.byte <-16,<-14,$e5,0
 	.byte <-17,<- 6,$e7,0
-	.byte <-16,<- 6,$fe,0
+	.byte <-14,<- 6,$fe,0
 
-	.byte <- 8,<- 6,$ff,0
 	.byte <- 8,<-14,$fd,0
 	.byte $80
 
@@ -804,11 +801,13 @@ EWL_StreetSkate_Crack_data:
 
 
 EWL_StreetSkate_Indicator_data:
-
-
 	.byte <- 8,<-16,$10,0
 	.byte <- 8,<- 8,$12,0
 	.byte $80
+
+
+
+
 
 EWL_StreetSkate_pointers_indicator:
 	.word EWL_StreetSkate_Indicator_data

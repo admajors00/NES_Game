@@ -188,14 +188,17 @@ prng:
 
 palette_level_2_night:
 
-.byte $0c,$0f,$2d,$10
+
+.byte $0c,$0f,$14,$24
 .byte $0c,$04,$38,$14
 .byte $0c,$0c,$38,$04
-.byte $0c,$0b,$0a,$19
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
+.byte $0c,$14,$08,$17
+
+.byte $00,$0f,$24,$26
+.byte $00,$0f,$27,$14
+.byte $00,$0f,$04,$24
+.byte $00,$06,$15,$26
+
 
 palette_level_3:
 
@@ -257,6 +260,16 @@ palette_Intro:
 .byte $30,$0f,$10,$27
 .byte $30,$0f,$36,$16
 
+palette_house:
+.byte $11,$0f,$10,$20
+.byte $11,$01,$11,$31
+.byte $11,$37,$17,$26
+.byte $11,$10,$19,$29
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
 
 Start_Screen:
 	.incbin "../graphics/Backgrounds/TitleScreen.bin"
@@ -272,8 +285,9 @@ Level_Screen_2_1:
 	.incbin"../graphics/Backgrounds/Level_2_1.bin"
 Level_Screen_2_2:
 	.incbin "../graphics/Backgrounds/Level_2_2.bin"
-Level_Screen_2_3:
-	.incbin "../graphics/Backgrounds/Level_2_3.bin"
+; Level_Screen_2_3:
+; 	.incbin "../graphics/Backgrounds/Level_2_3.bin"
+
 
 Level_Screen_3_1:
 	.incbin"../graphics/Backgrounds/Level_3_1.bin"
@@ -287,8 +301,8 @@ Level_Screen_3_5:
 	.incbin "../graphics/Backgrounds/Level_3_5.bin"
 End_Screen:
 	.incbin"../graphics/Backgrounds/EndScreen.bin"
-Instructions_Screen:
-	.incbin"../graphics/Backgrounds/Instructions.bin"
+WIN_Screen:
+    .incbin"../graphics/Backgrounds/WinScreen.bin"
 Intro_Screen_1:
 	.incbin"../graphics/Backgrounds/Intro_1.bin"
 Intro_Screen_2:
@@ -297,7 +311,15 @@ Intro_Screen_3:
 	.incbin"../graphics/Backgrounds/Intro_3.bin"
 Intro_Screen_4:
 	.incbin"../graphics/Backgrounds/Intro_4.bin"
-;.segment "SONG1"
+
+Level_Screen_House:
+	.incbin "../graphics/Backgrounds/House.bin"
+Level_Screen_Lake_sign:
+	.incbin "../graphics/Backgrounds/Lake_sign.bin"
+Level_Screen_Market_sign:
+	.incbin "../graphics/Backgrounds/Market_sign.bin"
+Level_Screen_SkatePark_sign:
+	.incbin "../graphics/Backgrounds/SkatePark_sign.bin"	
 song_test:
 .include "../audio/Song2.s"
 

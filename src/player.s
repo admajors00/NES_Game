@@ -281,7 +281,7 @@ UPDATE_ANIMATION_f 		= 1<<3
 				; else, subtract from both
 				lda velocity_x_LO
 				sec
-				sbc #$30
+				sbc #$18
 				
 				sta velocity_x_LO
 				lda velocity_x_HI

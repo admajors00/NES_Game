@@ -17,6 +17,24 @@ NUM_BACKGROUNDS = 7
 Background_1_Objects:
     .addr   Cone, Cone
 
+MarketSign:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_Market_sign
+LakeSign:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_Lake_sign
+SkateParkSign:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_SkatePark_sign
+House:
+    .byte 0
+    .addr 0
+    .addr Level_Screen_House   
+
+
 Lv1_bg_1:
     .byte 1
     .addr Pothole
@@ -82,7 +100,7 @@ Lv2_bg_2:
 Lv2_bg_3:
     .byte 1
     .addr Pothole
-    .addr Level_Screen_2_3
+    .addr Level_Screen_2_2
 
 Lv2_bg_4:
     .byte 1
@@ -91,22 +109,31 @@ Lv2_bg_4:
 Lv2_bg_5:
     .byte 1
     .addr Cone
-    .addr Level_Screen_2_3
+    .addr Level_Screen_2_2
 Lv2_bg_6:
     .byte 0
     .addr 0
-    .addr Level_Screen_2_3
+    .addr Level_Screen_2_2
 Lv2_bg_7:
     .byte 1
     .addr Crack
-    .addr Level_Screen_2_3
+    .addr Level_Screen_2_2
 Lv2_bg_8:
     .byte 1
     .addr Grate
-    .addr Level_Screen_2_3
+    .addr Level_Screen_2_2
 
-
-Level_2_bg_Array:
+Level_2_1_bg_Array:
+    .addr House
+    .addr Lv2_bg_5
+    .addr Lv2_bg_7
+    .addr Lv2_bg_2
+    .addr Lv2_bg_3
+    .addr Lv2_bg_7
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5
+    .addr MarketSign
+Level_2_2_bg_Array:
     .addr Lv2_bg_6
     .addr Lv2_bg_5
     .addr Lv2_bg_1
@@ -114,7 +141,18 @@ Level_2_bg_Array:
     .addr Lv2_bg_3
     .addr Lv2_bg_7
     .addr Lv2_bg_6
-    .addr Lv2_bg_5 
+    .addr Lv2_bg_5
+    .addr LakeSign
+Level_2_3_bg_Array:
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5
+    .addr Lv2_bg_1
+    .addr Lv2_bg_2
+    .addr Lv2_bg_3
+    .addr Lv2_bg_7
+    .addr Lv2_bg_6
+    .addr Lv2_bg_5
+    .addr SkateParkSign   
     
 Level_Random_bg_Array:
     .addr Lv2_bg_1
@@ -186,15 +224,7 @@ Level_3_bg_Array:
     .addr Lv3_bg_8
     .addr Lv3_bg_9
  
-Level_4_bg_Array:
-    .addr Lv2_bg_1
-    .addr Lv2_bg_2
-    .addr Lv2_bg_1
-    .addr Lv2_bg_1
-    .addr Lv2_bg_1
-    .addr Lv2_bg_1
-    .addr Lv2_bg_1
-    .addr Lv2_bg_1 
+
 
 
 

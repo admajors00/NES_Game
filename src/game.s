@@ -21,7 +21,7 @@ HIT_CHASER_f = 1<<1
     level = $78
 
     game_state_jump_table:
-        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop, Intro_Loop, Instruction_Loop
+        .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop, Intro_Loop, WIN_Loop
 
     Init:
         lda #3
@@ -42,8 +42,10 @@ HIT_CHASER_f = 1<<1
         lda level
         cmp #NUM_LEVELS
         bcc @cont
-            lda #0
-            sta level
+           jsr WIN_Init
+           lda #1
+           rts
+
         @cont:
         asl 
         tay
@@ -55,7 +57,7 @@ HIT_CHASER_f = 1<<1
         ldx level_pt_LO
         ldy level_pt_HI
         jsr Background::Load_Level_Background_Data
-
+        lda #0
         
     rts
 
@@ -95,6 +97,8 @@ HIT_CHASER_f = 1<<1
         jsr Background::load_background_nt1
 
         lda #0
+        sta nametable
+        sta scroll
         jsr BankSwitch
        
         ;jsr Game::Init
@@ -192,6 +196,12 @@ HIT_CHASER_f = 1<<1
         jsr Animation::Update
         
         jsr UpdateButtons
+        lda #BUTTON_SELECT
+        and Port_1_Pressed_Buttons
+        beq @cont2
+            lda #Game_States_e::paused
+            sta game_state
+        @cont2:
         
         jsr Player::Update
         jsr Chaser::Update
@@ -321,7 +331,18 @@ HIT_CHASER_f = 1<<1
 
    
     Paused_Loop:
-
+        jsr UpdateButtons
+        lda #BUTTON_SELECT
+        and Port_1_Pressed_Buttons
+        beq @cont
+            lda #Game_States_e::running
+            sta game_state
+        @cont:
+        lda #BUTTON_START
+        and Port_1_Pressed_Buttons
+        beq @done
+            JMP Start_Screen_Init
+        @done:
     rts
 
     Game_Over_Init:
@@ -382,7 +403,8 @@ HIT_CHASER_f = 1<<1
         @done:
     rts
 
-    Instructions_Init:
+
+    WIN_Init:
   
         LDA #%00000000   ;disable nmi
         STA $2000
@@ -395,49 +417,104 @@ HIT_CHASER_f = 1<<1
         AND #<~STATUS_BAR_FLAG
         sta scroll_flags
 
-        lda #0
+        lda#0
         sta nametable
         sta scroll
-        jsr BankSwitch
+        lda #Game_States_e::win
+        sta game_state   
 
-        lda #Game_States_e::instructions  
-        sta game_state
+        ldx #<music_data_get_fucked
+        ldy #>music_data_get_fucked
+        lda #1 ; NTSC
+        jsr famistudio_init
+
+        
+
         jsr store_high_score
-        
-        ldx #<palette_Instructions
-        ldy #>palette_Instructions
+        ldx #<palette_TitleScreen
+        ldy #>palette_TitleScreen
         jsr load_palettes
-        
-        LDA #<Instructions_Screen
+        lda #1
+        jsr BankSwitch
+        LDA #<WIN_Screen
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-        LDA #>Instructions_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+        LDA #>WIN_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
         jsr Background::load_background_nt1
        
-        lda #$3f
-		sta $2006
-		lda #$00
-		sta $2006
-		lda #$0f
-		sta $2007
+
         
-        LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+        LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA $2000
         sta bg_chr_rom_start_addr
-        LDA #%00001110   ; enable sprites, enable background, no clipping on left side
-        STA $2001 
-        sta bg_sprite_on_off 
-
+        LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+        STA $2001  
+        sta bg_sprite_on_off
     rts
-
-    Instruction_Loop:
+    WIN_Loop:
         jsr UpdateButtons
-        lda #BUTTON_SELECT
+        lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
             jmp Start_Screen_Init
         @done:
     rts
+    ; Instructions_Init:
+  
+    ;     LDA #%00000000   ;disable nmi
+    ;     STA $2000
+    ;     LDA #%00000000   ; disable rendering
+    ;     STA $2001    
+
+    ;     ;jsr Background::Draw_Box
+
+    ;     lda scroll_flags
+    ;     AND #<~STATUS_BAR_FLAG
+    ;     sta scroll_flags
+
+    ;     lda #0
+    ;     sta nametable
+    ;     sta scroll
+    ;     jsr BankSwitch
+
+    ;     lda #Game_States_e::instructions  
+    ;     sta game_state
+    ;     jsr store_high_score
+        
+    ;     ldx #<palette_Instructions
+    ;     ldy #>palette_Instructions
+    ;     jsr load_palettes
+        
+    ;     LDA #<Instructions_Screen
+    ;     STA bg_data_pt_LO           ; put the low byte of address of background into pointer
+    ;     LDA #>Instructions_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+    ;     STA bg_data_pt_HI           ; put high byte of address into pointer
+    ;     jsr Background::load_background_nt1
+       
+    ;     lda #$3f
+	; 	sta $2006
+	; 	lda #$00
+	; 	sta $2006
+	; 	lda #$0f
+	; 	sta $2007
+        
+    ;     LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+    ;     STA $2000
+    ;     sta bg_chr_rom_start_addr
+    ;     LDA #%00001110   ; enable sprites, enable background, no clipping on left side
+    ;     STA $2001 
+    ;     sta bg_sprite_on_off 
+
+    ; rts
+
+    ; Instruction_Loop:
+    ;     jsr UpdateButtons
+    ;     lda #BUTTON_SELECT
+    ;     and Port_1_Pressed_Buttons
+    ;     beq @done
+    ;         jmp Start_Screen_Init
+    ;     @done:
+    ; rts
 
     Level_Restart_Loop:
         jsr Animation::Update
@@ -483,6 +560,7 @@ HIT_CHASER_f = 1<<1
         ; sta game_state 
 	
         jsr Update_level
+        bne @done
 
         lda Chaser::velocity_x_HI       
         cmp #Game_Const::chaser_max_speed_HI;if chaser velocity hi is les than ax hi then add speed
@@ -515,6 +593,8 @@ HIT_CHASER_f = 1<<1
         jsr Obsticles::Init
         jsr Chaser::Reset
         jsr Player::Init 
+
+        @done:
 
 		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 		STA $2000

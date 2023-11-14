@@ -33,7 +33,7 @@ _GAME_INC = 1
     level_restart = 4
     next_level = 5
     intro = 6
-    instructions = 7
+    win = 7
 
 .endenum
 

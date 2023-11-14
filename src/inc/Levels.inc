@@ -9,7 +9,7 @@ _LEVELS_INC  =1
     bg_color .byte
 .endstruct
 
-NUM_LEVELS = 4
+NUM_LEVELS = 5
 
 Level_1_h:
     .byte 11
@@ -17,12 +17,25 @@ Level_1_h:
     .addr palette_level_1
     .byte 1
     .byte $0F
-Level_2_h:
-    .byte 8
-    .addr Level_2_bg_Array
-    .addr palette_level_2
+ Level_2_1_h:
+    .byte 9
+    .addr Level_2_1_bg_Array
+    .addr palette_house
     .byte 2
     .byte $11
+ 
+ Level_2_2_h:
+    .byte 9
+    .addr Level_2_2_bg_Array
+    .addr palette_level_2
+    .byte 2
+    .byte $11  
+ Level_2_3_h:
+    .byte 9
+    .addr Level_2_3_bg_Array
+    .addr palette_level_2_night
+    .byte 2
+    .byte $0C          
 Level_3_h:
     .byte 12
     .addr Level_3_bg_Array
@@ -30,12 +43,7 @@ Level_3_h:
     .byte 2
     .byte $30
 
-Level_4_h:
-    .byte 8
-    .addr Level_4_bg_Array
-    .addr palette_level_2_night
-    .byte 2
-    .byte $0c   
+  
 Level_Random_h:
     .byte 9
     .addr Level_Random_bg_Array
@@ -50,6 +58,6 @@ Intro_h:
     .byte $30
 
 Levels_table:
-    .addr Level_3_h,Level_1_h, Level_2_h,Level_4_h
+    .addr Level_2_1_h, Level_3_h,Level_2_2_h, Level_1_h,Level_2_3_h
 
 .endif
