@@ -167,6 +167,12 @@ store_high_score:
         sta temp_score_HI
         sta high_score_HI
 
+        lda #0 
+        sta ones_place
+        sta tens_place
+        sta hundreds_place
+        sta thousands_place
+        sta ten_thousands_place
         jsr convert_to_decimal
 
         lda #4

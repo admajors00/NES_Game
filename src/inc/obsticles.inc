@@ -61,7 +61,7 @@ Pothole:
 
 Grate:
     .byte $80
-    .byte $B4
+    .byte $B6
     .byte $18
     .byte $0A
     .byte Obstical_Types_e::rough

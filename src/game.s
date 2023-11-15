@@ -89,7 +89,7 @@ HIT_CHASER_f = 1<<1
         ldy #>palette_TitleScreen
         jsr load_palettes
         
-
+        jsr famistudio_music_pause
         LDA #<Start_Screen
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
@@ -122,7 +122,6 @@ HIT_CHASER_f = 1<<1
         lda #BUTTON_SELECT
         and Port_1_Pressed_Buttons
         beq @cont
-       
             jmp Infinite_Init
         @cont:
         lda #BUTTON_START
@@ -237,7 +236,7 @@ HIT_CHASER_f = 1<<1
         LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
         STA $2000
         sta bg_chr_rom_start_addr
-        LDA #%0001110   ; disable sprites, enable background, no clipping on left side
+        LDA #%00001110   ; disable sprites, enable background, no clipping on left side
         STA $2001
         sta bg_sprite_on_off
     rts
@@ -442,7 +441,7 @@ HIT_CHASER_f = 1<<1
         STA bg_data_pt_HI           ; put high byte of address into pointer
         jsr Background::load_background_nt1
        
-
+    
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA $2000

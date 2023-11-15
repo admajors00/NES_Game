@@ -4,53 +4,7 @@ _FRAMES_INC = 1
 OAM_FLIP_H = %01000000
 OAM_FLIP_V = %10000000
 
-EWL_StreetSkate_Walk_4_data:
 
-
-	.byte <-16,<-24,$01,2
-	.byte <- 8,<-24,$01,2|OAM_FLIP_H
-	.byte <-16,<-16,$03,2
-	.byte <- 8,<-16,$03,2|OAM_FLIP_H
-
-	.byte <-11,<- 8,$41,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_3_data:
-
-
-	.byte <-16,<-24,$01,2
-	.byte <- 8,<-24,$01,2|OAM_FLIP_H
-	.byte <-16,<-16,$03,2
-	.byte <- 8,<-16,$03,2|OAM_FLIP_H
-
-	.byte <-11,<- 8,$40,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_2_data:
-
-
-	.byte <-16,<-24,$01,2
-	.byte <- 8,<-24,$01,2|OAM_FLIP_H
-	.byte <-16,<-16,$03,2
-	.byte <- 8,<-16,$03,2|OAM_FLIP_H
-
-	.byte <-13,<- 8,$48,0
-	.byte $80
-
-
-EWL_StreetSkate_Walk_1_data:
-
-
-	.byte <-16,<-24,$01,2
-	.byte <- 8,<-24,$01,2|OAM_FLIP_H
-	.byte <-16,<-16,$03,2
-	.byte <- 8,<-16,$03,2|OAM_FLIP_H
-
-	.byte <-16,<- 8,$44,0
-	.byte <- 8,<- 8,$45,0
-	.byte $80
 
 
 EWL_StreetSkate_Push_4_data:
@@ -901,12 +855,7 @@ EWL_StreetSkate_pointers_kickflip:
 
 
 
-EWL_StreetSkate_pointers_walk:
 
-	.word EWL_StreetSkate_Walk_1_data
-	.word EWL_StreetSkate_Walk_2_data
-	.word EWL_StreetSkate_Walk_3_data
-	.word EWL_StreetSkate_Walk_4_data
 
 	
 

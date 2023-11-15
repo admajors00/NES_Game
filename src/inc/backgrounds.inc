@@ -73,7 +73,9 @@ Lv1_bg_8:
     .addr Level_Screen_4
 
 Level_1_bg_Array:
+
     .addr Lv1_bg_6
+    .addr Lv1_bg_4
     .addr Lv1_bg_8
     .addr Lv1_bg_1
     .addr Lv1_bg_2
@@ -123,16 +125,52 @@ Lv2_bg_8:
     .addr Grate
     .addr Level_Screen_2_2
 
-Level_2_1_bg_Array:
+Lv2_bg_9:
+    .byte 1
+    .addr Ramp
+    .addr Level_Screen_2_2
+
+House_to_Market_bg_Array:
     .addr House
     .addr Lv2_bg_5
     .addr Lv2_bg_7
+    .addr Lv2_bg_9
     .addr Lv2_bg_2
     .addr Lv2_bg_3
     .addr Lv2_bg_7
     .addr Lv2_bg_6
-    .addr Lv2_bg_5
+    .addr Lv2_bg_8
+    .addr Lv2_bg_6
+    .addr Lv2_bg_3
+    .addr Lv2_bg_9
+    .addr Lv2_bg_8
+    .addr Lv2_bg_6
+    .addr Lv2_bg_3
+    .addr Lv2_bg_6
+    .addr Lv2_bg_8
+    .addr Lv2_bg_6
+    .addr Lv2_bg_9
+    .addr Lv2_bg_3
+    .addr Lv2_bg_9
+    .addr Lv2_bg_3
+    .addr Lv2_bg_8
+    .addr Lv2_bg_7
+    .addr Lv2_bg_6
+    .addr Lv2_bg_3
+    .addr Lv2_bg_7
+    .addr Lv2_bg_6
+    .addr Lv2_bg_9
+    .addr Lv2_bg_3
+    .addr Lv2_bg_8
+    .addr Lv2_bg_6
+    .addr Lv2_bg_3
+    .addr Lv2_bg_9
+    .addr Lv2_bg_8
+    .addr Lv2_bg_6
+    .addr Lv2_bg_3
+    .addr Lv2_bg_9
     .addr MarketSign
+    .addr Lv2_bg_2
 Level_2_2_bg_Array:
     .addr Lv2_bg_6
     .addr Lv2_bg_5
@@ -187,7 +225,7 @@ Lv3_bg_4:
 
 Lv3_bg_5:
     .byte 1
-    .addr Pothole
+    .addr Crack
     .addr Level_Screen_3_1
 
 Lv3_bg_6:
@@ -221,6 +259,24 @@ Level_3_bg_Array:
     .addr Lv3_bg_4 ;caution
     .addr Lv3_bg_5 ;pothole
     .addr Lv3_bg_7 ;crack
+    .addr Lv3_bg_4
+    .addr Lv3_bg_6 ;crack
+     .addr Lv3_bg_7;crack
+    .addr Lv3_bg_2
+   .addr Lv3_bg_4 ;caution
+    .addr Lv3_bg_5 ;pothole
+    .addr Lv3_bg_4 ;caution
+    .addr Lv3_bg_5 ;pothole
+   .addr Lv3_bg_4 ;caution
+    .addr Lv3_bg_7;crack
+    .addr Lv3_bg_4 ;caution
+   
+    .addr Lv3_bg_6
+    .addr Lv3_bg_6 ;crack
+    .addr Lv3_bg_5 ;pothole
+    .addr Lv3_bg_7 ;crack
+    .addr Lv3_bg_2
+    .addr Lv3_bg_5 ;pothole
     .addr Lv3_bg_8
     .addr Lv3_bg_9
  

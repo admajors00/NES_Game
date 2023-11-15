@@ -216,13 +216,34 @@ UPDATE_ANIMATION_f 		= 1<<3
 			;  lsr velocity_x_HI
 			;  ror velocity_x_LO
 
-			lda velocity_Y_LO
+			; lda velocity_Y_LO
+			; clc
+			; adc velocity_x_LO
+			; sta velocity_Y_LO
+			; lda velocity_Y_HI
+			; adc velocity_x_HI
+			; sta velocity_Y_HI
+			; dec pos_y_HI
+			lda #0
+			sta jump_speed_LO
+			sta jump_speed_HI
+			lda velocity_x_LO
+			
+			sta velocity_Y_LO
 			clc
-			adc velocity_x_LO
+			lda velocity_x_HI
+			
+			sta velocity_Y_HI
+
+
+			sec 
+			lda velocity_Y_LO
+			sbc #$FF
 			sta velocity_Y_LO
 			lda velocity_Y_HI
-			adc velocity_x_HI
+			sbc #0
 			sta velocity_Y_HI
+
 			dec pos_y_HI
 			rts
 

@@ -17,9 +17,9 @@ Level_1_h:
     .addr palette_level_1
     .byte 1
     .byte $0F
- Level_2_1_h:
-    .byte 9
-    .addr Level_2_1_bg_Array
+ Level_house_to_market_h:
+    .byte 39
+    .addr House_to_Market_bg_Array
     .addr palette_house
     .byte 2
     .byte $11
@@ -37,7 +37,7 @@ Level_1_h:
     .byte 2
     .byte $0C          
 Level_3_h:
-    .byte 12
+    .byte 29
     .addr Level_3_bg_Array
     .addr palette_level_3
     .byte 2
@@ -58,6 +58,6 @@ Intro_h:
     .byte $30
 
 Levels_table:
-    .addr Level_2_1_h, Level_3_h,Level_2_2_h, Level_1_h,Level_2_3_h
+    .addr Level_house_to_market_h, Level_3_h,Level_2_2_h, Level_1_h,Level_2_3_h
 
 .endif
