@@ -70,8 +70,8 @@ PpuAddr			= $2006
 PpuData			= $2007
 OamDma			= $4014
 
-playList:
-	.addr music_data_untitled, music_data_get_fucked
+; playList:
+; 	.addr music_data_untitled, music_data_get_fucked
 
 reset:
 	sei			; disable IRQs

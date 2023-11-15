@@ -44,16 +44,16 @@ CautionSign:
 Cone:
     .byte $80
     .byte $B6
-    .byte $0F
-    .byte $0F
+    .byte $0D
+    .byte $0E
     .byte Obstical_Types_e::trip
     ;.byte Obstical_States_e::idle
     .addr Cone_Ani_Header
 
 Pothole:
     .byte $80
-    .byte $B6
-    .byte $0F
+    .byte $B8
+    .byte $0D
     .byte $0A
     .byte Obstical_Types_e::trip
    ; .byte Obstical_States_e::idle

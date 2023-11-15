@@ -128,7 +128,7 @@ Obstical_headers:
         sta pos_x
         clc
         lda pos_x
-        cmp #$08
+        cmp #$18
         bcs @dont_hide_obs
             ;remove obstical from frame as it scrolls off the screen
           
