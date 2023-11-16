@@ -1,18 +1,38 @@
 .segment "HEADER"
-  .byte $4E, $45, $53, $1A  ; iNES header identifier
-  .byte 2                   ; 2x 16KB PRG-ROM Banks
-  .byte 1                   ; 1x  8KB CHR-ROM
-  .byte $01                 ; mapper 0 (NROM)
-  .byte $00                 ; System: NES
+;   .byte $4E, $45, $53, $1A  ; iNES header identifier
+;   .byte 2                  ; 2x 16KB PRG-ROM Banks
+;   .byte 4                 ; 1x  8KB CHR-ROM
+; ;   .byte 0
+;   .byte $03                ; mapper 0 (NROM)
+;   .byte $00                 ; System: NES
+INES_MAPPER = 3 ; 0 = NROM
+INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
+INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 
+.byte $4E, $45, $53, $1A ; ID "NES", $1a;
+.byte $02 ; 16k PRG chunk count
+.byte $03 ; 8k CHR chunk count
+.byte INES_MIRROR | (INES_SRAM << 1) | ((INES_MAPPER & $f) << 4)
+.byte (INES_MAPPER & %11110000)
+.byte $0, $0, $0, $0, $0, $0, $0, $0 ; padding
 
 .segment "ZEROPAGE"
-pointerLo = $00   ; pointer variables are declared in RAM
-pointerHi = $01   ; low byte first, high byte immediately after
+main_pointer_LO = $f2  ; pointer variables are declared in RAM
+main_pointer_HI = $f3  ; low byte first, high byte immediately after
 
-scroll =$33
-nametable = $34
 
+
+amount_to_scroll = $f4; .res 1
+main_temp = $f5
+bg_chr_rom_start_addr = $f6
+bg_sprite_on_off = $f7
+frame_counter = $f8	
+
+rng_seed_LO = $f9
+rng_seed_HI = $fA
+.org $f9
+seed: .res 2
+.reloc
 .segment "RAM"
 
 
@@ -26,22 +46,32 @@ nametable = $34
 
 .include "controller.s"
 
-.include "../graphics/StreetCanvas_2.s"
-.include "game.s"
+;.include "../graphics/StreetCanvas_2.s"
+
 .include "player.s"
 .include "chaser.s"
+.include "obsticles.s"
 .include "animations.s"
+.include "background.s"
+.include "game.s"
+.include "StatusBar.s"
 .include "famistudio_ca65.s"
 
 
 
 
-;.include "game.asm"
+PpuCtrl			= $2000
+PpuMask			= $2001
+PpuStatus		= $2002
+OamAddr			= $2003
+OamData			= $2004
+PpuScroll		= $2005
+PpuAddr			= $2006
+PpuData			= $2007
+OamDma			= $4014
 
-
-
-
-
+; playList:
+; 	.addr music_data_untitled, music_data_get_fucked
 
 reset:
 	sei			; disable IRQs
@@ -54,6 +84,7 @@ reset:
 	stx	$2000		; disable NMI
 	stx	$2001		; disable rendering
 	stx	$4010		; disable DMC I	RQs
+ 
 
 	;; first wait for vblank to make sure PPU is ready
 jsr vblankwait
@@ -91,89 +122,15 @@ clear_nametables:
 		bne	@loop
 		dex
 		bne	@loop
+jsr vblankwait
+
+lda #$69
+sta rng_seed_LO
+lda #$42
+sta rng_seed_HI
 
 
-load_palettes:
-		lda	$2002		; read PPU status to reset the high/low latch
-		lda	#$3f
-		sta	$2006
-		lda	#$00
-		sta	$2006
-		ldx	#$00
-	@loop:
-		lda	palette, x	; load palette byte
-		sta	$2007		; write to PPU
-		inx			; set index to next byte
-		cpx	#$20
-		bne	@loop		; if x = $20, 32 bytes copied, all done
-
-; LoadSprites:
-; 	ldx #$80
-; 	stx Player::sprite_pos_x
-; 	LDX #$00 ; start at 0
-; 	LoadSpritesLoop:
-; 		LDA sprites, x ; load data from address (sprites + x)
-; 		STA $0200, x ; store into RAM address ($0200 + x)
-; 		INX ; X = X + 1
-; 		CPX #$20 ; Compare X to hex $10, decimal 16
-; 		BNE LoadSpritesLoop ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-; 		; if compare was equal to 16, continue down  
-
-
-
-
-load_background:
-	LDA $2002             ; read PPU status to reset the high/low latch
-	LDA #$20
-	STA $2006             ; write the high byte of $2000 address
-	LDA #$00
-	STA $2006             ; write the low byte of $2000 address
-
-	LDA #<StreetCanvas_2 
-	STA pointerLo           ; put the low byte of address of background into pointer
-	LDA #>StreetCanvas_2        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-	STA pointerHi           ; put high byte of address into pointer
-
-	LDX #$00            ; start at pointer + 0
-	LDY #$00
-	OutsideLoop:
-		
-		InsideLoop:
-			LDA (pointerLo), y  ; copy one background byte from address in pointer plus Y
-			STA $2007           ; this runs 256 * 4 times		
-			INY                 ; inside loop counter
-			CPY #$00
-			BNE InsideLoop      ; run the inside loop 256 times before continuing down
-		
-		INC pointerHi       ; low byte went 0 to 256, so high byte needs to be changed now
-		INX
-		CPX #$08
-		BNE OutsideLoop     ; run the outside loop 256 times before continuing down
-
-jsr Animation::Init
-jsr Chaser::Init
-jsr Player::init_character
-
-
-ldx #.lobyte(music_data_untitled)
-ldy #.hibyte(music_data_untitled)
-lda #1 ; NTSC
-jsr famistudio_init
-lda #0
-jsr famistudio_music_play
-
-
-LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-STA $2000
-
-LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-STA $2001         
-              
-
-
-
-
-
+jsr Game::Start_Screen_Init
 
 	
 forever:
@@ -183,101 +140,193 @@ forever:
 
 
 nmi:
-	; sprite DMA from $0200
-	
+	inc frame_counter
+	jsr Handle_Scroll
 
-	lda	#$00		; set the low byte (00) of the RAM address
-	sta	$2003
-	lda	#$02		; set the high byte (02) of the RAM address 
-	sta	$4014		; start the transfer
-	LDA #$00
-	STA $2006        ; clean up PPU address registers
-	STA $2006
-
-	LDA scroll
-	STA $2005        ; write the horizontal scroll count register
-
-	LDA #$00         ; no vertical scrolling
-	STA $2005
-
-	;;This is the PPU clean up section, so rendering the next frame starts properly.
-	LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-	ORA nametable    ; select correct nametable for bit 0
-	STA $2000
-
-	LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-	STA $2001	  
 	jsr famistudio_update
-
-
 	
-	jsr Animation::Update
-	jsr UpdateButtons
-	jsr Player::updatePlayer
+	jsr Game::Update
 	
 	
-
 	@end:
-	rti
+rti
+
+
+
+
+
 
 vblankwait:
 	bit	$2002
 	bpl	vblankwait
+rts
+
+
+BankSwitch:
+	tax
+
+	sta BankValues, x
+	rts
+BankValues:
+	.byte $00, $01, $02, $03
+;;;;;;;;;;;;;; 
+
+prng:
+	ldy #8     ; iteration count (generates 8 bits)
+	lda seed+0
+:
+	asl        ; shift the register
+	rol seed+1
+	bcc :+
+	eor #$39   ; apply XOR feedback whenever a 1 bit is shifted out
+:
+	dey
+	bne :--
+	sta seed+0
+	cmp #0     ; reload flags
 	rts
 
-Scroll:
-	       ; add one to our scroll variable each frame
-	@NTSwapCheck:
-		LDA scroll       ; check if the scroll just wrapped from 255 to 0
-		BNE @NTSwapCheckDone
-	
-	@NTSwap:
-		LDA nametable    ; load current nametable number (0 or 1)
-		EOR #$01         ; exclusive OR of bit 0 will flip that bit
-		STA nametable    ; so if nametable was 0, now 1
-					;    if nametable was 1, now 0
-	@NTSwapCheckDone:
-  	rts
-  
+palette_level_2_night:
+
+.byte $0c,$0f,$03,$14
+.byte $0c,$03,$38,$04
+.byte $0c,$03,$38,$04
+.byte $0c,$03,$09,$1c
 
 
 
-
-palette:
-
-
-
-.byte $2d,$3d,$38,$00
-.byte $2d,$12,$22,$32
-.byte $2d,$16,$26,$36
-.byte $2d,$14,$24,$34
+.byte $00,$0f,$24,$26
+.byte $00,$0f,$27,$14
+.byte $00,$0f,$04,$24
+.byte $00,$06,$15,$26
 
 
-.byte $0f,$0F,$30,$27
-.byte $0f,$00,$38,$31
-.byte $0f,$0f,$00,$20
-.byte $0f,$00,$37,$02
+palette_level_3:
+
+.byte $30,$2c,$0c,$26
+.byte $30,$2c,$0c,$12
+.byte $30,$2c,$0c,$37
+.byte $30,$0f,$2d,$16
+
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
+palette_level_2:
+.byte $11,$0f,$10,$20
+.byte $11,$01,$21,$31
+.byte $11,$31,$22,$21
+.byte $11,$10,$19,$29
+
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
+palette_level_1:
+;palette_EWL_StreetSkate_b:
+.byte $0f,$10,$12,$00 ; level 1 pallet
+.byte $0f,$12,$22,$32
+.byte $0f,$16,$26,$36
+.byte $0f,$14,$24,$38
+
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
+;palette_Level2_a:
+
+palette_TitleScreen:
+.byte $0f,$30,$12,$27
+.byte $0f,$0f,$0f,$0f
+.byte $0f,$20,$0f,$0f
+.byte $0f,$0f,$0f,$0f
+
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
+
+palette_Instructions:
+.byte $0f,$0f,$30,$27
+.byte $0f,$0f,$0f,$30
+.byte $0f,$2d,$10,$20
+.byte $0f,$18,$28,$38
+
+palette_Intro:
+.byte $30,$0f,$36,$11
+.byte $30,$0f,$0f,$30
+.byte $30,$0f,$10,$27
+.byte $30,$0f,$36,$16
+
+palette_house:
+.byte $11,$0f,$10,$20
+.byte $11,$01,$11,$31
+.byte $11,$37,$17,$26
+.byte $11,$10,$19,$29
+.byte $0f,$0f,$30,$27 ;sprite pallet
+.byte $0f,$0f,$37,$31
+.byte $0f,$0f,$10,$20
+.byte $0f,$17,$16,$27
 
 
+Start_Screen:
+	.incbin "../graphics/Backgrounds/TitleScreen.bin"
+Level_Screen_1:
+	.incbin"../graphics/Backgrounds/Level_1_1.bin"
+Level_Screen_2:
+	.incbin "../graphics/Backgrounds/Level_1_2.bin"
+Level_Screen_3:
+	.incbin "../graphics/Backgrounds/Level_1_3.bin"
+Level_Screen_4:
+	.incbin "../graphics/Backgrounds/Level_1_4.bin"
+Level_Screen_2_1:
+	.incbin"../graphics/Backgrounds/Level_2_1.bin"
+Level_Screen_2_2:
+	.incbin "../graphics/Backgrounds/Level_2_2.bin"
+; Level_Screen_2_3:
+; 	.incbin "../graphics/Backgrounds/Level_2_3.bin"
 
 
+Level_Screen_3_1:
+	.incbin"../graphics/Backgrounds/Level_3_1.bin"
+Level_Screen_3_2:
+	.incbin "../graphics/Backgrounds/Level_3_2.bin"
+Level_Screen_3_3:
+	.incbin "../graphics/Backgrounds/Level_3_3.bin"
+Level_Screen_3_4:
+	.incbin "../graphics/Backgrounds/Level_3_4.bin"
+Level_Screen_3_5:
+	.incbin "../graphics/Backgrounds/Level_3_5.bin"
+End_Screen:
+	.incbin"../graphics/Backgrounds/EndScreen.bin"
+WIN_Screen:
+    .incbin"../graphics/Backgrounds/WinScreen.bin"
+Intro_Screen_1:
+	.incbin"../graphics/Backgrounds/Intro_1.bin"
+Intro_Screen_2:
+	.incbin"../graphics/Backgrounds/Intro_2.bin"	
+Intro_Screen_3:
+	.incbin"../graphics/Backgrounds/Intro_3.bin"
+Intro_Screen_4:
+	.incbin"../graphics/Backgrounds/Intro_4.bin"
 
-	;; Background palette
-	; .byte 	$0f,$21,$31,$30
-	; .byte 	$0f,$21,$39,$19
-	; .byte 	$0f,$39,$29,$19
-	; .byte 	$0f,$27,$17,$26
-	; 	;; Sprite palette
-	; .byte	$0F,$2E,$16,$26
-	; .byte	$0F,$2E,$27,$36
-	; .byte	$0F,$36,$17,$2C
-	; .byte	$0F,$30,$12,$2B
-
-
-
-.segment "SONG1"
+Level_Screen_House:
+	.incbin "../graphics/Backgrounds/House.bin"
+Level_Screen_Lake_sign:
+	.incbin "../graphics/Backgrounds/Lake_sign.bin"
+Level_Screen_Market_sign:
+	.incbin "../graphics/Backgrounds/Market_sign.bin"
+Level_Screen_SkatePark_sign:
+	.incbin "../graphics/Backgrounds/SkatePark_sign.bin"	
 song_test:
 .include "../audio/Song2.s"
+
+
+song_game_over:
+.include "../audio/gameover_get_fucked.s"
 
 
 ;;;;;;;;;;;;;;  
@@ -293,9 +342,32 @@ song_test:
 	.word	0
   
 ;;;;;;;;;;;;;;  
-  
-.segment "CHARS"
-
-	.incbin	"../graphics/EWL.chr"	; includes 8KB graphics from SMB1
-
+; .segment "CHARS"
+	; .incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+	; .incbin	"../graphics/StartScreen.chr"
+ .segment "TITLEBANK"
+; ;.proc banked_chr_1
+		.incbin	"../graphics/Intro.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/StartScreen.chr"
+	;.endproc
 	
+
+.segment "LEVEL1"	
+	;.proc banked_chr_2
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level1.chr"
+.segment "LEVEL2"	
+	;.proc banked_chr_2
+		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+		.incbin	"../graphics/Level2.chr"
+; .segment "LEVEL3"	
+; 	;.proc banked_chr_2
+; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
+; 		.incbin	"../graphics/Level2.chr"
+	;.endproc
+; .proc Bank_Table
+; 	.addr banked_chr_1
+; 	.byte <.bank (banked_chr_1)
+; 	.addr banked_chr_2
+; 	.byte <.bank (banked_chr_2)
+; .endproc
