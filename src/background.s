@@ -52,9 +52,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 			
 		jsr Next_Background
 		jsr Background::load_background_nt1
-		; inc scroll_HI
-		; jsr Next_Background
-		; jsr Background::load_background_nt2
+
 		
 		jsr Reset_Buffers
 		lda #2
@@ -72,7 +70,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 		lda #NEW_ATTRIBUTE_FLAG
 		ora scroll_flags
 		sta scroll_flags
-		;inc scroll
+		
 		
 	rts
 
@@ -85,7 +83,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 			adc#$01
 			sta scroll
 			bcc @skip
-				;sta scroll
+			
 				lda scroll_HI
 				adc #0
 
@@ -98,11 +96,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 					and #%00000111
 					sta scroll_HI
 			@skip:
-			
-			; cmp #NUM_BACKGROUNDS	
-			; bcc @continue
-			; 	lda #0
-			; 	sta scroll_HI
+
 				
 			@continue:
 			jsr Next_Background
@@ -192,16 +186,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 		cmp scroll_HI_prev ;check that scroll high has changed
 		beq @done
 			sta scroll_HI_prev
-		;  jsr Update_Background_Obsticles
-			; lda scroll_flags
-			; and #USE_RANDOM_BACKGROUND
-			; beq @dont_use_random
-			; 	jsr prng
-			; 	and #%00000111
-			; 	asl
-			; 	tay
-			; 	jmp @check_random_done
-			; @dont_use_random:
+
 				lda scroll_HI
 				asl A
 				tay
@@ -226,8 +211,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 			beq @done
 			
 
-			; lda #1
-			; sta obsticles_active_flag
+	
 
 			ldy #Background_t::obsticle_list
 			lda (bg_header_pt_LO), y ;get first item from obsticle list
@@ -240,69 +224,10 @@ USE_RANDOM_BACKGROUND = 1<<3
 			ldy main_pointer_HI		
 			jsr Obsticles::Load 
 
-
-		
-			
-
 		@done:
 		
-		
 	rts
-	Draw_Box:
-            
-		LDA #$21           
-		sta main_pointer_HI
-		LDA #$AC
-		sta main_pointer_LO
-		; lda main_pointer_LO
-		; clc
-		; adc scroll
-		; sta main_pointer_LO
-		; lda main_pointer_HI
-		; adc #0
-		; sta main_pointer_HI  
-
-
-		LDA $2002             ; read PPU status to reset the high/low latch
-		LDA main_pointer_HI
-		STA $2006             ; write the high byte of $2000 address
-		
-		LDA main_pointer_LO
-		STA $2006             ; write the low byte of $2000 address
-		
-
-
-
-		LDX #$00            ; start at pointer + 0
-		LDY #$00
-		@OutsideLoop:
-			
-			@InsideLoop:
-				LDA #0  ; copy one background byte from address in pointer plus Y
-				STA $2007           ; this runs 256 * 4 times		
-				INY                 ; inside loop counter
-				CPY #$08
-				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
-			
-			lda main_pointer_LO
-			clc
-			adc #32
-			sta main_pointer_LO
-			lda main_pointer_HI
-			adc #0
-			sta main_pointer_HI    
-
-			LDA $2002             ; read PPU status to reset the high/low latch
-			LDA main_pointer_HI
-			STA $2006             ; write the high byte of $2000 address
-			LDA main_pointer_LO
-			STA $2006             ; write the low byte of $2000 address
-			
-			LDY #0
-			inx
-			CPX #$04
-			BNE @OutsideLoop     ; run the outside loop 256 times before continuing down
-	rts
+	
 	load_background_nt1: ;rendering should be stopped before calling this function
 		LDA $2002             ; read PPU status to reset the high/low latch
 		LDA #$20
@@ -327,7 +252,10 @@ USE_RANDOM_BACKGROUND = 1<<3
 			CPX #$04
 			BNE @OutsideLoop     ; run the outside loop 256 times before continuing down
 	rts
-		rts
+		
+
+
+		
 	load_background_nt2: ;rendering should be stopped before calling this function
 		LDA $2002             ; read PPU status to reset the high/low latch
 		LDA #$24

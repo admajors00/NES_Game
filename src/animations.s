@@ -1,22 +1,26 @@
-; adress space is $20$2F
-; .ifndef ANIMATIONS_INC
-; ANIMATIONS_INC =1
-; ;animation flags 
+; ============================================================================
+;   ANIMATIONS
+;==============================================================================
+;   This file handes all sprites except for the ones in the status bar
+;   Uses zero page $20- $2f
+;   see include file for animation header format
+;
+; animation frame data can be found in \graphics\frames.inc
+;===============================================================================
 
- .include "/inc/animations.inc"
- .include "../graphics/Frames.inc"
+
+
+.include "/inc/animations.inc"
+.include "../graphics/Frames.inc"
 .include "/inc/game.inc"
-;.include "player.inc"
-; BUTTON_A      = 1 << 7
-; BUTTON_B      = 1 << 6
-; BUTTON_SELECT = 1 << 5
-; BUTTON_START  = 1 << 4
+
 .segment "RAM"
 .org $400
+ ;the se animation haders are held in ram. Other code locations can updae the flags in these headers
 animation_headers_table:
-    .addr 0,0,0,0,0
+    .addr 0,0,0,0,0 ;filled with the following header addresses at runtime
 
-obs0_header_table:
+obs0_header_table: ;background obsticle
     .tag Animation_Header_t
 player_header_table:
     .tag Animation_Header_t
@@ -24,15 +28,15 @@ player_header_table:
 chaser_header_table:
     .tag Animation_Header_t
 
-obs1_header_table:
+obs1_header_table: ;forground obsticles
     .tag Animation_Header_t
 indicator_header_table:
     .tag Animation_Header_t
 
-Sprite_positions_table:
+Sprite_positions_table:;other locations in the code can update this table to move sprites
     .byte 0,0,0,0,0,0,0,0,0,0
 
-Alt_frametimer_table:
+Alt_frametimer_table:;sprites such as the player use their speed as a frame timer. These values should be put here
     .byte 0, 0, 0 ,0, 0
 .reloc
 
@@ -43,7 +47,7 @@ SPRITE_0_Y = $2C
 
 .segment "CODE"
 
-HEADER_TABLE_MAX_SIZE = 5
+HEADER_TABLE_MAX_SIZE = 5 ; number of sprites in header table
 
 OAM_DMA_ADDR = $200
 OAM_DMA_Y    = $200
@@ -58,29 +62,41 @@ OAM_DMA_X    = $203
     .export Load_Animation
     .export flags
 
-    pointer_1_LO = $20
+    pointer_1_LO = $20; a temporary pointer used for storing animations frame data
     pointer_1_HI = $21
 
-    pointer_2_LO = $22
+    pointer_2_LO = $22 ; a temporary pointer used for storing animations frame data
     pointer_2_HI = $23
 
-    oam_size = $24
-    flags = $25
+    oam_size = $24 ; keeps track of oam dma buffer index; ofset by status_oam_size for status bar ; see Clear_OAM_DMA
+    flags = $25 ;not used but could be
 
-    header_table_index = $26
+    header_table_index = $26;keeps track of the animation_headers_table index
   
 
     pointer_3_LO = $29
     pointer_3_HI = $2A
 
-    sprite_pos_x = $2B
+    sprite_pos_x = $2B ;holds the value of the current sprite frame location used in Update_sprite_pos
     sprite_pos_y = $2C
 
     temp_frame_index = $2D
 
+
+
+
+;======================================================================================================================
+;INIT (public)
+;
+;resets oam, loads addresses into animation hader table, loads sprite 0
+; 
+;
+; [in] x : Pointer to aniamation header (lo)
+; [in] y : Pointer to niamation header (hi)
+;======================================================================================================================
+
     Init:
-        ; lda #$0F
-        ; sta animation_timer
+
 
         lda #0
         sta flags
@@ -140,7 +156,17 @@ OAM_DMA_X    = $203
 
     rts
   
-    
+;======================================================================================================================
+; Load Animatio (public)
+;
+;   loads a valid animation header from memory. into the its corresponding position in the animation_headers_table
+; 
+;
+; [in] x : Pointer to aniamation header (lo)
+; [in] y : Pointer to niamation header (hi)
+;======================================================================================================================
+
+
     Load_Animation: ;add animation header to the list of headers
 
         stx pointer_1_LO
@@ -212,6 +238,14 @@ OAM_DMA_X    = $203
         @done:
 
     rts
+;======================================================================================================================
+; Update (public)
+;
+;goes through animation header table in reverse order. calls update_animation and Update_sprite_pos
+; 
+;
+;
+;======================================================================================================================
 
     Update:
         ;for animation in list
@@ -262,6 +296,16 @@ OAM_DMA_X    = $203
 
 
     rts
+;======================================================================================================================
+; Update (private)
+;
+;       Updates frame_timer, frame, and sets flags that are neccesary. Basically updates the header stored in ram
+; 
+;   [in] pointer_1_LO: addr of animation header from animation_header_tale to be update
+;   [in] pointer_1_HI:
+;   [out] player_input_flags_g : sets PLAYER_ANI_DONE_f if animation has finished
+;
+;======================================================================================================================
 
             
     Update_Animation: 
@@ -383,6 +427,16 @@ OAM_DMA_X    = $203
         ;else continue
         @done:
     rts
+;======================================================================================================================
+; Update_fram_pointer (private)
+;
+;       gets the next adress from the animation frame table and stores it 
+;       in the current frame addr location in the animation header
+; 
+;   [in] pointer_1_LO: addr of animation header from animation_header_tale to be updatee
+;   [in] pointer_1_HI:
+;
+;======================================================================================================================
 
     Update_Frame_Pointer:
         ; load the frame table addr into pointer 2
@@ -411,6 +465,21 @@ OAM_DMA_X    = $203
         ldy #Animation_Header_t::frame+1
         sta (pointer_1_LO), Y
     rts
+
+
+;======================================================================================================================
+; Update_sprite_pos (private)
+;
+;       Gets the oam data from the current sprite frame, and stors each in theoam dma bufer
+; 
+;   [in] pointer_1_LO: addr of animation header from animation_header_tale to be updatee
+;   [in] pointer_1_HI:
+;   [in] sprite_pos_x:  The position of the sprite must be stored here before calling
+;   [in] sprite_pos_y:
+;
+;======================================================================================================================
+
+
     .proc Update_sprite_pos
         ;load frame pointer
 
@@ -459,7 +528,7 @@ OAM_DMA_X    = $203
             iny
             lda (pointer_2_LO),Y
     
-            cmp #$80
+            cmp #$80;all sprte frame end witht his value
             bne @loop
             jmp @done
 
@@ -468,6 +537,20 @@ OAM_DMA_X    = $203
         @done:
     rts
     .endproc
+;======================================================================================================================
+; Clear_OAM_DMA (public)
+;
+;       
+;       clears the oam dma buffer. works backwards Stores $FE startig at oam_size down to status_oam_size. 
+;       status sprites dont get update every fram so they stay.
+;       also ensures that sprite 0 is loaded correctly
+;       
+;       sprites that arnt added to the uffer don increase oam_size so they get removed
+; 
+;   [uses] status_oam_size: addr of animation header from animation_header_tale to be updatee
+;   [uses] oam_size: gets reset to 0 
+;
+;======================================================================================================================
 
     Clear_OAM_DMA:
         
@@ -500,7 +583,3 @@ OAM_DMA_X    = $203
 
 .endscope
 
-
-
-;.export Animation
-; .endif

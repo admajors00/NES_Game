@@ -175,9 +175,7 @@ HIT_CHASER_f = 1<<1
         sta bg_sprite_on_off
     rts
     Game_Loop:
-        ;lda scroll_flags
-        ; and #USE_RANDOM_BACKGROUND
-        ; bne @cont
+
             ldy #Level_t::num_screens
             lda scroll_HI
             cmp (level_pt_LO),y
@@ -229,10 +227,7 @@ HIT_CHASER_f = 1<<1
         lda #Game_States_e::intro
         sta game_state
 
-        ; ldy #Level_t::bg_color
-        ; lda Intro_h, y
-        ; sta $2007
-
+      
         LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
         STA $2000
         sta bg_chr_rom_start_addr
@@ -314,9 +309,7 @@ HIT_CHASER_f = 1<<1
         STA Chaser::velocity_x_LO
         LDA #Game_Const::chaser_max_speed_HI
         STA Chaser::velocity_x_HI
-        ; ldy #Level_t::bg_color
-        ; lda Intro_h, y
-        ; sta $2007
+    
         lda #Game_States_e::running
         sta game_state
 
@@ -351,7 +344,7 @@ HIT_CHASER_f = 1<<1
         LDA #%00000000   ; disable rendering
         STA $2001    
 
-        ;jsr Background::Draw_Box
+
 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
@@ -458,62 +451,7 @@ HIT_CHASER_f = 1<<1
             jmp Start_Screen_Init
         @done:
     rts
-    ; Instructions_Init:
   
-    ;     LDA #%00000000   ;disable nmi
-    ;     STA $2000
-    ;     LDA #%00000000   ; disable rendering
-    ;     STA $2001    
-
-    ;     ;jsr Background::Draw_Box
-
-    ;     lda scroll_flags
-    ;     AND #<~STATUS_BAR_FLAG
-    ;     sta scroll_flags
-
-    ;     lda #0
-    ;     sta nametable
-    ;     sta scroll
-    ;     jsr BankSwitch
-
-    ;     lda #Game_States_e::instructions  
-    ;     sta game_state
-    ;     jsr store_high_score
-        
-    ;     ldx #<palette_Instructions
-    ;     ldy #>palette_Instructions
-    ;     jsr load_palettes
-        
-    ;     LDA #<Instructions_Screen
-    ;     STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-    ;     LDA #>Instructions_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
-    ;     STA bg_data_pt_HI           ; put high byte of address into pointer
-    ;     jsr Background::load_background_nt1
-       
-    ;     lda #$3f
-	; 	sta $2006
-	; 	lda #$00
-	; 	sta $2006
-	; 	lda #$0f
-	; 	sta $2007
-        
-    ;     LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-    ;     STA $2000
-    ;     sta bg_chr_rom_start_addr
-    ;     LDA #%00001110   ; enable sprites, enable background, no clipping on left side
-    ;     STA $2001 
-    ;     sta bg_sprite_on_off 
-
-    ; rts
-
-    ; Instruction_Loop:
-    ;     jsr UpdateButtons
-    ;     lda #BUTTON_SELECT
-    ;     and Port_1_Pressed_Buttons
-    ;     beq @done
-    ;         jmp Start_Screen_Init
-    ;     @done:
-    ; rts
 
     Level_Restart_Loop:
         jsr Animation::Update
@@ -661,14 +599,10 @@ HIT_CHASER_f = 1<<1
                     ora #PLAYER_HIT_DETECTED_f
                     sta player_input_flags_g
 
-                    ; lda #LIVES_CHANGE
-                    ; ora status_bar_flags
-                    ; sta status_bar_flags
+    
                     ldx lives
                     beq dead
-                        ; lda #3
-                        ; sta lives
-                        ; jmp @done
+ 
                     dex
                     stx lives
                     
@@ -694,8 +628,7 @@ HIT_CHASER_f = 1<<1
                 jmp @done
         @done:
     rts
-            ; lda #Player::PlayerActionStates::crash
-            ; sta Player::player_action_state
+
     check_chaser_hit:
         lda Chaser::pos_x_HI
         clc
@@ -714,9 +647,7 @@ HIT_CHASER_f = 1<<1
 
         @check_hit:
 
-            ; lda #HIT_CHASER_f
-            ; and hit_flag
-            ; bne @done ;jump i the player has already hit the obsticle
+
                 lda #HIT_CHASER_f
                 ora hit_flag
                 sta hit_flag
@@ -725,9 +656,7 @@ HIT_CHASER_f = 1<<1
                 sta player_input_flags_g
                 ldx lives
                 beq dead
-                    ; lda #3
-                    ; sta lives
-                    ; jmp @done
+      
                 dex
                 lda #Game_States_e::level_restart
                 sta game_state
@@ -744,7 +673,7 @@ HIT_CHASER_f = 1<<1
         lda score_LO
         clc
         adc #10
-        ;adc Player::velocity_x_HI
+
         sta score_LO
         lda score_HI
         adc#0
@@ -753,7 +682,7 @@ HIT_CHASER_f = 1<<1
         lda score_LO
         clc
         adc Player::velocity_x_HI
-        ;adc Player::velocity_x_HI
+
         sta score_LO
         lda score_HI
         adc#0
@@ -771,23 +700,6 @@ HIT_CHASER_f = 1<<1
             ora status_bar_flags
             sta status_bar_flags
 
-            ; lda #Game_Const::ground
-            ; sec
-            ; sbc Player::pos_y_HI
-            ; lsr a
-            ; lsr A
-            ; lsr A
-            
-            ; sta main_temp
-
-            ;  clc
-            ; lda score_LO
-           
-            ; adc main_temp
-            ; sta score_LO
-            ; lda score_HI
-            ; adc #0
-            ; sta score_HI
 
             clc
             lda score_LO

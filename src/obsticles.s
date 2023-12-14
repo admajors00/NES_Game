@@ -1,3 +1,14 @@
+; ============================================================================
+;   Obstacles
+;==============================================================================
+;   This file handes all obstacle stuff except collisions are handled in Game.s 
+;   because Game.s supposed to integrate all of the diffret parts
+;   Uses zero page $50- $5f
+;   see include file for obstacle header format
+;
+;===============================================================================
+
+
 .include "/inc/animations.inc"
 .include "../graphics/Frames.inc"
 .include "/inc/game.inc"
@@ -42,7 +53,13 @@ Obstical_headers:
     obsticle_index = $5e
     internal_flags = $5f
 
-
+;======================================================================================================================
+; Init (Public)
+;
+;       resets values, clears obstical animation header
+; 
+;
+;======================================================================================================================
     Init:
         lda #$00
         sta screen_pos_x
@@ -73,6 +90,15 @@ Obstical_headers:
         
 
     rts
+;======================================================================================================================
+; Update (Public)
+;
+;       updates postions of obstacles and puts them in Animation::Sprite_positions_table.
+;       deactivate obstacles animation once they move offscreen. adds obsticle animations 
+;       loads obstacle animations when they come onscreen
+; 
+;       obstacle posistiona re always stored n forground and background sprite locations
+;======================================================================================================================
 
 
     Update:
@@ -135,7 +161,8 @@ Obstical_headers:
             jsr Remove
             jmp @done
         @dont_hide_obs:
-           
+           ;obstacle posistiona re always stored n forground and background sprite locations
+           ;for simplicity
         ldy #Sprite_Positions_e::obst_1_x
 		lda pos_x
 		sta Sprite_positions_table, y
@@ -186,44 +213,14 @@ Obstical_headers:
             ldx temp_obst_LO
             ldy temp_obst_HI
             jmp Load 
-        ; ldy #Sprite_Positions_e::obst_1_x
-        ; lda pos_x
-        ; sta Sprite_positions_table, y
-        ; iny 
-        ; lda pos_y
-        ; sta Sprite_positions_table, y
 
-        ; ldy #Sprite_Positions_e::obst_0_x
-        ; lda pos_x
-        ; sta Sprite_positions_table, y
-        ; iny 
-        ; lda pos_y
-        ; sta Sprite_positions_table, y
         @done:
     rts
 
 
 
     Load:
-        ; lda #0
-        ; sta index
-        ; lda #1
-        ; sta main_temp
-        ; lda obsticles_active_flag
-        ; sec
-        ; @loop_1: ;check obsticals active flags for inactive obstcal
-        ;     lda index
-        ;     cmp #MAX_OBSTICLES
-        ;     bcs @done
-        ;     inc index
-        ;     asl main_temp
-        ;     lsr a
-        ;     bcs @loop_1
-        ; lsr main_temp
 
-        ; lda obsticles_active_flag
-        ; ora main_temp
-        ; sta obsticles_active_flag;set obstical active flag
 
         lda obsticles_active_flag
         beq @no_obs_loaded
@@ -240,10 +237,7 @@ Obstical_headers:
 
         lda #1
         sta obsticles_active_flag
-        ; lda #0
-        ; ; and #<~OBS_ON_SCREEN_F
-        ; ; and #<~OBS_OFF_SCREEN_F
-        ; sta internal_flags
+
         ldy #Obstical_t::pos_x
         lda (header_pt_LO), Y
         sta screen_pos_x
@@ -264,14 +258,6 @@ Obstical_headers:
         lda (header_pt_LO), Y
         sta  type
 
-        ; iny
-        ; lda (header_pt_LO), Y
-        ; tax
-
-        ; iny
-        ; lda (header_pt_LO), Y
-        ; tay
-        ; jsr Load_Animation
 
         ldy #Sprite_Positions_e::obst_1_x
         lda pos_x

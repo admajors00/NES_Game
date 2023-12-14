@@ -286,8 +286,7 @@ Level_Screen_2_1:
 	.incbin"../graphics/Backgrounds/Level_2_1.bin"
 Level_Screen_2_2:
 	.incbin "../graphics/Backgrounds/Level_2_2.bin"
-; Level_Screen_2_3:
-; 	.incbin "../graphics/Backgrounds/Level_2_3.bin"
+
 
 
 Level_Screen_3_1:
@@ -341,33 +340,19 @@ song_game_over:
 	;; External interrupt IRQ is not used in this tutorial 
 	.word	0
   
-;;;;;;;;;;;;;;  
-; .segment "CHARS"
-	; .incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
-	; .incbin	"../graphics/StartScreen.chr"
+
  .segment "TITLEBANK"
-; ;.proc banked_chr_1
+
 		.incbin	"../graphics/Intro.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/StartScreen.chr"
-	;.endproc
-	
+
 
 .segment "LEVEL1"	
-	;.proc banked_chr_2
+
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level1.chr"
 .segment "LEVEL2"	
-	;.proc banked_chr_2
+
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level2.chr"
-; .segment "LEVEL3"	
-; 	;.proc banked_chr_2
-; 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
-; 		.incbin	"../graphics/Level2.chr"
-	;.endproc
-; .proc Bank_Table
-; 	.addr banked_chr_1
-; 	.byte <.bank (banked_chr_1)
-; 	.addr banked_chr_2
-; 	.byte <.bank (banked_chr_2)
-; .endproc
+

@@ -14,14 +14,14 @@ ANI_FLAGS_MASK = %11110000
 .struct Animation_Header_t  
     num_frames          .byte
     frame_index         .byte
-    frames_pt           .addr
-    frame               .addr
-    frame_timers_pt     .addr
+    frames_pt           .addr ;table of pointers for frames
+    frame               .addr ; address to the current frame data
+    frame_timers_pt     .addr 
     frame_timer         .byte
     flags               .byte ;lower 4 bits determine what object its associated with, upper 4 are flags
 .endstruct
 
-.enum objects_e
+.enum objects_e ;doubles as index for animation_headers_table
     obstical_0 = $00
     player = $01
     guy_chasing = $02

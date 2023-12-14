@@ -28,24 +28,6 @@
 	relative_velocity_LO = $4F
 
 
-    .enum MovementStates		
-		idle = 0
-		inAirMoving = 1
-		inAirNotMoving = 2
-		onGroundMoving = 3
-		
-	.endenum
-	; movementStateJumpTable:
-	; 	.addr GroundedNotMoving, AirborneMoving, AirborneNotMoving, GroundedMoving
-
-	.enum ActionStates
-		idle = 0
-		running = 1
-		jumping = 2
-		ollie = 3
-	
-	.endenum
-
     .proc Init
         lda #0
         sta pos_x_LO
@@ -91,15 +73,7 @@
 	rts
 
 	 Update:
-		; lda Player::character_velocity_x_HIGH
-		; sta velocity_x_HI
-		; lda Player::character_velocity_x_LOW
-		;sta velocity_x_LO
 
-		; sec
-		; sbc #8
-		; @skip
-		; sta velocity_x_LO
 		lda velocity_x_LO
 		sec
 		sbc Player::velocity_x_LO

@@ -725,8 +725,6 @@ EWL_StreetSkate_Number_9_data:
 
 
 EWL_StreetSkate_Ramp_data:
-
-
 	.byte <-16,<-16,$6d,3
 	.byte <- 8,<-16,$70,3
 	.byte <-16,<- 8,$6f,3
@@ -735,8 +733,6 @@ EWL_StreetSkate_Ramp_data:
 
 
 EWL_StreetSkate_CautionSign_data:
-
-
 	.byte <-16,<-16,$5c,0
 	.byte <- 8,<-16,$5d,0
 	.byte <-16,<- 8,$5e,0
@@ -745,8 +741,6 @@ EWL_StreetSkate_CautionSign_data:
 
 
 EWL_StreetSkate_Crack_data:
-
-
 	.byte <-16,<-13,$64,0
 	.byte <- 8,<-13,$65,0
 	.byte <-16,<- 5,$66,0
