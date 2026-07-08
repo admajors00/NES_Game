@@ -294,9 +294,7 @@ Level_Screen_3_1:
 Level_Screen_3_2:
 	.incbin "../graphics/Backgrounds/Level_3_2.bin"
 Level_Screen_3_3:
-	.incbin "../graphics/Backgrounds/Level_3_3.bin"
 Level_Screen_3_4:
-	.incbin "../graphics/Backgrounds/Level_3_4.bin"
 Level_Screen_3_5:
 	.incbin "../graphics/Backgrounds/Level_3_5.bin"
 End_Screen:
@@ -308,9 +306,10 @@ Intro_Screen_1:
 Intro_Screen_2:
 	.incbin"../graphics/Backgrounds/Intro_2.bin"	
 Intro_Screen_3:
-	.incbin"../graphics/Backgrounds/Intro_3.bin"
+	.incbin"../graphics/Backgrounds/Intro_2.bin"
 Intro_Screen_4:
 	.incbin"../graphics/Backgrounds/Intro_4.bin"
+
 
 Level_Screen_House:
 	.incbin "../graphics/Backgrounds/House.bin"
@@ -320,14 +319,20 @@ Level_Screen_Market_sign:
 	.incbin "../graphics/Backgrounds/Market_sign.bin"
 Level_Screen_SkatePark_sign:
 	.incbin "../graphics/Backgrounds/SkatePark_sign.bin"	
-song_test:
-.include "../audio/Song2.s"
 
-
+; .segment "SONG1"
+song_intro:
+	.include "../audio/Intro.s"
+song_song:
+	music_data_name = music_data_too_fuckin_happy
+ 	.include "../audio/top_of_the_bell_curve_too_fuckin_happy.s"
+   	; .include "../audio/top_of_the_bell_curve_accelerating.s"
+	
 song_game_over:
 .include "../audio/gameover_get_fucked.s"
 
-
+; .segment "DPCM"
+; .incbin "../audio/Intro.dmc"
 ;;;;;;;;;;;;;;  
   
 .segment "VECTORS"
@@ -335,7 +340,7 @@ song_game_over:
 	;; When an NMI happens (once per frame if enabled) the label nmi:
 	.word	nmi
 	;; When the processor first turns on or is reset, it will jump to the
-	;; label reset:
+	;; label reset: 
 	.word	reset
 	;; External interrupt IRQ is not used in this tutorial 
 	.word	0
