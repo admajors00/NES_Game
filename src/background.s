@@ -51,7 +51,8 @@ USE_RANDOM_BACKGROUND = 1<<3
 		sty column_number
 			
 		jsr Next_Background
-		jsr Background::load_background_nt1
+		ldx #$00
+		jsr RLE::LoadRLEScreen
 
 		
 		jsr Reset_Buffers
@@ -170,11 +171,11 @@ USE_RANDOM_BACKGROUND = 1<<3
 		jsr load_palettes
 
 		lda #$3f
-		sta $2006
+		sta PpuAddr
 		lda #$00
-		sta $2006
+		sta PpuAddr
 		lda main_temp
-		sta $2007
+		sta PpuData
 
 		
 		
@@ -229,12 +230,12 @@ USE_RANDOM_BACKGROUND = 1<<3
 	rts
 	
 	load_background_nt1: ;rendering should be stopped before calling this function
-		LDA $2002             ; read PPU status to reset the high/low latch
+		LDA PpuStatus             ; read PPU status to reset the high/low latch
 		LDA #$20
-		STA $2006             ; write the high byte of $2000 address
+		STA PpuAddr             ; write the high byte of $2000 address
 		LDA #$00
-		STA $2006             ; write the low byte of $2000 address
-
+		STA PpuAddr             ; write the low byte of $2000 address
+		
 
 		LDX #$00            ; start at pointer + 0
 		LDY #$00
@@ -242,7 +243,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 			
 			@InsideLoop:
 				LDA (bg_data_pt_LO), y  ; copy one background byte from address in pointer plus Y
-				STA $2007           ; this runs 256 * 4 times		
+				STA PpuData           ; this runs 256 * 4 times		
 				INY                 ; inside loop counter
 				CPY #$00
 				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
@@ -257,11 +258,11 @@ USE_RANDOM_BACKGROUND = 1<<3
 
 		
 	load_background_nt2: ;rendering should be stopped before calling this function
-		LDA $2002             ; read PPU status to reset the high/low latch
+		LDA PpuStatus             ; read PPU status to reset the high/low latch
 		LDA #$24
-		STA $2006             ; write the high byte of $2000 address
+		STA PpuAddr             ; write the high byte of $2000 address
 		LDA #$00
-		STA $2006             ; write the low byte of $2000 address
+		STA PpuAddr             ; write the low byte of $2000 address
 
 
 		LDX #$04            ; start at pointer + 0
@@ -270,7 +271,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 			
 			@InsideLoop:
 				LDA (bg_data_pt_LO), y  ; copy one background byte from address in pointer plus Y
-				STA $2007           ; this runs 256 * 4 times		
+				STA PpuData           ; this runs 256 * 4 times		
 				INY                 ; inside loop counter
 				CPY #$00
 				BNE @InsideLoop      ; run the inside loop 256 times before continuing down
@@ -310,15 +311,15 @@ USE_RANDOM_BACKGROUND = 1<<3
 load_palettes:
 		stx main_pointer_LO
 		sty main_pointer_HI
-		lda	$2002		; read PPU status to reset the high/low latch
+		lda	PpuStatus		; read PPU status to reset the high/low latch
 		lda	#$3f
-		sta	$2006
+		sta	PpuAddr
 		lda	#$00
-		sta	$2006
+		sta	PpuAddr
 		ldy	#$00
 	@loop:
 		lda	(main_pointer_LO), y	; load palette byte
-		sta	$2007		; write to PPU
+		sta	PpuData		; write to PPU
 		iny			; set index to next byte
 		cpy	#$20
 		bne	@loop		; if x = $20, 32 bytes copied, all done
@@ -346,36 +347,36 @@ Handle_Scroll:
 		and #<~NEW_COLUMN_FLAG
 
 	lda	#$00		; set the low byte (00) of the RAM address
-	sta	$2003
+	sta	OamAddr
 	lda	#$02		; set the high byte (02) of the RAM address 
-	sta	$4014		; start the transfer
+	sta	OamDma		; start the transfer
 	LDA #$00
-	STA $2006        ; clean up PPU address registers
-	STA $2006
+	STA PpuAddr        ; clean up PPU address registers
+	STA PpuAddr
 
 	LDA #$00
-	STA $2005        ; write the horizontal scroll count register        ; no vertical scrolling
-	STA $2005
+	STA PpuScroll        ; write the horizontal scroll count register        ; no vertical scrolling
+	STA PpuScroll
 
 	;;This is the PPU clean up section, so rendering the next frame starts properly.
 	LDA bg_chr_rom_start_addr  ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 	
     ;	ORA nametable    ; select correct nametable for bit 0
-	STA $2000
+	STA PpuCtrl
 
 	lda bg_sprite_on_off   ; enable sprites, enable background, no clipping on left side
-	STA $2001	  
+	STA PpuMask	  
 
 	LDA #STATUS_BAR_FLAG
 	and	scroll_flags
 	beq skip_statusbar
     WaitNotSprite0:
-        lda $2002
+        lda PpuStatus
         and #%01000000
         bne WaitNotSprite0   ; wait until sprite 0 not hit
 
     WaitSprite0:
-        lda $2002
+        lda PpuStatus
         and #%01000000
         beq WaitSprite0      ; wait until sprite 0 is hit
 
@@ -387,14 +388,14 @@ Handle_Scroll:
     ; now set the scroll and nametable to use for the rest of the screen down
   
     LDA scroll
-    STA $2005        ; write the horizontal scroll count register
+    STA PpuScroll        ; write the horizontal scroll count register
 
     LDA #$00         ; no vertical scrolling
-    STA $2005
+    STA PpuScroll
         
     LDA bg_chr_rom_start_addr  ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
     ORA nametable    ; select correct nametable for bit 0
-    STA $2000
+    STA PpuCtrl
 
 rts
 
@@ -454,7 +455,7 @@ Draw_New_Attributes_To_Buffer:
 	@add_status_bar_offset_done:
 
 
-	LDA $2002             ; read PPU status to reset the high/low latch
+	LDA PpuStatus             ; read PPU status to reset the high/low latch
 	@loop:
 		LDA (new_background_LO), y    ; copy new attribute byte
 		sta Attribute_Buffer, y
@@ -510,14 +511,14 @@ Draw_New_Attributes_From_Buffer:
 
 		LDY #$08
 	@add_status_bar_offset_done:
-	LDA $2002             ; read PPU status to reset the high/low latch
+	LDA PpuStatus             ; read PPU status to reset the high/low latch
 	@loop:
 		LDA column_HI
-		STA $2006             ; write the high byte of column address
+		STA PpuAddr             ; write the high byte of column address
 		LDA column_LO
-		STA $2006             ; write the low byte of column address
+		STA PpuAddr             ; write the low byte of column address
 		LDA Attribute_Buffer, y    ; copy new attribute byte
-		STA $2007
+		STA PpuData
 		tya
 		clc
 		adc #$08
@@ -618,15 +619,15 @@ Draw_New_Collumn_From_Buffer:
 	
 
 	lda #%00000100
-	sta $2000
-	lda $2002
+	sta PpuCtrl
+	lda PpuStatus
 	lda column_HI
-	sta $2006
+	sta PpuAddr
 	lda column_LO
-	sta $2006
+	sta PpuAddr
 	@loop:
 		lda Scroll_Buffer,x
-		sta $2007
+		sta PpuData
         dex
 		bne @loop
 

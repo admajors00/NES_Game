@@ -15,7 +15,7 @@
 .include "/inc/game.inc"
 
 .segment "RAM"
-.org $400
+.org $100
  ;the se animation haders are held in ram. Other code locations can updae the flags in these headers
 animation_headers_table:
     .addr 0,0,0,0,0 ;filled with the following header addresses at runtime

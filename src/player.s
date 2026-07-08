@@ -10,13 +10,13 @@
 .include "/inc/animations.inc"
 .include "/inc/game.inc"
 .include "../graphics/Frames.inc"
-; OAM address ($2003) > write / OAM data ($2004) > write
-; Set the "sprite" address using OAMADDR ($2003)
+; OAM address (OamAddr) > write / OAM data ($2004) > write
+; Set the "sprite" address using OAMADDR (OamAddr)
 ; Then write the following bytes via OAMDATA ($2004)
 .segment "CODE"
-OAM_ADDR  = $2003
-OAM_DATA  = $2004
-OAM_DMA   = $4014
+OAM_ADDR  = OamAddr
+OAM_DATA  = OamData
+OAM_DMA   = OamDma
 
 OAM_Y    = 0
 OAM_TILE = 1

@@ -1,3 +1,4 @@
+.list on
 .segment "HEADER"
 ;   .byte $4E, $45, $53, $1A  ; iNES header identifier
 ;   .byte 2                  ; 2x 16KB PRG-ROM Banks
@@ -47,7 +48,7 @@ seed: .res 2
 .include "controller.s"
 
 ;.include "../graphics/StreetCanvas_2.s"
-
+.include "../Tools/rle_decomp.s"
 .include "player.s"
 .include "chaser.s"
 .include "obsticles.s"
@@ -56,6 +57,7 @@ seed: .res 2
 .include "game.s"
 .include "StatusBar.s"
 .include "famistudio_ca65.s"
+
 
 
 
@@ -81,8 +83,8 @@ reset:
 	ldx	#$ff		; Set up stack
 	txs			;  .
 	inx			; now X = 0
-	stx	$2000		; disable NMI
-	stx	$2001		; disable rendering
+	stx	PpuCtrl		; disable NMI
+	stx	PpuMask		; disable rendering
 	stx	$4010		; disable DMC I	RQs
  
 
@@ -108,16 +110,16 @@ jsr vblankwait
 
 
 clear_nametables:
-		lda	$2002		; read PPU status to reset the high/low latch
+		lda	PpuStatus		; read PPU status to reset the high/low latch
 		lda	#$20		; write the high byte of $2000
-		sta	$2006		;  .
+		sta	PpuAddr		;  .
 		lda	#$00		; write the low byte of $2000
-		sta	$2006		;  .
+		sta	PpuAddr		;  .
 		ldx	#$08		; prepare to fill 8 pages ($800 bytes)
 		ldy	#$00		;  x/y is 16-bit counter, high byte in x
 		lda	#$2F		; fill with tile $27 (a solid box)
 	@loop:
-		sta	$2007
+		sta	PpuData
 		dey
 		bne	@loop
 		dex
@@ -157,7 +159,7 @@ rti
 
 
 vblankwait:
-	bit	$2002
+	bit	PpuStatus
 	bpl	vblankwait
 rts
 
@@ -273,59 +275,61 @@ palette_house:
 
 
 Start_Screen:
-	.incbin "../graphics/Backgrounds/TitleScreen.bin"
+	.incbin "../graphics/Backgrounds/TitleScreen.rle"
 Level_Screen_1:
-	.incbin"../graphics/Backgrounds/Level_1_1.bin"
+	.incbin"../graphics/Backgrounds/Level_1_1.rle"
 Level_Screen_2:
-	.incbin "../graphics/Backgrounds/Level_1_2.bin"
+	.incbin "../graphics/Backgrounds/Level_1_2.rle"
 Level_Screen_3:
-	.incbin "../graphics/Backgrounds/Level_1_3.bin"
+	.incbin "../graphics/Backgrounds/Level_1_3.rle"
 Level_Screen_4:
-	.incbin "../graphics/Backgrounds/Level_1_4.bin"
+	.incbin "../graphics/Backgrounds/Level_1_4.rle"
 Level_Screen_2_1:
-	.incbin"../graphics/Backgrounds/Level_2_1.bin"
+	.incbin"../graphics/Backgrounds/Level_2_1.rle"
 Level_Screen_2_2:
-	.incbin "../graphics/Backgrounds/Level_2_2.bin"
+	.incbin "../graphics/Backgrounds/Level_2_2.rle"
 
 
 
 Level_Screen_3_1:
-	.incbin"../graphics/Backgrounds/Level_3_1.bin"
+	.incbin"../graphics/Backgrounds/Level_3_1.rle"
 Level_Screen_3_2:
-	.incbin "../graphics/Backgrounds/Level_3_2.bin"
+	.incbin "../graphics/Backgrounds/Level_3_2.rle"
 Level_Screen_3_3:
-	.incbin "../graphics/Backgrounds/Level_3_3.bin"
+	.incbin "../graphics/Backgrounds/Level_3_3.rle"
 Level_Screen_3_4:
-	.incbin "../graphics/Backgrounds/Level_3_4.bin"
+	.incbin "../graphics/Backgrounds/Level_3_4.rle"
 Level_Screen_3_5:
-	.incbin "../graphics/Backgrounds/Level_3_5.bin"
+	.incbin "../graphics/Backgrounds/Level_3_5.rle"
 End_Screen:
-	.incbin"../graphics/Backgrounds/EndScreen.bin"
+	.incbin"../graphics/Backgrounds/EndScreen.rle"
 WIN_Screen:
-    .incbin"../graphics/Backgrounds/WinScreen.bin"
+    .incbin"../graphics/Backgrounds/WinScreen.rle"
 Intro_Screen_1:
-	.incbin"../graphics/Backgrounds/Intro_1.bin"
+	.incbin"../graphics/Backgrounds/Intro_1.rle"
 Intro_Screen_2:
-	.incbin"../graphics/Backgrounds/Intro_2.bin"	
+	.incbin"../graphics/Backgrounds/Intro_2.rle"	
 Intro_Screen_3:
-	.incbin"../graphics/Backgrounds/Intro_3.bin"
+	.incbin"../graphics/Backgrounds/Intro_3.rle"
 Intro_Screen_4:
-	.incbin"../graphics/Backgrounds/Intro_4.bin"
+	.incbin"../graphics/Backgrounds/Intro_4.rle"
 
 Level_Screen_House:
-	.incbin "../graphics/Backgrounds/House.bin"
+	.incbin "../graphics/Backgrounds/House.rle"
 Level_Screen_Lake_sign:
-	.incbin "../graphics/Backgrounds/Lake_sign.bin"
+	.incbin "../graphics/Backgrounds/Lake_sign.rle"
 Level_Screen_Market_sign:
-	.incbin "../graphics/Backgrounds/Market_sign.bin"
+	.incbin "../graphics/Backgrounds/Market_sign.rle"
 Level_Screen_SkatePark_sign:
-	.incbin "../graphics/Backgrounds/SkatePark_sign.bin"	
+	.incbin "../graphics/Backgrounds/SkatePark_sign.rle"	
 song_test:
 .include "../audio/Song2.s"
 
 
 song_game_over:
 .include "../audio/gameover_get_fucked.s"
+
+
 
 
 ;;;;;;;;;;;;;;  

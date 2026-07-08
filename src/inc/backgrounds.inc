@@ -307,9 +307,12 @@ Intro_bg_Array:
     .addr Intro_bg_4
 
 
-.org $460
+.org $150
 Scroll_Buffer: .res 32
 Attribute_Buffer: .res 32
+
+.org $400
+Background_Buffer: .res 1024
 .reloc
 
 

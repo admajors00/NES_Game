@@ -75,9 +75,9 @@ HIT_CHASER_f = 1<<1
 
     Start_Screen_Init:
         LDA #%00000000   ; disable NMI
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable sprites, enable background, no clipping on left side
-        STA $2001
+        STA PpuMask
         lda #Game_States_e::start_screen
         sta game_state
 
@@ -93,8 +93,9 @@ HIT_CHASER_f = 1<<1
         LDA #<Start_Screen
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
-        STA bg_data_pt_HI           ; put high byte of address into pointer
-        jsr Background::load_background_nt1
+        STA bg_data_pt_HI   
+        ldx $00        ; put high byte of address into pointer
+        jsr  RLE::LoadRLEScreen
 
         lda #0
         sta nametable
@@ -107,11 +108,11 @@ HIT_CHASER_f = 1<<1
 
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
 
         LDA #%00001110   ; enable sprites, enable background, no clipping on left side
-        STA $2001
+        STA PpuMask
         sta bg_sprite_on_off        
     rts
 
@@ -135,9 +136,9 @@ HIT_CHASER_f = 1<<1
 
     Start_Game:
         LDA #%00000000   ; disable NMI
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable sprites, enable background, no clipping on left side
-        STA $2001   
+        STA PpuMask   
 
         lda scroll_flags
         ora #STATUS_BAR_FLAG
@@ -168,10 +169,10 @@ HIT_CHASER_f = 1<<1
 
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-        STA $2001
+        STA PpuMask
         sta bg_sprite_on_off
     rts
     Game_Loop:
@@ -210,9 +211,9 @@ HIT_CHASER_f = 1<<1
     rts
     Intro_Init:
         LDA #%00000000   ; disable NMI
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable sprites, enable background, no clipping on left side
-        STA $2001 
+        STA PpuMask 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
         sta scroll_flags
@@ -229,10 +230,10 @@ HIT_CHASER_f = 1<<1
 
       
         LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00001110   ; disable sprites, enable background, no clipping on left side
-        STA $2001
+        STA PpuMask
         sta bg_sprite_on_off
     rts
 
@@ -261,9 +262,9 @@ HIT_CHASER_f = 1<<1
 
     Infinite_Init:
         LDA #%00000000   ; disable NMI
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable sprites, enable background, no clipping on left side
-        STA $2001 
+        STA PpuMask 
         lda scroll_flags
         ora #STATUS_BAR_FLAG
         sta scroll_flags
@@ -314,10 +315,10 @@ HIT_CHASER_f = 1<<1
         sta game_state
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00011110     ; disable sprites, enable background, no clipping on left side
-        STA $2001
+        STA PpuMask
         sta bg_sprite_on_off
     rts
 
@@ -340,9 +341,9 @@ HIT_CHASER_f = 1<<1
     Game_Over_Init:
   
         LDA #%00000000   ;disable nmi
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable rendering
-        STA $2001    
+        STA PpuMask    
 
 
 
@@ -374,15 +375,16 @@ HIT_CHASER_f = 1<<1
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>End_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
-        jsr Background::load_background_nt1
+        ldx $00
+        jsr RLE::LoadRLEScreen
        
 
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-        STA $2001  
+        STA PpuMask  
         sta bg_sprite_on_off
 
     rts
@@ -399,9 +401,9 @@ HIT_CHASER_f = 1<<1
     WIN_Init:
   
         LDA #%00000000   ;disable nmi
-        STA $2000
+        STA PpuCtrl
         LDA #%00000000   ; disable rendering
-        STA $2001    
+        STA PpuMask    
 
         ;jsr Background::Draw_Box
 
@@ -432,15 +434,16 @@ HIT_CHASER_f = 1<<1
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>WIN_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
-        jsr Background::load_background_nt1
+        ldx $00
+        jsr RLE::LoadRLEScreen
        
     
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-        STA $2001  
+        STA PpuMask  
         sta bg_sprite_on_off
     rts
     WIN_Loop:
@@ -462,9 +465,9 @@ HIT_CHASER_f = 1<<1
          
         beq @done
             LDA #%00000000   ;disable nmi
-            STA $2000
+            STA PpuCtrl
             LDA #%00000000   ; disable rendering
-            STA $2001  
+            STA PpuMask  
             lda #0
             ; sta score_HI
             ; sta score_LO
@@ -477,10 +480,10 @@ HIT_CHASER_f = 1<<1
             jsr Chaser::Reset
             jsr Player::Init 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA $2000
+        STA PpuCtrl
         sta bg_chr_rom_start_addr
         LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-        STA $2001  
+        STA PpuMask  
         sta bg_sprite_on_off
         @done:
     rts
@@ -489,9 +492,9 @@ HIT_CHASER_f = 1<<1
         ;load level number screen wait for a minute 
         
 		LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA $2000
+		STA PpuCtrl
 		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
-		STA $2001   
+		STA PpuMask   
 
         ; lda #Game_States_e::level_restart
         ; sta game_state 
@@ -534,10 +537,10 @@ HIT_CHASER_f = 1<<1
         @done:
 
 		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA $2000
+		STA PpuCtrl
         sta bg_chr_rom_start_addr
 		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-		STA $2001
+		STA PpuMask
         sta bg_sprite_on_off
        
 
