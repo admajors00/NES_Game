@@ -63,7 +63,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 	
 	
 		jsr Next_Background
-		jsr Draw_New_Collumn_To_Buffer
+		jsr RLE::DecodeRLEScreenIntoBuffer
 		jsr Draw_New_Attributes_To_Buffer
 		lda #NEW_COLUMN_FLAG
 		ora scroll_flags
@@ -114,7 +114,7 @@ USE_RANDOM_BACKGROUND = 1<<3
 					and #%01111111
 					sta column_number
 					
-					jsr Draw_New_Collumn_To_Buffer
+					jsr RLE::DecodeRLEScreenIntoBuffer
 					lda #NEW_COLUMN_FLAG
 					ora scroll_flags
 					sta scroll_flags
@@ -555,7 +555,7 @@ Draw_New_Collumn_To_Buffer:
 	lda #STATUS_BAR_FLAG
 	and scroll_flags
 	bne @add_status_bar_offset
-		ldx #$1e ;buffer start addr offset for status bar
+		ldx #$1e   ;buffer start addr offset for status bar
 		ldy #$00	;acreen new bg start addr offset for status bar
 		jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
