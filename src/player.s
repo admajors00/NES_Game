@@ -66,8 +66,8 @@ UPDATE_ANIMATION_f 		= 1<<3
 
 	player_state = $1F
 
-	jump_speed_LO = $80
-	jump_speed_HI = $81
+	jump_speed_LO = $90
+	jump_speed_HI = $91
 	.enum PlayerMovementStates		
 		idle = 0
 		inAirMoving = 1

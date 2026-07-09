@@ -13,7 +13,7 @@ def main():
         if "_T.bin" in file:
             input_file = cwd + "\\" + file
             output_file = input_file.replace("_T.bin", ".rle")
-            print(input_file)
+            
 
             if os.path.isfile(output_file):
                 os.remove(output_file)
@@ -69,13 +69,19 @@ def main():
             input_file_num_bytes = os.stat(input_file).st_size
             output_file_num_bytes = os.stat(output_file).st_size
 
-            total_uncomp_size += input_file_num_bytes
+            compression_pct = 1 - (output_file_num_bytes / input_file_num_bytes)
+            print(file + f"\tCompression (%): {compression_pct * 100:.1f}")
+            # if compression_pct < 0:
+            #     total_comp_size += input_file_num_bytes
+            # else:
             total_comp_size += output_file_num_bytes
+            total_uncomp_size += input_file_num_bytes
         
     print('Input total file size (bytes):', total_uncomp_size)
     print('Output total file size (bytes):', total_comp_size)
     compression_pct = 1 - (total_comp_size / total_uncomp_size)
     print(f"Compression (%): {compression_pct * 100:.1f}")
+    print( "Bytes Saved : ",total_uncomp_size - total_comp_size )
     print()
 
 def write_byte(output, count, byte):

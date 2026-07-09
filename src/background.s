@@ -27,7 +27,7 @@ scroll_flags = $3B
 bg_header_pt_LO = $3C
 bg_header_pt_HI = $3D
 
-scroll =$3e
+scroll = $3e
 scroll_HI = $3f
 
 
@@ -35,12 +35,14 @@ NEW_COLUMN_FLAG = 1<<0
 NEW_ATTRIBUTE_FLAG = 1<<1
 STATUS_BAR_FLAG = 1<<2
 USE_RANDOM_BACKGROUND = 1<<3
+RESET_SCROLL_VARIABLES_FLAG = 1<<4
 
 
 
 .scope Background
 
 	Init:
+		jsr RLE::Reset_RLE_Variables
 		lda #2
 		sta scroll_HI_prev
 		ldy #0 
@@ -188,9 +190,9 @@ USE_RANDOM_BACKGROUND = 1<<3
 		beq @done
 			sta scroll_HI_prev
 
-				lda scroll_HI
-				asl A
-				tay
+			lda scroll_HI
+			asl A
+			tay
 
 			@check_random_done:
 			lda (level_bg_header_pt_LO),y ;get bg header at the index of scroll hi
@@ -555,8 +557,8 @@ Draw_New_Collumn_To_Buffer:
 	lda #STATUS_BAR_FLAG
 	and scroll_flags
 	bne @add_status_bar_offset
-		ldx #$1e   ;buffer start addr offset for status bar
-		ldy #$00	;acreen new bg start addr offset for status bar
+		ldx #$1e   
+		ldy #$00	
 		jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
 		ldx #$18
@@ -602,7 +604,7 @@ Draw_New_Collumn_From_Buffer:
 	lda #STATUS_BAR_FLAG
 	and scroll_flags
 	bne @add_status_bar_offset
-		ldx #$1E ;buffer start addr offset for status bar
+		ldx #$20
 		jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
 		
@@ -614,7 +616,7 @@ Draw_New_Collumn_From_Buffer:
 		LDA column_HI
 		ADC #$00
 		STA column_HI 
-		ldx #$18;buffer start addr offset for status bar
+		ldx #$1A;buffer start addr offset for status bar
 	@add_status_bar_offset_done:
 	
 
