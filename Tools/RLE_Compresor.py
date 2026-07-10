@@ -70,11 +70,11 @@ def main():
             output_file_num_bytes = os.stat(output_file).st_size
 
             compression_pct = 1 - (output_file_num_bytes / input_file_num_bytes)
-            print(file + f"\tCompression (%): {compression_pct * 100:.1f}")
-            # if compression_pct < 0:
-            #     total_comp_size += input_file_num_bytes
-            # else:
-            total_comp_size += output_file_num_bytes
+            print( f"{file:<30} Compression (%): {compression_pct * 100:>12.1f}")
+            if compression_pct < 0:
+                total_comp_size += input_file_num_bytes
+            else:
+                total_comp_size += output_file_num_bytes
             total_uncomp_size += input_file_num_bytes
         
     print('Input total file size (bytes):', total_uncomp_size)

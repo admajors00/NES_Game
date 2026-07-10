@@ -40,10 +40,10 @@ def main():
                         val = bg_data[j,i]
                         file.write(val)
 
-    # input_file_num_bytes = os.stat(input_file).st_size
-    # output_file_num_bytes = os.stat(output_file).st_size
-    # print('Input total file size (bytes):', input_file_num_bytes)
-    # print('Output total file size (bytes):', output_file_num_bytes)
+        # input_file_num_bytes = os.stat(input_file).st_size
+        # output_file_num_bytes = os.stat(output_file).st_size
+        # print('Input total file size (bytes):', input_file_num_bytes)
+        # print('Output total file size (bytes):', output_file_num_bytes)
 
 if __name__ == "__main__":
     main()
