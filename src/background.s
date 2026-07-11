@@ -1,12 +1,14 @@
  .include "/inc/animations.inc"
 .include "/inc/obsticles.inc"
+
 .include "/inc/backgrounds.inc"
 .include "/inc/Levels.inc"
 .segment "CODE"
 scroll_HI_prev = $30
 bg_data_pt_LO = $31
 bg_data_pt_HI = $32
-
+at_data_pt_LO = $60
+at_data_pt_HI = $61
 
 level_bg_header_pt_LO = $33
 level_bg_header_pt_HI = $34
@@ -53,8 +55,9 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 		sty column_number
 			
 		jsr Next_Background
-		ldx #$00
 		jsr RLE::LoadRLEScreen
+		ldx #$00
+		jsr RLE::DecodeRLEAttributeTableIntoBuffer
 
 		
 		jsr Reset_Buffers
@@ -65,8 +68,8 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 	
 	
 		jsr Next_Background
+		jsr RLE::Reset_RLE_Variables
 		jsr RLE::DecodeRLEScreenIntoBuffer
-		jsr Draw_New_Attributes_To_Buffer
 		lda #NEW_COLUMN_FLAG
 		ora scroll_flags
 		sta scroll_flags
@@ -178,6 +181,7 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 		sta PpuAddr
 		lda main_temp
 		sta PpuData
+		
 
 		
 		
@@ -201,13 +205,21 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 			lda (level_bg_header_pt_LO),y
 			sta bg_header_pt_HI
 
-
-			ldy #Background_t::background_data ;get the background data
+			; get the background data
+			ldy #Background_t::background_data 
 			lda (bg_header_pt_LO), Y
 			sta bg_data_pt_LO
 			iny
 			lda (bg_header_pt_LO), Y
 			sta bg_data_pt_HI
+
+			; Get the attribute data
+			ldy #Background_t::attribute_data 
+			lda (bg_header_pt_LO), Y
+			sta at_data_pt_LO
+			iny
+			lda (bg_header_pt_LO), Y
+			sta at_data_pt_HI
 
 			ldy #Background_t::num_obsticles
 			lda (bg_header_pt_LO), Y ;if num obsticles == 0 jump to done
@@ -226,7 +238,8 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 			ldx main_pointer_LO
 			ldy main_pointer_HI		
 			jsr Obsticles::Load 
-
+			jsr RLE::DecodeRLEAttributeTableIntoBuffer
+			
 		@done:
 		
 	rts
@@ -335,13 +348,13 @@ Handle_Scroll:
     and scroll_flags
     beq @New_Column_Check_done
             
-        jsr Draw_New_Collumn_From_Buffer
+    	jsr Draw_New_Collumn_From_Buffer
     
         LDA #NEW_ATTRIBUTE_FLAG   
         AND scroll_flags       ; check for multiple of 32
         Beq @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
 
-        jsr Draw_New_Attributes_From_Buffer
+        ;jsr Draw_New_Attributes_From_Buffer
 
     @New_Column_Check_done:
         lda scroll_flags
@@ -604,7 +617,7 @@ Draw_New_Collumn_From_Buffer:
 	lda #STATUS_BAR_FLAG
 	and scroll_flags
 	bne @add_status_bar_offset
-		ldx #$20
+		ldx #$1E
 		jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
 		
@@ -616,7 +629,7 @@ Draw_New_Collumn_From_Buffer:
 		LDA column_HI
 		ADC #$00
 		STA column_HI 
-		ldx #$1A;buffer start addr offset for status bar
+		ldx #$18;buffer start addr offset for status bar
 	@add_status_bar_offset_done:
 	
 

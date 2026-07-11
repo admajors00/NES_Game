@@ -90,13 +90,19 @@ HIT_CHASER_f = 1<<1
         jsr load_palettes
         
         jsr famistudio_music_pause
-        LDA #<Start_Screen
+        LDA #<TitleScreen_bg
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-        LDA #>Start_Screen        ; #> is the same as HIGH() function in NESASM, used to get the high byte
+        LDA #>TitleScreen_bg        ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI   
+        LDA #<TitleScreen_at
+        STA at_data_pt_LO           
+        LDA #>TitleScreen_at        
+        STA at_data_pt_HI   
+        
         ldx $00        ; put high byte of address into pointer
-        jsr  RLE::LoadRLEScreen
-
+        jsr RLE::LoadRLEScreen
+        ldx $00
+        jsr RLE::DecodeRLEAttributeTableIntoBuffer
         lda #0
         sta nametable
         sta scroll
@@ -371,13 +377,18 @@ HIT_CHASER_f = 1<<1
         jsr load_palettes
         lda #1
         jsr BankSwitch
-        LDA #<End_Screen
+        LDA #<EndScreen_bg
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-        LDA #>End_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+        LDA #>EndScreen_bg       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
+        LDA #<EndScreen_at
+        STA at_data_pt_LO           
+        LDA #>EndScreen_at        
+        STA at_data_pt_HI
         ldx $00
         jsr RLE::LoadRLEScreen
-       
+        ldx $00
+        jsr RLE::DecodeRLEAttributeTableIntoBuffer
 
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -430,13 +441,18 @@ HIT_CHASER_f = 1<<1
         jsr load_palettes
         lda #1
         jsr BankSwitch
-        LDA #<WIN_Screen
+        LDA #<WinScreen_bg
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
-        LDA #>WIN_Screen       ; #> is the same as HIGH() function in NESASM, used to get the high byte
+        LDA #>WinScreen_bg       ; #> is the same as HIGH() function in NESASM, used to get the high byte
         STA bg_data_pt_HI           ; put high byte of address into pointer
+        LDA #<WinScreen_at
+        STA at_data_pt_LO           
+        LDA #>WinScreen_at        
+        STA at_data_pt_HI
         ldx $00
         jsr RLE::LoadRLEScreen
-       
+        ldx $00
+        jsr RLE::DecodeRLEAttributeTableIntoBuffer
     
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1

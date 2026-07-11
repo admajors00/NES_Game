@@ -54,5 +54,8 @@ def main():
     print('Input total file size (bytes):', input_file_num_bytes)
     print('Output total file size (bytes):', output_file_num_bytes)
 
+
+
+
 if __name__ == "__main__":
     main()

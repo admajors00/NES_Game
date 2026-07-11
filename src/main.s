@@ -274,54 +274,7 @@ palette_house:
 .byte $0f,$17,$16,$27
 
 
-Start_Screen:
-	.incbin "../graphics/Backgrounds/TitleScreen.rle"
-Level_Screen_1:
-	.incbin"../graphics/Backgrounds/Level_1_1.rle"
-Level_Screen_2:
-	.incbin "../graphics/Backgrounds/Level_1_2.rle"
-Level_Screen_3:
-	.incbin "../graphics/Backgrounds/Level_1_3.rle"
-Level_Screen_4:
-	.incbin "../graphics/Backgrounds/Level_1_4.rle"
-Level_Screen_2_1:
-	.incbin"../graphics/Backgrounds/Level_2_1.rle"
-Level_Screen_2_2:
-	.incbin "../graphics/Backgrounds/Level_2_2.rle"
-
-
-
-Level_Screen_3_1:
-	.incbin"../graphics/Backgrounds/Level_3_1.rle"
-Level_Screen_3_2:
-	.incbin "../graphics/Backgrounds/Level_3_2.rle"
-Level_Screen_3_3:
-	.incbin "../graphics/Backgrounds/Level_3_3.rle"
-Level_Screen_3_4:
-	.incbin "../graphics/Backgrounds/Level_3_4.rle"
-Level_Screen_3_5:
-	.incbin "../graphics/Backgrounds/Level_3_5.rle"
-End_Screen:
-	.incbin"../graphics/Backgrounds/EndScreen.rle"
-WIN_Screen:
-    .incbin"../graphics/Backgrounds/WinScreen.rle"
-Intro_Screen_1:
-	.incbin"../graphics/Backgrounds/Intro_1.rle"
-Intro_Screen_2:
-	.incbin"../graphics/Backgrounds/Intro_2.rle"	
-Intro_Screen_3:
-	.incbin"../graphics/Backgrounds/Intro_3.rle"
-Intro_Screen_4:
-	.incbin"../graphics/Backgrounds/Intro_4.rle"
-
-Level_Screen_House:
-	.incbin "../graphics/Backgrounds/House.rle"
-Level_Screen_Lake_sign:
-	.incbin "../graphics/Backgrounds/Lake_sign.rle"
-Level_Screen_Market_sign:
-	.incbin "../graphics/Backgrounds/Market_sign.rle"
-Level_Screen_SkatePark_sign:
-	.incbin "../graphics/Backgrounds/SkatePark_sign.rle"	
+.include "/inc/BackgroundData.inc"
 song_test:
 .include "../audio/Song2.s"
 

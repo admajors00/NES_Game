@@ -1,94 +1,145 @@
 import argparse
 import os
+import numpy as np
+import math
 
 MAX_BYTE_COUNT = 255
+
+
+
 
 def main():
     cwd = os.getcwd()
     cwd = cwd + "\\graphics\\Backgrounds"
     files  = os.listdir(cwd)
-    total_uncomp_size = 0
     total_comp_size = 0
+    total_uncomp_size= 0
+
     for file in files:
-        if "_T.bin" in file:
+
+        if ".bin" in file:
             input_file = cwd + "\\" + file
-            output_file = input_file.replace("_T.bin", ".rle")
-            
+            bg_rle_file = input_file.replace(".bin", "_bg.rle")
+            at_rle_file = input_file.replace(".bin", "_at.rle")
 
-            if os.path.isfile(output_file):
-                os.remove(output_file)
+            bg_data, at_data = GetData(input_file)
+            bg_data_T, at_data_T = TransposeData(bg_data, at_data)      
+            bg_data_comp = CompressData(bg_data_T)
+            at_data_comp = CompressData( at_data)
 
-            with open(input_file, 'rb') as f:
-                bytes_read = f.read()
-                
-                prev_byte = ''
-                count = 0
-                for byte in bytes_read:
-                    if prev_byte == '':
-                        prev_byte = byte
-                        count = 1
-                    elif byte == prev_byte:
-                        count += 1
-                    
-                    # I may modify this at some point to use negative
-                    # numbers to represent a list of bytes which should
-                    # be copied as-is. For example, a count of -6 would mean
-                    # that the next six bytes should be copied as-is.
-                    #
-                    # I could convert a negative number n to an 8-bit two's complement
-                    # number for conversion to hex by doing the following per the Wikipedia
-                    # article:
-                    #
-                    # = 2^8 - n
-                    #
-                    # For n = -5
-                    # = 2^8 - 5
-                    # = 251
-                    #
-                    # This means I would need to limit the following count to 127
-                    if count == MAX_BYTE_COUNT:
-                        write_byte(output_file, count, prev_byte)
-                        prev_byte = byte
-                        count = 0
-                        
-                    if byte != prev_byte:
-                        write_byte(output_file, count, prev_byte)
-                        
-                        #print('setting prev_byte to',byte)
-                        prev_byte = byte
-                        count = 1
-                        
-                
-                # write final byte to file
-                write_byte(output_file, count, prev_byte)
-                
-                # tack on terminating #$00 bytes
-                write_byte(output_file, 0, 0)
-            
-            # print file compression info
-            input_file_num_bytes = os.stat(input_file).st_size
-            output_file_num_bytes = os.stat(output_file).st_size
+            with open(bg_rle_file, 'wb') as f:
+                for byte in bg_data_comp:
+                    f.write(byte)
 
-            compression_pct = 1 - (output_file_num_bytes / input_file_num_bytes)
-            print( f"{file:<30} Compression (%): {compression_pct * 100:>12.1f}")
-            if compression_pct < 0:
-                total_comp_size += input_file_num_bytes
+            with open(at_rle_file, 'wb') as f:
+                for byte in at_data_comp:
+                    f.write(byte)
+
+            bg_input_size  = bg_data.size * bg_data.itemsize
+            bg_output_size = bg_data_comp.size * bg_data_comp.itemsize
+
+            at_input_size  = at_data.size * at_data.itemsize
+            at_output_size = at_data_comp.size * at_data_comp.itemsize
+
+            bg_compression_pct = 1 - (bg_output_size / bg_input_size)
+            at_compression_pct = 1 - (at_output_size / at_input_size)
+            print(file)
+            print( f"\t bg in: {bg_input_size:>5} bg out: {bg_output_size:>5}  {bg_compression_pct * 100:>6.1f}%")
+            print( f"\t at in: {at_input_size:>5} at out: {at_output_size:>5}  {at_compression_pct * 100:>6.1f}%")
+
+            if bg_compression_pct < 0:
+                total_comp_size += bg_input_size
             else:
-                total_comp_size += output_file_num_bytes
-            total_uncomp_size += input_file_num_bytes
-        
-    print('Input total file size (bytes):', total_uncomp_size)
-    print('Output total file size (bytes):', total_comp_size)
-    compression_pct = 1 - (total_comp_size / total_uncomp_size)
-    print(f"Compression (%): {compression_pct * 100:.1f}")
-    print( "Bytes Saved : ",total_uncomp_size - total_comp_size )
-    print()
+                total_comp_size += bg_output_size
+            if at_compression_pct < 0:
+                total_comp_size += at_input_size
+            else:
+                total_comp_size += at_output_size
 
-def write_byte(output, count, byte):
-    #print('writing',count,'of',bytes([byte]))
-    with open(output, 'ab') as g:
-        g.write(bytes([count]))
-        g.write(bytes([byte]))
+            total_uncomp_size += bg_input_size + at_input_size
+
+    compression_pct = 1 - (total_comp_size / total_uncomp_size)
+    print(f"Total size: {total_uncomp_size}")
+    print(f"Comp size:  {total_comp_size}")
+    
+    print(f"Comp size:  {compression_pct * 100:.1f}%")
+    print(f"Bytes Saved:  {total_uncomp_size - total_comp_size}")
+    return
+
+
+
+
+def GetData(input_file):
+    col = 0
+    row = 0
+    bg_data = np.zeros((30, 32), dtype=np.uint8)
+    attribute_data = np.zeros((2,32), dtype=np.uint8)
+    with open(input_file, 'rb') as f:
+        while (byte := f.read(1)):
+            if row >= 30:
+                attribute_data[row-30, col]  = byte[0]
+            else:
+                bg_data[row, col] = byte[0]
+            col += 1
+            if col >= 32:
+                col = 0
+                row += 1
+    return bg_data, attribute_data                   
+
+
+
+def TransposeData( bg_data, attribute_data):
+
+    bg_data_T = np.zeros((32, 30), dtype=np.uint8)
+    attribute_data_T = np.zeros((8,8), dtype=np.uint8)
+
+    for i in range(0, 30):
+        for j in range(0,32):
+            bg_data_T[j, i] =  bg_data[ i, j]     
+                    
+    for i in range(0,64):
+        attribute_data_T[i%8, math.floor(i/8)] = attribute_data[math.floor(i/32), i%32]
+
+    return bg_data_T, attribute_data_T
+        
+
+
+def CompressData(input_data):
+
+    input_data = input_data.flatten()
+    compressed_data = np.zeros((1, 0), dtype=np.uint8)
+    prev_byte = ''
+    count = 0
+
+    for byte in input_data:
+
+        if prev_byte == '':
+            prev_byte = byte
+            count = 1
+
+        elif byte == prev_byte:
+            count += 1
+        
+        if count == MAX_BYTE_COUNT:
+            compressed_data = np.append(compressed_data,np.uint8( [count, prev_byte]))
+            prev_byte = byte
+            count = 0
+            
+        if byte != prev_byte:
+            compressed_data = np.append(compressed_data, np.uint8([count, prev_byte]))
+            prev_byte = byte
+            count = 1
+            
+    
+    # write final byte to file
+    compressed_data = np.append(compressed_data, np.uint8([count, prev_byte]))
+    
+    # tack on terminating #$00 bytes
+    compressed_data = np.append(compressed_data, np.uint8([0, 0]))
+
+    return compressed_data
+
+
 
 if __name__ == "__main__":
     main()

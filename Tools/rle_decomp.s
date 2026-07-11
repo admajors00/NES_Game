@@ -51,13 +51,8 @@ DecodeRLEScreen:
     lda #%00000100
 	  sta PpuCtrl
     LDA PpuStatus
-    CPX #$01
-    BEQ @loadOne
+    
     LDA #$20
-    JMP @cont
-  @loadOne:
-    LDA #$24
-  @cont:
     STA PpuAddr
     LDA #$00
     STA PpuAddr
@@ -84,7 +79,7 @@ DecodeRLEScreen:
 
     inc bytesWritten 
     ldx bytesWritten
-    cpx #32
+    cpx #30
     BEQ @nextcol
     
   @return:
@@ -132,7 +127,7 @@ DecodeRLEScreen:
 DecodeRLEScreenIntoBuffer:
   ; Load bytes Written with the number of times we want to write to buffer
   ; buffer needs to be filled bottom up
-  ldx #$20
+  ldx #$1E
   stx bytesWritten
 
   ldx column
@@ -149,13 +144,13 @@ DecodeRLEScreenIntoBuffer:
   and scroll_flags
   bne @add_status_bar_offset
     ; No offset
-    ldx #$20
+    ldx #$1E
     stx buffOffset
     
     jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
     ; skip status bar
-		ldx #$1B
+		ldx #$18
     stx buffOffset
 	@add_status_bar_offset_done:
   
@@ -233,6 +228,70 @@ Reset_RLE_Variables:
   sta index
   sta bytes_to_write
   sta column
-   rts
+  rts
+
+
+DecodeRLEAttributeTableIntoBuffer:
+    
+    lda #$00
+    sta bytesWritten
+    ; set output address
+    lda #%00000000
+	  sta PpuCtrl
+    LDA PpuStatus
+    lda nametable 
+    EOR #$01
+    Beq @loadOne
+    LDA #$23
+    JMP @cont
+  @loadOne:
+    LDA #$27
+  @cont:
+    STA PpuAddr
+
+    LDA #$C0
+    STA PpuAddr
+
+    ; ; copy screen to VRAM
+    ; Decode RLE
+    LDY #$00
+  @big:
+    ; get count and byte
+    ; get count (has to be LDA rather than LDX)
+    LDA (at_data_pt_LO),y
+    TAX
+    CPX #$00
+    BEQ @done
+    INY
+    ; get byte
+    LDA (at_data_pt_LO), y
+  @loop:
+    
+    
+    STA PpuData
+    stx temp
+
+    inc bytesWritten 
+    ldx bytesWritten
+    cpx #$FF
+    BEQ @done
+    
+ 
+    ldx temp
+    DEX
+    BNE @loop
+    INY
+    BNE @big
+    INC at_data_pt_HI
+    JMP @big
+
+
+  @done:
+    lda #0
+    sta temp
+    sta bytesWritten
+
+  
+  RTS
 
 .endscope
