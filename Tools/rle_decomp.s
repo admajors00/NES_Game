@@ -233,15 +233,15 @@ Reset_RLE_Variables:
 
 DecodeRLEAttributeTableIntoBuffer:
     
-    lda #$00
-    sta bytesWritten
-    ; set output address
-    lda #%00000000
-	  sta PpuCtrl
-    LDA PpuStatus
-    lda nametable 
-    EOR #$01
-    Beq @loadOne
+  lda #$00
+  sta bytesWritten
+  ; set output address
+  lda #%00000000
+  sta PpuCtrl
+  LDA PpuStatus
+
+  lda nametable
+  Bne @loadOne
     LDA #$23
     JMP @cont
   @loadOne:

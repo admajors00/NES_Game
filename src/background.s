@@ -37,7 +37,7 @@ NEW_COLUMN_FLAG = 1<<0
 NEW_ATTRIBUTE_FLAG = 1<<1
 STATUS_BAR_FLAG = 1<<2
 USE_RANDOM_BACKGROUND = 1<<3
-RESET_SCROLL_VARIABLES_FLAG = 1<<4
+NEW_BG_FLAG= 1<<4
 
 
 
@@ -197,7 +197,9 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 			lda scroll_HI
 			asl A
 			tay
-
+			lda #NEW_BG_FLAG
+			ora scroll_flags
+			sta scroll_flags
 			@check_random_done:
 			lda (level_bg_header_pt_LO),y ;get bg header at the index of scroll hi
 			sta bg_header_pt_LO
@@ -238,7 +240,7 @@ RESET_SCROLL_VARIABLES_FLAG = 1<<4
 			ldx main_pointer_LO
 			ldy main_pointer_HI		
 			jsr Obsticles::Load 
-			jsr RLE::DecodeRLEAttributeTableIntoBuffer
+			
 			
 		@done:
 		
@@ -346,20 +348,28 @@ Handle_Scroll:
    
     LDA #NEW_COLUMN_FLAG
     and scroll_flags
-    beq @New_Column_Check_done
+    beq @update_att
             
     	jsr Draw_New_Collumn_From_Buffer
-    
-        LDA #NEW_ATTRIBUTE_FLAG   
-        AND scroll_flags       ; check for multiple of 32
-        Beq @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
+	@update_att:
+        ; LDA #NEW_ATTRIBUTE_FLAG   
+        ; AND scroll_flags       ; check for multiple of 32
+        ; Beq @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
 
-        ;jsr Draw_New_Attributes_From_Buffer
+	
+	lda scroll
+	beq @New_Column_Check_done
+		jsr RLE::DecodeRLEAttributeTableIntoBuffer
+		lda #<~NEW_BG_FLAG
+		and scroll_flags
+		sta scroll_flags
+
 
     @New_Column_Check_done:
         lda scroll_flags
         and #<~NEW_ATTRIBUTE_FLAG
 		and #<~NEW_COLUMN_FLAG
+		sta scroll_flags
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	OamAddr
