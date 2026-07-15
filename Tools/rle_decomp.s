@@ -44,22 +44,22 @@ temp_bg_pointer_HI = $88
 
 
 DecodeRLEScreen:
-    lda #0
-    sta column
+  lda #0
+  sta column
   sta temp
-    ; set output address
-    lda #%00000100
-	  sta PpuCtrl
-    LDA PpuStatus
-    
-    LDA #$20
-    STA PpuAddr
-    LDA #$00
-    STA PpuAddr
+  ; set output address
+  lda #%00000100
+  sta PpuCtrl
+  LDA PpuStatus
+  
+  LDA #$20
+  STA PpuAddr
+  LDA #$00
+  STA PpuAddr
 
-    ; ; copy screen to VRAM
-    ; Decode RLE
-    LDY #$00
+  ; ; copy screen to VRAM
+  ; Decode RLE
+  LDY #$00
   @big:
     ; get count and byte
     ; get count (has to be LDA rather than LDX)
@@ -130,8 +130,13 @@ DecodeRLEScreenIntoBuffer:
   ldx #$1E
   stx bytesWritten
 
-  ldx column
-  bne @do_not_update_bg_pointer
+  lda #NEW_BG_FLAG
+	and scroll_flags
+  beq @do_not_update_bg_pointer
+    lda #$00
+    sta index
+    sta bytes_to_write
+    sta column
     ldx bg_data_pt_LO
     stx temp_bg_pointer_LO
     ldx bg_data_pt_HI
@@ -144,13 +149,13 @@ DecodeRLEScreenIntoBuffer:
   and scroll_flags
   bne @add_status_bar_offset
     ; No offset
-    ldx #$1E
+    ldx #$1f
     stx buffOffset
     
     jmp @add_status_bar_offset_done
 	@add_status_bar_offset:
     ; skip status bar
-		ldx #$18
+		ldx #$1f
     stx buffOffset
 	@add_status_bar_offset_done:
   
@@ -198,7 +203,7 @@ DecodeRLEScreenIntoBuffer:
     BNE @loop
       INY
       BNE @big
-      INC temp_bg_pointer_HI
+      INC temp_bg_pointer_LO+1
       JMP @big
     
   
@@ -210,7 +215,7 @@ DecodeRLEScreenIntoBuffer:
     BNE @dont_inc_index
       inc index
       BNE @dont_inc_index
-        INC temp_bg_pointer_HI
+        INC temp_bg_pointer_LO+1
     
     @dont_inc_index:
     RTS
@@ -235,12 +240,12 @@ DecodeRLEAttributeTableIntoBuffer:
     
   lda #$00
   sta bytesWritten
-  ; set output address
+  
   lda #%00000000
   sta PpuCtrl
   LDA PpuStatus
 
-  lda nametable
+  cpx #00
   Bne @loadOne
     LDA #$23
     JMP @cont
@@ -248,12 +253,8 @@ DecodeRLEAttributeTableIntoBuffer:
     LDA #$27
   @cont:
     STA PpuAddr
-
     LDA #$C0
     STA PpuAddr
-
-    ; ; copy screen to VRAM
-    ; Decode RLE
     LDY #$00
   @big:
     ; get count and byte
@@ -265,31 +266,17 @@ DecodeRLEAttributeTableIntoBuffer:
     INY
     ; get byte
     LDA (at_data_pt_LO), y
-  @loop:
-    
-    
+  @loop:   
     STA PpuData
-    stx temp
-
-    inc bytesWritten 
-    ldx bytesWritten
-    cpx #$FF
-    BEQ @done
-    
- 
-    ldx temp
     DEX
     BNE @loop
-    INY
-    BNE @big
-    INC at_data_pt_HI
-    JMP @big
+      INY
+      BNE @big
+        INC at_data_pt_LO+1
+        JMP @big
 
 
   @done:
-    lda #0
-    sta temp
-    sta bytesWritten
 
   
   RTS

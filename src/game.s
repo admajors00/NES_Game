@@ -97,8 +97,8 @@ HIT_CHASER_f = 1<<1
         LDA #<TitleScreen_at
         STA at_data_pt_LO           
         LDA #>TitleScreen_at        
-        STA at_data_pt_HI   
-        
+        STA at_data_pt_HI  
+         
         ldx $00        ; put high byte of address into pointer
         jsr RLE::LoadRLEScreen
         ldx $00

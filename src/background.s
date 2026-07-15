@@ -129,7 +129,7 @@ NEW_BG_FLAG= 1<<4
 					AND #%00011111            ; check for multiple of 32
 					Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
 
-						jsr Draw_New_Attributes_To_Buffer
+						;jsr Draw_New_Attributes_To_Buffer
 						lda #NEW_ATTRIBUTE_FLAG
 						ora scroll_flags
 						sta scroll_flags
@@ -351,14 +351,21 @@ Handle_Scroll:
     beq @update_att
             
     	jsr Draw_New_Collumn_From_Buffer
+		lda #<~NEW_COLUMN_FLAG
+		and scroll_flags
+		sta scroll_flags
 	@update_att:
         ; LDA #NEW_ATTRIBUTE_FLAG   
         ; AND scroll_flags       ; check for multiple of 32
         ; Beq @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
 
 	
-	lda scroll
+	lda scroll_flags
+	and #NEW_BG_FLAG
 	beq @New_Column_Check_done
+		lda nametable
+		eor #1
+		tax
 		jsr RLE::DecodeRLEAttributeTableIntoBuffer
 		lda #<~NEW_BG_FLAG
 		and scroll_flags
@@ -366,10 +373,7 @@ Handle_Scroll:
 
 
     @New_Column_Check_done:
-        lda scroll_flags
-        and #<~NEW_ATTRIBUTE_FLAG
-		and #<~NEW_COLUMN_FLAG
-		sta scroll_flags
+       
 
 	lda	#$00		; set the low byte (00) of the RAM address
 	sta	OamAddr
