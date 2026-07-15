@@ -13,6 +13,7 @@ def main():
     cwd = cwd + "\\graphics\\Backgrounds"
     files  = os.listdir(cwd)
     total_comp_size = 0
+    total_comp_unop_size = 0
     total_uncomp_size= 0
 
     for file in files:
@@ -46,7 +47,7 @@ def main():
             print(file)
             print( f"\t bg in: {bg_input_size:>5} bg out: {bg_output_size:>5}  {bg_compression_pct * 100:>6.1f}%")
             print( f"\t at in: {at_input_size:>5} at out: {at_output_size:>5}  {at_compression_pct * 100:>6.1f}%")
-
+            total_comp_unop_size += bg_output_size + at_output_size
             if bg_compression_pct < 0:
                 total_comp_size += bg_input_size
             else:
@@ -59,8 +60,10 @@ def main():
             total_uncomp_size += bg_input_size + at_input_size
 
     compression_pct = 1 - (total_comp_size / total_uncomp_size)
-    print(f"Total size: {total_uncomp_size}")
-    print(f"Comp size:  {total_comp_size}")
+    print(f"Total size:      {total_uncomp_size}")
+    print(f"Comp OP size:    {total_comp_size}")
+    print(f"Comp unOP size:  {total_comp_unop_size}")
+    print(f"space saved op:  {total_comp_unop_size - total_comp_size}")
     
     print(f"Comp size:  {compression_pct * 100:.1f}%")
     print(f"Bytes Saved:  {total_uncomp_size - total_comp_size}")

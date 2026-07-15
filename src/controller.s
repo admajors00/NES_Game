@@ -12,10 +12,10 @@ BUTTON_RIGHT  = 1 << 0
 Port_1 = $4016
 Port_2 = $4017
 
-Port_1_Pressed_Buttons = $F0 ;pressed this frame
-Port_1_Down_Buttons = $F1;     = $31 ;held down
-Port_1_Released_Buttons = $F2
-Port_1_prev_Down_Buttons = $F3
+Port_1_Pressed_Buttons = $A0 ;pressed this frame
+Port_1_Down_Buttons = $A1;     = $31 ;held down
+Port_1_Released_Buttons = $A2
+Port_1_prev_Down_Buttons = $A3
 
 UpdateButtons:
     lda Port_1_Down_Buttons

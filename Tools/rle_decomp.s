@@ -2,36 +2,8 @@
 
 .segment "CODE"
 .scope RLE
-LoadRLEScreen:
-  ; Clobbers: A, X
-;   LDA #bg_data_pt_LO
-;   STA main_pointer_LO
-;   LDA #bg_data_pt_HI
-;   STA main_pointer_HI
 
- 
 
-  JSR DecodeRLEScreen
-RTS
-;;;;;;;;;;;;;;;;
-;; DecodeRLEScreen
-;;
-;; Decodes an RLE-compressed screen and loads it into the background.
-;;
-;;
-;; Sample usage:
-;;
-;;   LDA #<bg_title_screen
-;;   STA pointer+0
-;;   LDA #>bg_title_screen
-;;   STA pointer+1
-;;
-;;   ; set which nametable to load (0 = nametable 0, 1 = nametable 1)
-;;   LDX #$00
-;;
-;;   JSR DecodeRLEScreen
-;;
-;; Clobbers: A, X, Y
 column = $80
 bytesWritten = $81
 temp = $82
@@ -43,7 +15,7 @@ temp_bg_pointer_LO = $87
 temp_bg_pointer_HI = $88
 
 
-DecodeRLEScreen:
+LoadRLEScreen:
   lda #0
   sta column
   sta temp
