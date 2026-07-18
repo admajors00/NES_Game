@@ -10,99 +10,117 @@ MAX_BYTE_COUNT = 255
 
 def main():
     cwd = os.getcwd()
-    cwd = cwd + "\\graphics\\Backgrounds"
-    files  = os.listdir(cwd)
-    total_comp_size = 0
-    total_comp_unop_size = 0
-    total_uncomp_size= 0
+    binaryFileDirectory = cwd + "\\graphics\\Backgrounds"
+    files = os.listdir(binaryFileDirectory)
 
+    sb1_fileName = cwd + "\\graphics\\StatusBars\\Statusbar.bin"
+    sb2_fileName = cwd + "\\graphics\\StatusBars\\Statusbar2.bin"
+    sb1_data = GetStatusBarData(sb1_fileName)
+    sb2_data = GetStatusBarData(sb2_fileName)
+
+    
+    total_comp_size = 0
+    total_uncomp_size = 0
+    print(f"{"Stats":-^100}")
+    print( f"{"file":<20} BG: {"uncomp":^7}|{"sbRem":^7}|{"comp":^7}|{" comp% ":^7}| AT: {"uncomp":^7}|{"comp":^7}|{" comp%":^7}|")
+    print(f"{"-":-^100}")
     for file in files:
 
         if ".bin" in file:
-            input_file = cwd + "\\" + file
+        
+            input_file = binaryFileDirectory + "\\" + file
             bg_rle_file = input_file.replace(".bin", "_bg.rle")
             at_rle_file = input_file.replace(".bin", "_at.rle")
 
-            bg_data, at_data = GetData(input_file)
-            bg_data_ = RemoveStatusBar(bg_data)
-            bg_data_T = TransposeBgData(bg_data_)      
-            bg_data_comp = CompressData(bg_data_T)
-            at_data_comp = CompressData( at_data)
+            didStatusBarGetRemoved = 0
+            didBgDataGetSmaller = 0
+            didAtDataGetSmaller = 0
+            
+            # pull binary data from file and store it in an array. Seperate attribute table from bg data
+            bg_data, at_data = GetBgAndAtData(input_file) 
+            # If the bg has a status bar, remove it. get bool status for if it wass removed
+            bg_data_sb, didStatusBarGetRemoved  = CheckForAndRemoveStatusBar(bg_data, sb1_data)
+            if not didStatusBarGetRemoved:
+                bg_data_sb, didStatusBarGetRemoved  = CheckForAndRemoveStatusBar(bg_data, sb2_data)
+            # transpose baground data so it can be read column by colum, for easy writing to the nametable with scroll
+            bg_data_T = TransposeBgData(bg_data_sb)      
+            # Compress the background data. If the size gets bigger return uncompresed. bool lets us know which happend to add to header
+            bg_data_comp, didBgDataGetSmaller = CompressData(bg_data_T)
+            # do the same for attribute data
+            at_data_comp, didAtDataGetSmaller = CompressData(at_data)
 
+
+            # append header as first byte so we know if this background contains a status bar and/or is compressed
+            bgHeader = 0b00000000
+            atHeader = 0b00000000
+            if didBgDataGetSmaller:
+                bgHeader = bgHeader & 0b00000001
+            if didStatusBarGetRemoved:
+                bgHeader = bgHeader & 0b00000010
+            if didAtDataGetSmaller:
+                atHeader = atHeader & 0b0000000
+            bg_data_comp = np.insert(bg_data_comp, 0, bgHeader)
+            at_data_comp = np.insert(at_data_comp, 0, atHeader)
+
+            # write the bg file 
             with open(bg_rle_file, 'wb') as f:
                 for byte in bg_data_comp:
                     f.write(byte)
-
+            # write the attribute file
             with open(at_rle_file, 'wb') as f:
                 for byte in at_data_comp:
                     f.write(byte)
 
-  
 
-            bg_compression_pct = 1 - (bg_data_comp.size / bg_data_.size)
+            bg_compression_pct = 1 - (bg_data_comp.size / bg_data.size)
             at_compression_pct = 1 - (at_data_comp.size / at_data.size)
-            print(file)
-            print( f"\t bg in: {bg_data_.size:>5} bg out: {bg_data_comp.size:>5}  {bg_compression_pct * 100:>6.1f}%")
-            print( f"\t at in: {at_data.size:>5} at out: {at_data_comp.size:>5}  {at_compression_pct * 100:>6.1f}%")
-            
-
-            if bg_compression_pct < 0:
-                total_comp_size += bg_data_.size
-            else:
-                total_comp_size += bg_data_comp.size
-                
-            if at_compression_pct < 0:
-                total_comp_size += at_data.size
-            else:
-                total_comp_size += at_data_comp.size 
-
-            total_comp_unop_size += bg_data_comp.size + at_data_comp.size
+ 
+            total_comp_size += bg_data_comp.size + at_data_comp.size
             total_uncomp_size += bg_data.size + at_data.size
 
+            print( f"{file:<20} {bg_data.size:>8}{bg_data_sb.size:>8} {bg_data_comp.size:>8}{bg_compression_pct * 100:>8.1f}% | {at_data.size:>8}{at_data_comp.size:>8}{at_compression_pct * 100:>8.1f}%")
+
+
     compression_pct = 1 - (total_comp_size / total_uncomp_size)
-    print(f"Total size:      {total_uncomp_size}")
-    print(f"Comp OP size:    {total_comp_size}")
-    print(f"Comp unOP size:  {total_comp_unop_size}")
-    print(f"space saved op:  {total_comp_unop_size - total_comp_size}")
-    
-    print(f"Comp size:  {compression_pct * 100:.1f}%")
-    print(f"Bytes Saved:  {total_uncomp_size - total_comp_size}")
+
+    print(f"{"-":-^100}")
+    print(f"{"Total size:":<20}{total_uncomp_size}")
+    print(f"{"Comp size:":<20}{total_comp_size}")
+    print(f"{"Comp pct:":<20}{compression_pct * 100:.1f}%")
+    print(f"{"Bytes Saved:":<20}{total_uncomp_size - total_comp_size}")
+    print(f"{"-":-^100}")
     return
 
-def RemoveStatusBar(bg_data):
-    col = 0
-    row = 0
-    statusBar = np.zeros((6, 32), dtype=np.uint8)
-    cwd = os.getcwd()
-    sb_fileName = cwd + "\graphics\Backgrounds\Statusbar.bin"
-    with open(sb_fileName, 'rb') as f:
-        while (byte := f.read(1)):      
-            statusBar[row, col] = byte[0]
-            col += 1
-            if col >= 32:
-                col = 0
-                row += 1
 
-    col = 0
+
+
+def GetStatusBarData(statusBarFileName):
     row = 0
-    statusBar2 = np.zeros((6, 32), dtype=np.uint8)            
-    sb2_fileName = cwd + "\graphics\Backgrounds\Statusbar2.bin"
-    with open(sb2_fileName, 'rb') as f:
+    col = 0
+    statusBarData = np.zeros((6,32), dtype=np.uint8)
+    with open(statusBarFileName, 'rb') as f:
         while (byte := f.read(1)):      
-            statusBar2[row, col] = byte[0]
+            statusBarData[row, col] = byte[0]
             col += 1
             if col >= 32:
                 col = 0
-                row += 1            
+                row += 1  
+    return statusBarData
+
+
+
+def CheckForAndRemoveStatusBar(bg_data, sb_data):
     bg_data_sb = bg_data[0:6]
     bg_data_nsb = bg_data[6:]
-    if(np.array_equal(statusBar,bg_data_sb ) or np.array_equal(statusBar2,bg_data_sb )):
-        return bg_data_nsb
+    didStatusBarGetRemoved = 0
+    if np.array_equal(sb_data,bg_data_sb ):
+        didStatusBarGetRemoved = 1
+        return bg_data_nsb, didStatusBarGetRemoved
     else:
-        return bg_data
+        return bg_data, didStatusBarGetRemoved
 
 
-def GetData(input_file):
+def GetBgAndAtData(input_file):
     col = 0
     row = 0
     bg_data = np.zeros((30, 32), dtype=np.uint8)
@@ -150,6 +168,7 @@ def CompressData(input_data):
     compressed_data = np.zeros((1, 0), dtype=np.uint8)
     prev_byte = ''
     count = 0
+    didFileGetSmaller = 0
 
     for byte in input_data:
 
@@ -177,7 +196,11 @@ def CompressData(input_data):
     # tack on terminating #$00 bytes
     compressed_data = np.append(compressed_data, np.uint8([0, 0]))
 
-    return compressed_data
+    if( compressed_data.size < input_data.size):
+        didFileGetSmaller = 1
+        return compressed_data, didFileGetSmaller
+
+    return input_data, didFileGetSmaller
 
 
 
