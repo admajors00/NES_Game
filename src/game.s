@@ -89,7 +89,12 @@ HIT_CHASER_f = 1<<1
         ldy #>palette_TitleScreen
         jsr load_palettes
         
-        jsr famistudio_music_pause
+        ldx #<music_data_intro
+        ldy #>music_data_intro
+        lda #1 ; NTSC
+        jsr famistudio_init
+        lda #0
+        jsr famistudio_music_play
         LDA #<TitleScreen_bg
         STA bg_data_pt_LO           ; put the low byte of address of background into pointer
         LDA #>TitleScreen_bg        ; #> is the same as HIGH() function in NESASM, used to get the high byte
@@ -134,7 +139,9 @@ HIT_CHASER_f = 1<<1
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
         beq @done
+           jsr famistudio_music_stop
            JMP Intro_Init
+
         @done:
     rts
 
@@ -154,8 +161,8 @@ HIT_CHASER_f = 1<<1
         AND #<~USE_RANDOM_BACKGROUND
         sta scroll_flags
 
-        ldx #<music_data_untitled
-        ldy #>music_data_untitled
+        ldx #<music_data_name
+        ldy #>music_data_name
         lda #1 ; NTSC
         jsr famistudio_init
         lda #0
@@ -227,6 +234,8 @@ HIT_CHASER_f = 1<<1
         lda #80
         sta timer
 
+        
+
         ldx #<Intro_h
         ldy #>Intro_h
         jsr Background::Load_Level_Background_Data
@@ -287,8 +296,8 @@ HIT_CHASER_f = 1<<1
         lda #$42
         sta rng_seed_HI
 
-        ldx #<music_data_untitled
-        ldy #>music_data_untitled
+        ldx #<music_data_name
+        ldy #>music_data_name
         lda #1 ; NTSC
         jsr famistudio_init
         lda #0

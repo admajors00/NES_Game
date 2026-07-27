@@ -277,6 +277,13 @@ palette_house:
 .include "/inc/BackgroundData.inc"
 song_test:
 .include "../audio/Song2.s"
+song_intro:
+	.include "../audio/Intro.s"
+song_song:
+	music_data_name = music_data_too_fuckin_happy
+ 	.include "../audio/top_of_the_bell_curve_too_fuckin_happy.s"
+   	; .include "../audio/top_of_the_bell_curve_accelerating.s"
+	
 
 
 song_game_over:
@@ -284,7 +291,8 @@ song_game_over:
 
 
 
-
+; .segment "DPCM"
+; .incbin "../audio/Intro.dmc"
 ;;;;;;;;;;;;;;  
   
 .segment "VECTORS"
@@ -292,7 +300,7 @@ song_game_over:
 	;; When an NMI happens (once per frame if enabled) the label nmi:
 	.word	nmi
 	;; When the processor first turns on or is reset, it will jump to the
-	;; label reset:
+	;; label reset: 
 	.word	reset
 	;; External interrupt IRQ is not used in this tutorial 
 	.word	0
