@@ -48,12 +48,14 @@ seed: .res 2
 .include "controller.s"
 
 ;.include "../graphics/StreetCanvas_2.s"
-.include "../Tools/rle_decomp.s"
 .include "player.s"
 .include "chaser.s"
 .include "obsticles.s"
 .include "animations.s"
-.include "background.s"
+
+.include "background_manager.s"
+.include "scene_manager.s"
+.include "level_manager.s"
 .include "game.s"
 .include "StatusBar.s"
 .include "famistudio_ca65.s"
@@ -143,7 +145,7 @@ forever:
 
 nmi:
 	inc frame_counter
-	jsr Handle_Scroll
+	jsr BgManager::Handle_Scroll
 
 	jsr famistudio_update
 	

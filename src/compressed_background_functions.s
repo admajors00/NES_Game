@@ -1,18 +1,12 @@
+.segment "CODE"
+
 ;;;;;;;;;;;;;;;;
 
 .segment "CODE"
 .scope RLE
 
 
-column = $80
-bytesWritten = $81
-temp = $82
-temp2 = $83
-index = $84
-buffOffset = $85
-bytes_to_write = $86
-temp_bg_pointer_LO = $87
-temp_bg_pointer_HI = $88
+
 
 
 Load_RLE_Background:
@@ -92,10 +86,6 @@ Load_RLE_Background:
 
 
 
-
-
-
-
 Decode_RLE_Background_Column_Into_Buffer:
   ; Load bytes Written with the number of times we want to write to buffer
   ; buffer needs to be filled bottom up
@@ -153,13 +143,11 @@ Decode_RLE_Background_Column_Into_Buffer:
       
 
   @loop:
-    
     stx bytes_to_write
     
     ; buffer is filled backwards, skip first buffOffset bytes
     ; While bytes written is greater than buffer offset 
     ; do not write to the buffer
-    
     ldx bytesWritten
     cpx buffOffset
     BCS @do_not_write_to_buffer
@@ -178,8 +166,6 @@ Decode_RLE_Background_Column_Into_Buffer:
       INC temp_bg_pointer_LO+1
       JMP @big
     
-  
-
    @done:
     sty index
     inc column
@@ -199,8 +185,9 @@ Decode_RLE_Background_Column_Into_Buffer:
       sta column
     RTS
 
-Reset_RLE_Variables:
 
+
+Reset_RLE_Variables:
   lda #0
   sta index
   sta bytes_to_write
@@ -208,8 +195,9 @@ Reset_RLE_Variables:
   rts
 
 
+
+
 Decode_RLE_Background_Attribute_Table_Into_PPU:
-    
   lda #$00
   sta bytesWritten
   

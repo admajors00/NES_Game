@@ -1,0 +1,13 @@
+
+
+
+level data
+    |-------num_screens
+    |-------pallet_table_pt
+    |-------bank_num 
+    |-------bg_color
+    |-------scene_array_pt
+            |--------num_obsticles
+            |--------obsticle_list
+            |--------background_data
+            |--------attribute_data

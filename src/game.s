@@ -56,7 +56,7 @@ HIT_CHASER_f = 1<<1
         sta level_pt_HI
         ldx level_pt_LO
         ldy level_pt_HI
-        jsr Background::Load_Level_Background_Data
+        jsr ScManager::Load_Level_Data
         lda #0
         
     rts
@@ -100,9 +100,9 @@ HIT_CHASER_f = 1<<1
         STA at_data_pt_HI  
          
         ldx $00        ; put high byte of address into pointer
-        jsr RLE::LoadRLEScreen
+        jsr BgManager::RLE::Load_RLE_Background
         ldx $00
-        jsr RLE::DecodeRLEAttributeTableIntoBuffer
+        jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
         lda #0
         sta nametable
         sta scroll
@@ -165,7 +165,7 @@ HIT_CHASER_f = 1<<1
         jsr Init
         jsr Status_Bar_Init
         jsr Update_level
-        jsr Background::Init
+        jsr ScManager::Init
         jsr Obsticles::Init
         jsr Chaser::Init
         jsr Player::Init
@@ -193,7 +193,7 @@ HIT_CHASER_f = 1<<1
         @cont:
         jsr Update_Score
         jsr Obsticles::Update
-        jsr Background::Update 
+        jsr ScManager::Update 
         
         jsr Check_For_Hit
        
@@ -229,8 +229,8 @@ HIT_CHASER_f = 1<<1
 
         ldx #<Intro_h
         ldy #>Intro_h
-        jsr Background::Load_Level_Background_Data
-        jsr Background::Init
+        jsr ScManager::Load_Level_Data
+        jsr ScManager::Init
         lda #Game_States_e::intro
         sta game_state
 
@@ -261,7 +261,7 @@ HIT_CHASER_f = 1<<1
             lda #1
             sta timer
             sta amount_to_scroll
-            jsr Background::Update
+            jsr ScManager::Update
 
         @done:
     rts
@@ -305,8 +305,8 @@ HIT_CHASER_f = 1<<1
         stx level_pt_LO
         ldy #>Level_Random_h
         sty level_pt_HI
-        jsr Background::Load_Level_Background_Data
-        jsr Background::Init
+        jsr ScManager::Load_Level_Data
+        jsr ScManager::Init
         jsr Obsticles::Init
         jsr Chaser::Init
         jsr Player::Init
@@ -386,9 +386,9 @@ HIT_CHASER_f = 1<<1
         LDA #>EndScreen_at        
         STA at_data_pt_HI
         ldx $00
-        jsr RLE::LoadRLEScreen
+        jsr BgManager::RLE::Load_RLE_Background
         ldx $00
-        jsr RLE::DecodeRLEAttributeTableIntoBuffer
+        jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
 
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -416,7 +416,7 @@ HIT_CHASER_f = 1<<1
         LDA #%00000000   ; disable rendering
         STA PpuMask    
 
-        ;jsr Background::Draw_Box
+        ;jsr ScManagerDraw_Box
 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
@@ -450,9 +450,9 @@ HIT_CHASER_f = 1<<1
         LDA #>WinScreen_at        
         STA at_data_pt_HI
         ldx $00
-        jsr RLE::LoadRLEScreen
+        jsr BgManager::RLE::Load_RLE_Background
         ldx $00
-        jsr RLE::DecodeRLEAttributeTableIntoBuffer
+        jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
     
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -472,96 +472,9 @@ HIT_CHASER_f = 1<<1
     rts
   
 
-    Level_Restart_Loop:
-        jsr Animation::Update
-        jsr Player::Update
-        jsr UpdateButtons
-        jsr Update_Score
-        lda Port_1_Pressed_Buttons
-         
-        beq @done
-            LDA #%00000000   ;disable nmi
-            STA PpuCtrl
-            LDA #%00000000   ; disable rendering
-            STA PpuMask  
-            lda #0
-            ; sta score_HI
-            ; sta score_LO
-            sta scroll
-            sta scroll_HI
-            lda #Game_States_e::running
-            sta game_state 
-            jsr Background::Init
-            jsr Obsticles::Init
-            jsr Chaser::Reset
-            jsr Player::Init 
-        LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-        STA PpuCtrl
-        sta bg_chr_rom_start_addr
-        LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-        STA PpuMask  
-        sta bg_sprite_on_off
-        @done:
-    rts
-
-    Next_Level_Loop:
-        ;load level number screen wait for a minute 
-        
-		LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA PpuCtrl
-		LDA #%00000000   ; enable sprites, enable background, no clipping on left side
-		STA PpuMask   
-
-        ; lda #Game_States_e::level_restart
-        ; sta game_state 
-	
-        jsr Update_level
-        bne @done
-
-        lda Chaser::velocity_x_HI       
-        cmp #Game_Const::chaser_max_speed_HI;if chaser velocity hi is les than ax hi then add speed
-        bcc @cont;if cchaser velocity hi is equal to max then chek low
-            bne @skip
-            lda Chaser::velocity_x_LO;if velocity lo is greater than or equal to max lo then skip
-            cmp #Game_Const::chaser_max_speed_LO
-            bcs  @skip   
-		@cont:
-            lda Chaser::velocity_x_LO
-            clc
-            adc #Game_Const::chaser_speed_increase
-            sta  Chaser::velocity_x_LO
-            lda  Chaser::velocity_x_HI
-            adc #0
-            sta Chaser::velocity_x_HI
-        @skip:
-
-		lda #2
-		sta scroll_HI_prev
-		ldy #0 
-		sty scroll_HI
-		sty scroll
-		sty nametable
-	
-		
-        lda #Game_States_e::running
-        sta game_state 
-        jsr Background::Init
-        jsr Obsticles::Init
-        jsr Chaser::Reset
-        jsr Player::Init 
-
-        @done:
-
-		LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
-		STA PpuCtrl
-        sta bg_chr_rom_start_addr
-		LDA #%00011110   ; enable sprites, enable background, no clipping on left side
-		STA PpuMask
-        sta bg_sprite_on_off
-       
 
 
-    rts
+
     Check_For_Hit:
         jsr check_obst_hit
         jsr check_chaser_hit  
