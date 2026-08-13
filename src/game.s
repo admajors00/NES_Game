@@ -231,7 +231,7 @@ HIT_CHASER_f = 1<<1
         AND #<~STATUS_BAR_FLAG
         sta scroll_flags
 
-        lda #80
+        lda #$F0
         sta timer
 
         
@@ -242,6 +242,13 @@ HIT_CHASER_f = 1<<1
         jsr Background::Init
         lda #Game_States_e::intro
         sta game_state
+
+        ldx #<music_data_accelerating
+        ldy #>music_data_accelerating
+        lda #1 ; NTSC
+        jsr famistudio_init
+        lda #0
+        jsr famistudio_music_play
 
       
         LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
@@ -258,7 +265,7 @@ HIT_CHASER_f = 1<<1
         and Port_1_Pressed_Buttons
         beq @cont
             jmp Start_Game
-        @cont:
+        @cont:    
         ldy #Level_t::num_screens
         lda scroll_HI
 
@@ -267,8 +274,9 @@ HIT_CHASER_f = 1<<1
 
         dec timer
         bne @done
-            lda #1
+            lda #2
             sta timer
+            lda #1
             sta amount_to_scroll
             jsr Background::Update
 
@@ -407,7 +415,12 @@ HIT_CHASER_f = 1<<1
         STA PpuMask  
         sta bg_sprite_on_off
 
+        lda scroll_flags
+        AND #<~STATUS_BAR_FLAG
+        AND #<~NEW_ATTRIBUTE_FLAG
+        sta scroll_flags
     rts
+
     GameOver_Loop:
         jsr UpdateButtons
         lda #BUTTON_START

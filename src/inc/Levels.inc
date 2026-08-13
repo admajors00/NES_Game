@@ -12,32 +12,32 @@ _LEVELS_INC  =1
 NUM_LEVELS = 5
 
 Level_1_h:
-    .byte 11
+    .byte 6
     .addr Level_1_bg_Array
     .addr palette_level_1
     .byte 1
     .byte $0F
  Level_house_to_market_h:
-    .byte 39
+    .byte 5
     .addr House_to_Market_bg_Array
     .addr palette_house
     .byte 2
     .byte $11
  
  Level_2_2_h:
-    .byte 9
+    .byte 7
     .addr Level_2_2_bg_Array
     .addr palette_level_2
     .byte 2
     .byte $11  
  Level_2_3_h:
-    .byte 9
+    .byte 7
     .addr Level_2_3_bg_Array
     .addr palette_level_2_night
     .byte 2
     .byte $0C          
 Level_3_h:
-    .byte 29
+    .byte 5
     .addr Level_3_bg_Array
     .addr palette_level_3
     .byte 2

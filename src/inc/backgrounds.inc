@@ -87,19 +87,14 @@ Lv1_bg_8:
     .addr Level_1_4_at
 
 Level_1_bg_Array:
-
     .addr Lv1_bg_6
-    .addr Lv1_bg_4
-    .addr Lv1_bg_8
+    .addr Lv1_bg_5
     .addr Lv1_bg_1
     .addr Lv1_bg_2
     .addr Lv1_bg_3
-    .addr Lv1_bg_4
     .addr Lv1_bg_6
-    .addr Lv1_bg_7
     .addr Lv1_bg_6
-    .addr Lv1_bg_7
-    .addr Lv1_bg_6
+
 
 
 
@@ -156,61 +151,24 @@ Lv2_bg_9:
 House_to_Market_bg_Array:
     .addr House
     .addr Lv2_bg_5
-    .addr Lv2_bg_7
     .addr Lv2_bg_9
     .addr Lv2_bg_2
-    .addr Lv2_bg_3
-    .addr Lv2_bg_7
-    .addr Lv2_bg_6
-    .addr Lv2_bg_8
-    .addr Lv2_bg_6
-    .addr Lv2_bg_3
-    .addr Lv2_bg_9
-    .addr Lv2_bg_8
-    .addr Lv2_bg_6
-    .addr Lv2_bg_3
-    .addr Lv2_bg_6
-    .addr Lv2_bg_8
-    .addr Lv2_bg_6
-    .addr Lv2_bg_9
-    .addr Lv2_bg_3
-    .addr Lv2_bg_9
-    .addr Lv2_bg_3
-    .addr Lv2_bg_8
-    .addr Lv2_bg_7
-    .addr Lv2_bg_6
-    .addr Lv2_bg_3
-    .addr Lv2_bg_7
-    .addr Lv2_bg_6
-    .addr Lv2_bg_9
-    .addr Lv2_bg_3
-    .addr Lv2_bg_8
-    .addr Lv2_bg_6
-    .addr Lv2_bg_3
-    .addr Lv2_bg_9
-    .addr Lv2_bg_8
-    .addr Lv2_bg_6
-    .addr Lv2_bg_3
-    .addr Lv2_bg_9
     .addr MarketSign
-    .addr Lv2_bg_2
+
 Level_2_2_bg_Array:
     .addr Lv2_bg_6
     .addr Lv2_bg_5
     .addr Lv2_bg_1
-    .addr Lv2_bg_2
-    .addr Lv2_bg_3
     .addr Lv2_bg_7
     .addr Lv2_bg_6
     .addr Lv2_bg_5
     .addr LakeSign
+
 Level_2_3_bg_Array:
     .addr Lv2_bg_6
     .addr Lv2_bg_5
     .addr Lv2_bg_1
     .addr Lv2_bg_2
-    .addr Lv2_bg_3
-    .addr Lv2_bg_7
     .addr Lv2_bg_6
     .addr Lv2_bg_5
     .addr SkateParkSign   
@@ -283,33 +241,8 @@ Lv3_bg_9:
 Level_3_bg_Array:
     .addr Lv3_bg_1
     .addr Lv3_bg_2
-    .addr Lv3_bg_6 ;crack
-    .addr Lv3_bg_2
-    .addr Lv3_bg_7;crack
-    .addr Lv3_bg_4 ;caution
-    .addr Lv3_bg_5 ;pothole
-    .addr Lv3_bg_4 ;caution
-    .addr Lv3_bg_5 ;pothole
     .addr Lv3_bg_7 ;crack
     .addr Lv3_bg_4
-    .addr Lv3_bg_6 ;crack
-     .addr Lv3_bg_7;crack
-    .addr Lv3_bg_2
-   .addr Lv3_bg_4 ;caution
-    .addr Lv3_bg_5 ;pothole
-    .addr Lv3_bg_4 ;caution
-    .addr Lv3_bg_5 ;pothole
-   .addr Lv3_bg_4 ;caution
-    .addr Lv3_bg_7;crack
-    .addr Lv3_bg_4 ;caution
-   
-    .addr Lv3_bg_6
-    .addr Lv3_bg_6 ;crack
-    .addr Lv3_bg_5 ;pothole
-    .addr Lv3_bg_7 ;crack
-    .addr Lv3_bg_2
-    .addr Lv3_bg_5 ;pothole
-    .addr Lv3_bg_8
     .addr Lv3_bg_9
  
 

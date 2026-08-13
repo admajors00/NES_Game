@@ -1,5 +1,7 @@
-.ifndef _BACKGROUNDDATA_INC
-_BACKGROUNDSDATA_INC  =1
+.ifndef _BACKGROUNDDATA_INC
+
+_BACKGROUNDSDATA_INC  =1
+
 
 
 
@@ -100,12 +102,6 @@ Level_2_3_at:
 Level_2_3_bg:
 	.incbin "../graphics/Backgrounds/Level_2_3_bg.rle"
 
-Level_2_at:
-	.incbin "../graphics/Backgrounds/Level_2_at.rle"
-
-Level_2_bg:
-	.incbin "../graphics/Backgrounds/Level_2_bg.rle"
-
 Level_3_1_at:
 	.incbin "../graphics/Backgrounds/Level_3_1_at.rle"
 
@@ -159,7 +155,5 @@ WinScreen_at:
 
 WinScreen_bg:
 	.incbin "../graphics/Backgrounds/WinScreen_bg.rle"
-
-
 
 .endif

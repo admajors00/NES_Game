@@ -275,24 +275,24 @@ palette_house:
 
 
 .include "/inc/BackgroundData.inc"
-song_test:
-.include "../audio/Song2.s"
-song_intro:
+song_game_over:
+	.include "../audio/gameover_get_fucked.s"
+
+song_titleScreen:
 	.include "../audio/Intro.s"
+song_intro:
+	.include "../audio/top_of_the_bell_curve_accelerating.s"
+
 song_song:
 	music_data_name = music_data_too_fuckin_happy
  	.include "../audio/top_of_the_bell_curve_too_fuckin_happy.s"
-   	; .include "../audio/top_of_the_bell_curve_accelerating.s"
 	
 
 
-song_game_over:
-.include "../audio/gameover_get_fucked.s"
 
 
 
-; .segment "DPCM"
-; .incbin "../audio/Intro.dmc"
+
 ;;;;;;;;;;;;;;  
   
 .segment "VECTORS"
