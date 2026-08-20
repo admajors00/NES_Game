@@ -16,25 +16,34 @@
 
 .segment "RAM"
 .org $100
- ;the se animation haders are held in ram. Other code locations can updae the flags in these headers
+ ;the se animation headers are held in ram. Other code locations can updae the flags in these headers
 animation_headers_table:
     .addr 0,0,0,0,0 ;filled with the following header addresses at runtime
 
-obs0_header_table: ;background obsticle
+
+obs0_header_table: ;background obstacle
     .tag Animation_Header_t
+
+
 player_header_table:
     .tag Animation_Header_t
+
 
 chaser_header_table:
     .tag Animation_Header_t
 
-obs1_header_table: ;forground obsticles
+
+obs1_header_table: ;forground obstacles
     .tag Animation_Header_t
+
+
 indicator_header_table:
     .tag Animation_Header_t
 
+
 Sprite_positions_table:;other locations in the code can update this table to move sprites
     .byte 0,0,0,0,0,0,0,0,0,0
+
 
 Alt_frametimer_table:;sprites such as the player use their speed as a frame timer. These values should be put here
     .byte 0, 0, 0 ,0, 0
@@ -83,8 +92,6 @@ OAM_DMA_X    = $203
     temp_frame_index = $2D
 
 
-
-
 ;======================================================================================================================
 ;INIT (public)
 ;
@@ -94,10 +101,7 @@ OAM_DMA_X    = $203
 ; [in] x : Pointer to aniamation header (lo)
 ; [in] y : Pointer to niamation header (hi)
 ;======================================================================================================================
-
     Init:
-
-
         lda #0
         sta flags
 
@@ -151,22 +155,19 @@ OAM_DMA_X    = $203
         sta OAM_DMA_TILE
         lda #%00100000
         sta OAM_DMA_ATTR
-
-        
-
     rts
   
+
+
 ;======================================================================================================================
-; Load Animatio (public)
+; Load Animation (public)
 ;
 ;   loads a valid animation header from memory. into the its corresponding position in the animation_headers_table
 ; 
 ;
-; [in] x : Pointer to aniamation header (lo)
-; [in] y : Pointer to niamation header (hi)
+; [in] x : Pointer to animation header (lo)
+; [in] y : Pointer to animation header (hi)
 ;======================================================================================================================
-
-
     Load_Animation: ;add animation header to the list of headers
 
         stx pointer_1_LO
@@ -174,26 +175,18 @@ OAM_DMA_X    = $203
         ldy #Animation_Header_t::flags
         lda #ANI_OBJECTS_MASK
        
-        and (pointer_1_LO), Y ; get object number whic is equal to index in header table
+        and (pointer_1_LO), Y ; get object number which is equal to index in header table
        
         asl
-      
         tay
-        
         lda animation_headers_table, Y
         sta pointer_2_LO
         iny
         lda animation_headers_table, Y
         sta pointer_2_HI
-        
-
-        
+                
         jmp @store_header
  
-
-
-
-
         @store_header:;pointer 1 is new header, pointer 2 is local storage
             ldy #Animation_Header_t::num_frames
             lda (pointer_1_LO), Y
@@ -234,10 +227,11 @@ OAM_DMA_X    = $203
             ldy #Animation_Header_t::flags
             lda (pointer_1_LO), Y
             sta (pointer_2_LO), Y
-
         @done:
-
     rts
+
+
+
 ;======================================================================================================================
 ; Update (public)
 ;
@@ -246,12 +240,9 @@ OAM_DMA_X    = $203
 ;
 ;
 ;======================================================================================================================
-
     Update:
         ;for animation in list
         ;if started 
-     
-       
         jsr Clear_OAM_DMA
         lda #HEADER_TABLE_MAX_SIZE
         asl 
@@ -262,7 +253,6 @@ OAM_DMA_X    = $203
             ldy header_table_index
             beq @done       
              ; if index is 0 stop
-
             dey          
             ;load the next addres from the header table
             lda animation_headers_table ,y
@@ -270,14 +260,12 @@ OAM_DMA_X    = $203
             lda Sprite_positions_table, Y
             sta sprite_pos_y
        
-            
             dey
             lda animation_headers_table ,y
             sta pointer_1_LO
             lda Sprite_positions_table, Y
             sta sprite_pos_x
       
-
             sty header_table_index
 
             ldy #Animation_Header_t::flags
@@ -292,10 +280,11 @@ OAM_DMA_X    = $203
             @no_update:
             jsr Update_sprite_pos
             jmp @loop
-        @done:           
-
-
+        @done:      
     rts
+
+
+
 ;======================================================================================================================
 ; Update (private)
 ;
@@ -305,14 +294,10 @@ OAM_DMA_X    = $203
 ;   [in] pointer_1_HI:
 ;   [out] player_input_flags_g : sets PLAYER_ANI_DONE_f if animation has finished
 ;
-;======================================================================================================================
-
-            
+;======================================================================================================================            
     Update_Animation: 
-        
         ;pointer 1 should already be loaded with the current header location
         ;decrement the frame timer
-        
         ldy #Animation_Header_t::frame_timer 
         lda (pointer_1_LO), y
         sec
@@ -341,7 +326,6 @@ OAM_DMA_X    = $203
                     ldy #Animation_Header_t::frame_index
                     sta (pointer_1_LO), y
                     sta temp_frame_index
-
                  
                         ;dec temp_frame_index
                         ;put frame timer table address into pointer 2
@@ -364,8 +348,6 @@ OAM_DMA_X    = $203
                         ; sta Player::player_animation_flag                   
 
                         jmp @done
-                    
-
                 ;else 
                 @not_a_loop:  
                     lda header_table_index
@@ -410,7 +392,6 @@ OAM_DMA_X    = $203
                     ldy #Animation_Header_t::frame_timer
                     sta (pointer_1_LO), y
 
-
                     ;update the frame pointer
                     jsr Update_Frame_Pointer
                     jmp @done
@@ -427,6 +408,9 @@ OAM_DMA_X    = $203
         ;else continue
         @done:
     rts
+
+
+
 ;======================================================================================================================
 ; Update_fram_pointer (private)
 ;
@@ -437,7 +421,6 @@ OAM_DMA_X    = $203
 ;   [in] pointer_1_HI:
 ;
 ;======================================================================================================================
-
     Update_Frame_Pointer:
         ; load the frame table addr into pointer 2
         ldy #Animation_Header_t::frames_pt 
@@ -446,7 +429,6 @@ OAM_DMA_X    = $203
         iny 
         lda (pointer_1_LO), y
         sta pointer_2_HI
-
 
         ;put the current frame index into y
         lda temp_frame_index
@@ -467,6 +449,7 @@ OAM_DMA_X    = $203
     rts
 
 
+
 ;======================================================================================================================
 ; Update_sprite_pos (private)
 ;
@@ -478,13 +461,8 @@ OAM_DMA_X    = $203
 ;   [in] sprite_pos_y:
 ;
 ;======================================================================================================================
-
-
     .proc Update_sprite_pos
         ;load frame pointer
-
-
-        
         ldy #Animation_Header_t::frame
         lda (pointer_1_LO), y
         sta pointer_2_LO
@@ -536,7 +514,10 @@ OAM_DMA_X    = $203
      
         @done:
     rts
-    .endproc
+.endproc
+
+
+
 ;======================================================================================================================
 ; Clear_OAM_DMA (public)
 ;
@@ -551,10 +532,7 @@ OAM_DMA_X    = $203
 ;   [uses] oam_size: gets reset to 0 
 ;
 ;======================================================================================================================
-
     Clear_OAM_DMA:
-        
-     
         lda #$FE
         ldx oam_size
     
@@ -575,8 +553,6 @@ OAM_DMA_X    = $203
             sta OAM_DMA_TILE
             lda #%00100000
             sta OAM_DMA_ATTR
-           
-
     rts
 
 

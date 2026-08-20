@@ -2,68 +2,33 @@
 ; .IFNDEF GAME_INC
 ; GAME_INC =1
 .include "/inc/game.inc"
+.include "/inc/level_manager.inc"
 
-HIT_OBST_f = 1<< 0
-HIT_CHASER_f = 1<<1
+
 
 .scope Game
-    ;some game constants
-    score_HI = $71
-    score_LO = $70
-    hit_flag = $72
-    lives = $73
-    game_state = $74
 
-    timer = $75
-
-    level_pt_LO= $76
-    level_pt_HI = $77
-    level = $78
 
     game_state_jump_table:
         .addr Start_Screen_Loop, Game_Loop, Paused_Loop, GameOver_Loop, Level_Restart_Loop, Next_Level_Loop, Intro_Loop, WIN_Loop
 
+
     Init:
-        lda #3
-        sta lives
+        lda #Game_Const::number_of_lives
+        sta ::lives
         lda #Game_States_e::start_screen
-        sta game_state
+        sta ::game_state
 
         lda #0
-        sta score_HI
-        sta score_LO
-        sta level
-        
-
-    rts
-
-    Update_level:
-
-        lda level
-        cmp #NUM_LEVELS
-        bcc @cont
-           jsr WIN_Init
-           lda #1
-           rts
-
-        @cont:
-        asl 
-        tay
-        lda Levels_table,Y
-        sta level_pt_LO
-        iny 
-        lda Levels_table,Y
-        sta level_pt_HI
-        ldx level_pt_LO
-        ldy level_pt_HI
-        jsr ScManager::Load_Level_Data
-        lda #0
-        
-    rts
+        sta ::score_HI
+        sta ::score_LO
+        sta ::level
+    rts 
 
     
+
     Update:
-        lda game_state
+        lda ::game_state
         asl
         tax
         LDA game_state_jump_table, x
@@ -73,13 +38,15 @@ HIT_CHASER_f = 1<<1
         jmp (main_pointer_LO)
     rts
 
+
+
     Start_Screen_Init:
         LDA #%00000000   ; disable NMI
         STA PpuCtrl
         LDA #%00000000   ; disable sprites, enable background, no clipping on left side
         STA PpuMask
         lda #Game_States_e::start_screen
-        sta game_state
+        sta ::game_state
 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
@@ -107,11 +74,6 @@ HIT_CHASER_f = 1<<1
         sta nametable
         sta scroll
         jsr BankSwitch
-       
-        ;jsr Game::Init
-
-
-
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA PpuCtrl
@@ -122,8 +84,9 @@ HIT_CHASER_f = 1<<1
         sta bg_sprite_on_off        
     rts
 
+
+
     Start_Screen_Loop:
-      
         jsr UpdateButtons
        
         lda #BUTTON_SELECT
@@ -171,7 +134,7 @@ HIT_CHASER_f = 1<<1
         jsr Player::Init
       
         lda #Game_States_e::running
-        sta game_state
+        sta ::game_state
 
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -181,15 +144,17 @@ HIT_CHASER_f = 1<<1
         STA PpuMask
         sta bg_sprite_on_off
     rts
-    Game_Loop:
 
-            ldy #Level_t::num_screens
-            lda scroll_HI
-            cmp (level_pt_LO),y
-            bcc @cont
-                inc level
-                lda #Game_States_e::next_level
-                sta game_state
+
+
+    Game_Loop:
+        ldy #Level_t::num_screens
+        lda scroll_HI
+        cmp (level_pt_LO),y
+        bcc @cont
+            inc ::level
+            lda #Game_States_e::next_level
+            sta ::game_state
         @cont:
         jsr Update_Score
         jsr Obsticles::Update
@@ -204,7 +169,7 @@ HIT_CHASER_f = 1<<1
         and Port_1_Pressed_Buttons
         beq @cont2
             lda #Game_States_e::paused
-            sta game_state
+            sta ::game_state
         @cont2:
         
         jsr Player::Update
@@ -215,6 +180,9 @@ HIT_CHASER_f = 1<<1
         
         @done:
     rts
+
+
+
     Intro_Init:
         LDA #%00000000   ; disable NMI
         STA PpuCtrl
@@ -232,9 +200,8 @@ HIT_CHASER_f = 1<<1
         jsr ScManager::Load_Level_Data
         jsr ScManager::Init
         lda #Game_States_e::intro
-        sta game_state
+        sta ::game_state
 
-      
         LDA #%10000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
         STA PpuCtrl
         sta bg_chr_rom_start_addr
@@ -242,6 +209,8 @@ HIT_CHASER_f = 1<<1
         STA PpuMask
         sta bg_sprite_on_off
     rts
+
+
 
     Intro_Loop:
         jsr UpdateButtons
@@ -266,6 +235,8 @@ HIT_CHASER_f = 1<<1
         @done:
     rts
 
+
+
     Infinite_Init:
         LDA #%00000000   ; disable NMI
         STA PpuCtrl
@@ -275,12 +246,9 @@ HIT_CHASER_f = 1<<1
         ora #STATUS_BAR_FLAG
         sta scroll_flags
 
-
-       lda scroll_flags
-       ora #USE_RANDOM_BACKGROUND
-       sta scroll_flags
-
-        
+        lda scroll_flags
+        ora #USE_RANDOM_BACKGROUND
+        sta scroll_flags
 
         lda #$69
         sta rng_seed_LO
@@ -294,13 +262,10 @@ HIT_CHASER_f = 1<<1
         lda #0
         jsr famistudio_music_play
         
-        
         jsr Animation::Init
         jsr Init
         jsr Status_Bar_Init
         
-        
-       
         ldx #<Level_Random_h
         stx level_pt_LO
         ldy #>Level_Random_h
@@ -311,14 +276,13 @@ HIT_CHASER_f = 1<<1
         jsr Chaser::Init
         jsr Player::Init
         
-
         LDA #Game_Const::chaser_max_speed_LO
         STA Chaser::velocity_x_LO
         LDA #Game_Const::chaser_max_speed_HI
         STA Chaser::velocity_x_HI
-    
+
         lda #Game_States_e::running
-        sta game_state
+        sta ::game_state
 
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 0
         STA PpuCtrl
@@ -329,13 +293,14 @@ HIT_CHASER_f = 1<<1
     rts
 
    
+
     Paused_Loop:
         jsr UpdateButtons
         lda #BUTTON_SELECT
         and Port_1_Pressed_Buttons
         beq @cont
             lda #Game_States_e::running
-            sta game_state
+            sta ::game_state
         @cont:
         lda #BUTTON_START
         and Port_1_Pressed_Buttons
@@ -344,14 +309,13 @@ HIT_CHASER_f = 1<<1
         @done:
     rts
 
+
+
     Game_Over_Init:
-  
         LDA #%00000000   ;disable nmi
         STA PpuCtrl
         LDA #%00000000   ; disable rendering
         STA PpuMask    
-
-
 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
@@ -361,7 +325,7 @@ HIT_CHASER_f = 1<<1
         sta nametable
         sta scroll
         lda #Game_States_e::game_over
-        sta game_state   
+        sta ::game_state   
 
         ldx #<music_data_get_fucked
         ldy #>music_data_get_fucked
@@ -390,7 +354,6 @@ HIT_CHASER_f = 1<<1
         ldx $00
         jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
 
-        
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA PpuCtrl
         sta bg_chr_rom_start_addr
@@ -399,6 +362,9 @@ HIT_CHASER_f = 1<<1
         sta bg_sprite_on_off
 
     rts
+
+
+
     GameOver_Loop:
         jsr UpdateButtons
         lda #BUTTON_START
@@ -410,13 +376,10 @@ HIT_CHASER_f = 1<<1
 
 
     WIN_Init:
-  
         LDA #%00000000   ;disable nmi
         STA PpuCtrl
         LDA #%00000000   ; disable rendering
         STA PpuMask    
-
-        ;jsr ScManagerDraw_Box
 
         lda scroll_flags
         AND #<~STATUS_BAR_FLAG
@@ -426,14 +389,12 @@ HIT_CHASER_f = 1<<1
         sta nametable
         sta scroll
         lda #Game_States_e::win
-        sta game_state   
+        sta ::game_state   
 
         ldx #<music_data_get_fucked
         ldy #>music_data_get_fucked
         lda #1 ; NTSC
         jsr famistudio_init
-
-        
 
         jsr store_high_score
         ldx #<palette_TitleScreen
@@ -453,7 +414,6 @@ HIT_CHASER_f = 1<<1
         jsr BgManager::RLE::Load_RLE_Background
         ldx $00
         jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
-    
         
         LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
         STA PpuCtrl
@@ -462,6 +422,9 @@ HIT_CHASER_f = 1<<1
         STA PpuMask  
         sta bg_sprite_on_off
     rts
+
+
+
     WIN_Loop:
         jsr UpdateButtons
         lda #BUTTON_START
@@ -473,12 +436,11 @@ HIT_CHASER_f = 1<<1
   
 
 
-
-
     Check_For_Hit:
         jsr check_obst_hit
         jsr check_chaser_hit  
     rts
+
 
 
     check_obst_hit:;the players x value is inside the obstical
@@ -494,11 +456,13 @@ HIT_CHASER_f = 1<<1
                 clc
                 cmp Player::pos_x_HI
                 bcc @over_obst
+
         @not_over_obst:
-            lda #<~HIT_OBST_f
+            lda #<~::HIT_OBST_f
             and hit_flag
             sta hit_flag
             jmp @done
+
         @over_obst:
             ;check if player is hitting or above obsticle
             lda Obsticles::pos_y
@@ -508,10 +472,10 @@ HIT_CHASER_f = 1<<1
             cmp Player::pos_y_HI
             bcs @above_obst ;jump if the player is above the obstical
 
-            lda #HIT_OBST_f
+            lda #::HIT_OBST_f
             and hit_flag
             bne @done ;jump if the player has already hit the obsticle
-                lda #HIT_OBST_f
+                lda #::HIT_OBST_f
                 ora hit_flag
                 sta hit_flag
 
@@ -526,40 +490,45 @@ HIT_CHASER_f = 1<<1
                 lda Obsticles::type
                 cmp #Obstical_Types_e::ramp
                 beq @ramp
+
                 @trip:
                     lda player_input_flags_g
                     ora #PLAYER_HIT_DETECTED_f
                     sta player_input_flags_g
-
     
-                    ldx lives
+                    ldx ::lives
                     beq dead
  
                     dex
-                    stx lives
+                    stx ::lives
                     
                     lda #Game_States_e::level_restart
-                    sta game_state  
+                    sta ::game_state  
                     jmp @done
+
                 @rough:
                     lda player_input_flags_g
                     ora #PLAYER_ROUGH_DETECTED_f
                     sta player_input_flags_g
-                    lda #<~HIT_OBST_f
+                    lda #<~::HIT_OBST_f
                     and hit_flag
                     sta hit_flag
                     jmp @done
+
                 @ramp:
                     lda player_input_flags_g
                     ora #PLAYER_RAMP_DETECTED_f
                     sta player_input_flags_g
                     jmp @done
+
             @above_obst:
                 jmp Add_Obstical_To_Score
-                
                 jmp @done
+
         @done:
     rts
+
+
 
     check_chaser_hit:
         lda Chaser::pos_x_HI
@@ -572,58 +541,63 @@ HIT_CHASER_f = 1<<1
         cmp Player::pos_x_HI
         bcc @check_hit
         @not_grabed:
-            lda #<~HIT_CHASER_f
+            lda #<~::HIT_CHASER_f
             and hit_flag
             sta hit_flag
             jmp @done
 
         @check_hit:
-
-
-                lda #HIT_CHASER_f
+                lda #::HIT_CHASER_f
                 ora hit_flag
                 sta hit_flag
                 lda player_input_flags_g
                 ora #PLAYER_GRAB_DETECTED_f
                 sta player_input_flags_g
-                ldx lives
+                ldx ::lives
                 beq dead
       
                 dex
                 lda #Game_States_e::level_restart
-                sta game_state
-                stx lives
+                sta ::game_state
+                stx ::lives
                 jmp @done
         @done:
     rts
+
+
 
     dead:
         jmp Game_Over_Init
     rts
 
+
+
     Add_Obstical_To_Score:
-        lda score_LO
+        lda ::score_LO
         clc
         adc #10
 
-        sta score_LO
-        lda score_HI
+        sta ::score_LO
+        lda ::score_HI
         adc#0
-        sta score_HI
+        sta ::score_HI
 
-        lda score_LO
+        lda ::score_LO
         clc
         adc Player::velocity_x_HI
 
-        sta score_LO
-        lda score_HI
+        sta ::score_LO
+        lda ::score_HI
         adc#0
-        sta score_HI
+        sta ::score_HI
 
         lda #SCORE_CHANGE
         ora status_bar_flags
         sta status_bar_flags
     rts
+
+
+
     Add_Tricks_To_Score:
         lda Player::player_movement_state
         cmp #Player::PlayerMovementStates::inAirMoving
@@ -634,15 +608,16 @@ HIT_CHASER_f = 1<<1
 
 
             clc
-            lda score_LO
+            lda ::score_LO
             
             adc Player::player_action_state
-            sta score_LO
-            lda score_HI
+            sta ::score_LO
+            lda ::score_HI
             adc #0
-            sta score_HI
+            sta ::score_HI
         @done:
     rts
-.endscope
 
-; .ENDIF
+
+
+.endscope

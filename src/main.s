@@ -3,9 +3,10 @@
 ;   .byte $4E, $45, $53, $1A  ; iNES header identifier
 ;   .byte 2                  ; 2x 16KB PRG-ROM Banks
 ;   .byte 4                 ; 1x  8KB CHR-ROM
-; ;   .byte 0
+;   .byte 0
 ;   .byte $03                ; mapper 0 (NROM)
 ;   .byte $00                 ; System: NES
+
 INES_MAPPER = 3 ; 0 = NROM
 INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
 INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
@@ -31,23 +32,17 @@ frame_counter = $f8
 
 rng_seed_LO = $f9
 rng_seed_HI = $fA
+
+
 .org $f9
 seed: .res 2
 .reloc
 .segment "RAM"
-
-
-;;; "nes" linker config requires a STARTUP section, even if it's empty
-
-.segment "STARTUP"
-
-
+.segment "STARTUP" ;;; "nes" linker config requires a STARTUP section, even if it's empty
 .segment "CODE"
 .autoimport 	+
 
 .include "controller.s"
-
-;.include "../graphics/StreetCanvas_2.s"
 .include "player.s"
 .include "chaser.s"
 .include "obsticles.s"
@@ -62,8 +57,6 @@ seed: .res 2
 
 
 
-
-
 PpuCtrl			= $2000
 PpuMask			= $2001
 PpuStatus		= $2002
@@ -74,8 +67,7 @@ PpuAddr			= $2006
 PpuData			= $2007
 OamDma			= $4014
 
-; playList:
-; 	.addr music_data_untitled, music_data_get_fucked
+
 
 reset:
 	sei			; disable IRQs
@@ -126,37 +118,26 @@ clear_nametables:
 		bne	@loop
 		dex
 		bne	@loop
-jsr vblankwait
 
+jsr vblankwait
 lda #$69
 sta rng_seed_LO
 lda #$42
 sta rng_seed_HI
-
-
 jsr Game::Start_Screen_Init
 
-	
 forever:
 	jmp	forever
-
 
 
 
 nmi:
 	inc frame_counter
 	jsr BgManager::Handle_Scroll
-
 	jsr famistudio_update
-	
 	jsr Game::Update
-	
-	
 	@end:
 rti
-
-
-
 
 
 
@@ -166,16 +147,20 @@ vblankwait:
 rts
 
 
+
 BankSwitch:
 	tax
-
 	sta BankValues, x
 	rts
+
+
+
 BankValues:
 	.byte $00, $01, $02, $03
-;;;;;;;;;;;;;; 
 
-prng:
+
+
+LoadRandNumIntoAcc:
 	ldy #8     ; iteration count (generates 8 bits)
 	lda seed+0
 :
@@ -190,107 +175,24 @@ prng:
 	cmp #0     ; reload flags
 	rts
 
-palette_level_2_night:
-
-.byte $0c,$0f,$03,$14
-.byte $0c,$03,$38,$04
-.byte $0c,$03,$38,$04
-.byte $0c,$03,$09,$1c
 
 
-
-.byte $00,$0f,$24,$26
-.byte $00,$0f,$27,$14
-.byte $00,$0f,$04,$24
-.byte $00,$06,$15,$26
-
-
-palette_level_3:
-
-.byte $30,$2c,$0c,$26
-.byte $30,$2c,$0c,$12
-.byte $30,$2c,$0c,$37
-.byte $30,$0f,$2d,$16
-
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
-
-palette_level_2:
-.byte $11,$0f,$10,$20
-.byte $11,$01,$21,$31
-.byte $11,$31,$22,$21
-.byte $11,$10,$19,$29
-
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
-
-palette_level_1:
-;palette_EWL_StreetSkate_b:
-.byte $0f,$10,$12,$00 ; level 1 pallet
-.byte $0f,$12,$22,$32
-.byte $0f,$16,$26,$36
-.byte $0f,$14,$24,$38
-
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
-
-;palette_Level2_a:
-
-palette_TitleScreen:
-.byte $0f,$30,$12,$27
-.byte $0f,$0f,$0f,$0f
-.byte $0f,$20,$0f,$0f
-.byte $0f,$0f,$0f,$0f
-
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
-
-palette_Instructions:
-.byte $0f,$0f,$30,$27
-.byte $0f,$0f,$0f,$30
-.byte $0f,$2d,$10,$20
-.byte $0f,$18,$28,$38
-
-palette_Intro:
-.byte $30,$0f,$36,$11
-.byte $30,$0f,$0f,$30
-.byte $30,$0f,$10,$27
-.byte $30,$0f,$36,$16
-
-palette_house:
-.byte $11,$0f,$10,$20
-.byte $11,$01,$11,$31
-.byte $11,$37,$17,$26
-.byte $11,$10,$19,$29
-.byte $0f,$0f,$30,$27 ;sprite pallet
-.byte $0f,$0f,$37,$31
-.byte $0f,$0f,$10,$20
-.byte $0f,$17,$16,$27
-
-
+.include "/inc/palettes.inc"
 .include "/inc/BackgroundData.inc"
+
+
+
 song_test:
-.include "../audio/Song2.s"
+	.include "../audio/Song2.s"
+
 
 
 song_game_over:
-.include "../audio/gameover_get_fucked.s"
+	.include "../audio/gameover_get_fucked.s"
 
 
 
-
-;;;;;;;;;;;;;;  
-  
 .segment "VECTORS"
-
 	;; When an NMI happens (once per frame if enabled) the label nmi:
 	.word	nmi
 	;; When the processor first turns on or is reset, it will jump to the
@@ -300,18 +202,20 @@ song_game_over:
 	.word	0
   
 
- .segment "TITLEBANK"
 
+ .segment "TITLEBANK"
 		.incbin	"../graphics/Intro.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/StartScreen.chr"
 
 
-.segment "LEVEL1"	
 
+.segment "LEVEL1"	
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level1.chr"
-.segment "LEVEL2"	
 
+
+
+.segment "LEVEL2"	
 		.incbin	"../graphics/Sprites.chr"	; includes 8KB graphics from SMB1
 		.incbin	"../graphics/Level2.chr"
 

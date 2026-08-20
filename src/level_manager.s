@@ -1,6 +1,8 @@
 
-Update_level:
+.include "inc/level_manager.inc"
 
+
+Update_level:
     lda level
     cmp #NUM_LEVELS
     bcc @cont
@@ -20,12 +22,12 @@ Update_level:
     ldy level_pt_HI
     jsr ScManager::Load_Level_Data
     lda #0
-    
 rts
 
+
+
 Next_Level_Loop:
-    ;load level number screen wait for a minute 
-    
+    ;load level number screen
     LDA #%00000000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
     STA PpuCtrl
     LDA #%00000000   ; enable sprites, enable background, no clipping on left side
@@ -63,7 +65,7 @@ Next_Level_Loop:
 
     
     lda #Game_States_e::running
-    sta Game::game_state 
+    sta ::game_state
     jsr ScManager::Init
     jsr Obsticles::Init
     jsr Chaser::Reset
@@ -78,6 +80,7 @@ Next_Level_Loop:
     STA PpuMask
     sta bg_sprite_on_off
 rts
+
 
 
 Level_Restart_Loop:
@@ -98,7 +101,7 @@ Level_Restart_Loop:
         sta scroll
         sta scroll_HI
         lda #Game_States_e::running
-        sta Game::game_state 
+        sta ::game_state 
         jsr ScManager::Init
         jsr Obsticles::Init
         jsr Chaser::Reset
@@ -111,3 +114,5 @@ Level_Restart_Loop:
     sta bg_sprite_on_off
     @done:
 rts
+
+

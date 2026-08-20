@@ -53,6 +53,7 @@ Obstical_headers:
     obsticle_index = $5e
     internal_flags = $5f
 
+
 ;======================================================================================================================
 ; Init (Public)
 ;
@@ -90,6 +91,9 @@ Obstical_headers:
         
 
     rts
+
+
+
 ;======================================================================================================================
 ; Update (Public)
 ;
@@ -99,8 +103,6 @@ Obstical_headers:
 ; 
 ;       obstacle posistiona re always stored n forground and background sprite locations
 ;======================================================================================================================
-
-
     Update:
         lda obsticles_active_flag ;this is set when ther is an obsticle in the upcoming frame
         beq @done
@@ -180,6 +182,8 @@ Obstical_headers:
         @done: 
     rts
 
+
+
     Remove:
         lda #$F8
         sta pos_x 
@@ -191,8 +195,6 @@ Obstical_headers:
 
         lda #0
         sta obsticles_active_flag
-
-        
 
         ldy #Animation_Header_t::flags
         lda obs1_header_table, Y
@@ -220,8 +222,6 @@ Obstical_headers:
 
 
     Load:
-
-
         lda obsticles_active_flag
         beq @no_obs_loaded
             lda internal_flags
@@ -258,7 +258,6 @@ Obstical_headers:
         lda (header_pt_LO), Y
         sta  type
 
-
         ldy #Sprite_Positions_e::obst_1_x
         lda pos_x
         sta Sprite_positions_table, y
@@ -274,6 +273,9 @@ Obstical_headers:
         sta Sprite_positions_table, y
         @done:
     rts
+
+
+
 
 .endscope
 

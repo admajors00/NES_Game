@@ -112,9 +112,9 @@ Update_Score:
         lda #SCORE_POS_Y
         sta score_pos_y_
 
-        lda Game::score_LO
+        lda ::score_LO
         sta temp_score_LO
-        lda Game::score_HI
+        lda ::score_HI
         sta temp_score_HI
         jsr convert_to_decimal
         jsr Send_Score_To_OAM_Buff
@@ -131,7 +131,7 @@ Update_Score:
     jsr Send_Lives_To_OAM_Buff
 
     @done_lives_update:
-    lda Game::lives
+    lda ::lives
     adc #13
     sta status_oam_size
 
@@ -139,7 +139,7 @@ Update_Score:
     
 
     @done:
-    lda Game::lives
+    lda ::lives
     adc #12
     sta status_oam_size
      asl status_oam_size
@@ -149,21 +149,21 @@ rts
 
 store_high_score:
     lda high_score_HI
-    cmp Game::score_HI
+    cmp ::score_HI
     bcc @new_high_score ;branch if score is grreter tha high score
     bne @done 
         ;high ends of score are equal check low ends
         lda high_score_LO
-        cmp Game::score_LO
+        cmp ::score_LO
         bcc @new_high_score
         jmp @done
     @new_high_score:
 
 
-        lda Game::score_LO
+        lda ::score_LO
         sta temp_score_LO
         sta high_score_LO
-        lda Game::score_HI
+        lda ::score_HI
         sta temp_score_HI
         sta high_score_HI
 
@@ -364,7 +364,7 @@ Send_Level_To_OAM_Buff:
   
         
     
-    lda Game::level
+    lda ::level
     clc
     adc #1
     asl
@@ -418,7 +418,7 @@ Send_Level_To_OAM_Buff:
         ; lda >EWL_StreetSkate_pointers_eggLife
 
         ; sta main_pointer_HI
-        ldx Game::lives
+        ldx ::lives
         stx main_temp
         ldx #0
         

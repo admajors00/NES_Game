@@ -13,7 +13,6 @@
 
 .scope ScManager
 
-	
 
 	Init:
 		jsr BgManager::RLE::Reset_RLE_Variables
@@ -30,14 +29,12 @@
 		jsr BgManager::RLE::Load_RLE_Background
 		ldx #$00
 		jsr BgManager::RLE::Decode_RLE_Background_Attribute_Table_Into_PPU
-
 		
 		jsr Reset_Buffers
 		lda #2
 		sta scroll_HI_prev
 		ldy #1
 		sty scroll_HI
-	
 	
 		jsr Next_Scene
 		jsr BgManager::RLE::Reset_RLE_Variables
@@ -49,19 +46,21 @@
 		ora scroll_flags
 		sta scroll_flags
 		
-		
 	rts
+
+
 
 	Update:
 		ldx amount_to_scroll
 		beq scroll_done
 		loop_1:
+			; increment scroll value
 			lda scroll
 			clc
-			adc#$01
+			adc #$01
 			sta scroll
+			; if scroll overflowed 
 			bcc @skip
-			
 				lda scroll_HI
 				adc #0
 
@@ -70,12 +69,11 @@
 				lda scroll_flags
 				and #USE_RANDOM_BACKGROUND
 				beq @continue
-					jsr prng
+					jsr LoadRandNumIntoAcc
 					and #%00000111
 					sta scroll_HI
 			@skip:
 
-				
 			@continue:
 			jsr Next_Scene
 			jsr BgManager::Scroll
@@ -100,17 +98,15 @@
 					LDA scroll
 					AND #%00011111            ; check for multiple of 32
 					Bne @New_Column_Check_done    ; if low 5 bits = 0, time to write new attribute bytes
-
 						;jsr Draw_New_Attributes_To_Buffer
 						lda #NEW_ATTRIBUTE_FLAG
 						ora scroll_flags
 						sta scroll_flags
-				@New_Column_Check_done:
 
+				@New_Column_Check_done:
 
 			dec amount_to_scroll
 			bne loop_1
-			jmp scroll_done
 
 		scroll_done:
 
@@ -199,9 +195,6 @@
 			lda (curr_sc_pt_LO), Y ;if num obsticles == 0 jump to done
 			beq @done
 			
-
-	
-
 			ldy #Scene_t::obsticle_list
 			lda (curr_sc_pt_LO), y ;get first item from obsticle list
 			sta main_pointer_LO
@@ -212,8 +205,6 @@
 			ldx main_pointer_LO
 			ldy main_pointer_HI		
 			jsr Obsticles::Load 
-			
-			
 		@done:
 		
 	rts
